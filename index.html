@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Go.Flow — Console Import Go Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);min-height:100vh}
+.grad-bar{height:4px;background:var(--grad)}
+.hdr{background:var(--nuit);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-sub{color:rgba(255,255,255,.45);font-size:10px;letter-spacing:2px;text-transform:uppercase;-webkit-text-fill-color:rgba(255,255,255,.45)}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto}
+.tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--bleu)}
+.tab.active{color:var(--nuit);border-bottom-color:var(--bleu)}
+.wrap{padding:20px 24px;max-width:1400px;margin:0 auto}
+.btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
+.btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#007acc}
+.btn-sec{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-sec:hover{background:var(--gris)}
+.btn-danger{background:#fee2e2;color:#dc2626}.btn-danger:hover{background:#fecaca}
+.btn-success{background:#d1fae5;color:#059669}
+.btn-grad{background:var(--grad);color:#fff;font-weight:600}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:6px}
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:180px;position:relative}
+.search input{width:100%;padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;background:#fff}
+.search::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px}
+select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;background:#fff;outline:none;cursor:pointer}
+.view-tog{display:flex;background:var(--gris);border-radius:8px;padding:3px;gap:2px}
+.view-btn{padding:6px 10px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:15px;transition:.2s}
+.view-btn.active{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.stats{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap}
+.stat{background:#fff;border-radius:10px;padding:14px 18px;flex:1;min-width:130px;border:1px solid var(--border)}
+.stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--nuit)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1280px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:.2s;border:1px solid var(--border)}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.11);transform:translateY(-2px)}
+.card-img{height:150px;background:linear-gradient(135deg,#f0f0f8,#e8e8f0);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff}
+.b-bailey{background:var(--bleu)}.b-clara{background:var(--violet)}.b-other{background:var(--orange)}
+.card-body{padding:14px}
+.card-ref{font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:3px}
+.card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;line-height:1.3}
+.card-cat{font-size:11px;color:var(--muted);margin-bottom:10px}
+.card-prices{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:3px}
+.pr{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.pr-lbl{color:var(--muted)}.pr-val{font-weight:600}
+.pr-ttc{font-size:13px;color:var(--bleu);font-weight:700}
+.card-acts{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--nuit);color:#fff;padding:11px 12px;text-align:left;font-weight:500;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:hover{background:#f8f8fc}
+tbody td{padding:10px 12px}
+.settings-panel{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid var(--border);display:none}
+.settings-panel.open{display:block}
+.s-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-hdr{padding:22px 22px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:17px}
+.modal-x{background:var(--gris);border:none;width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:0 22px 22px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.fg{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.fc{padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.fc:focus{border-color:var(--bleu)}
+textarea.fc{resize:vertical;min-height:70px}
+.fact{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.upload-area{border:2px dashed var(--border);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:.2s;font-size:13px;color:var(--muted)}
+.upload-area:hover{border-color:var(--bleu);background:#f0f8ff}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumb{position:relative;width:68px;height:68px}
+.thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+.thumb button{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
+.sim-form{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)}
+.sim-result{background:var(--nuit);border-radius:12px;padding:20px;color:#fff}
+.sim-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+.sim-row:last-child{border-bottom:none}
+.sim-total{font-weight:700;font-size:15px;color:var(--jaune)}
+.sim-marge{color:var(--vert)}
+.prod-prev{display:flex;gap:14px;background:var(--gris);border-radius:8px;padding:14px;margin-bottom:14px;align-items:flex-start}
+.prev-icon{width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden}
+.prev-icon img{width:100%;height:100%;object-fit:cover}
+.trans-sel{display:flex;gap:8px}
+.trans-btn{flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
+.trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(100px);opacity:0;transition:.3s;border-left:4px solid var(--vert)}
+.toast.show{transform:translateY(0);opacity:1}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty .ico{font-size:44px;margin-bottom:10px}
+.empty h3{font-family:'Montserrat',sans-serif;margin-bottom:6px;color:var(--text)}
+.calc-preview{background:var(--gris);border-radius:8px;padding:14px;margin-top:14px;font-size:12px;display:none}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+@media print{
+  body{background:#fff}
+  .hdr,.tabs,.toolbar,.card-acts,.btn,.overlay,.toast,.settings-panel,.hdr-right{display:none!important}
+  .ph{display:block!important}
+  .wrap{padding:0;max-width:100%}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}
+  .grid{grid-template-columns:repeat(2,1fr)!important}
+  .tbl-wrap{box-shadow:none}
+  .sim-result{color:#000;background:#f9f9f9;border:1px solid #ddd}
+  .sim-row{border-bottom-color:#ddd}
+}
+.ph{display:none;padding:16px 0;margin-bottom:18px;border-bottom:3px solid transparent;border-image:var(--grad) 1}
+.ph-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:var(--nuit)}
+.ph-sub{font-size:11px;color:var(--muted);margin-top:3px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--gris)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.comp-row{display:flex;gap:6px;align-items:center}
+.comp-row input{flex:1}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<header class="hdr">
+  <div>
+    <div class="logo">Go.Flow</div>
+    <div class="logo-sub">Go Group — Console Import</div>
+  </div>
+  <div class="hdr-right">
+    <button class="btn btn-sec btn-sm" onclick="toggleSettings()">⚙️ Paramètres</button>
+    <button class="btn btn-sec btn-sm" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-sec btn-sm" onclick="window.print()">🖸️ PDF</button>
+  </div>
+</header>
+
+<div class="ph" id="ph">
+  <div class="ph-logo">Go.Flow</div>
+  <div class="ph-sub">Go Group · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em></div>
+  <div class="ph-sub" id="ph-date" style="margin-top:4px"></div>
+</div>
+
+<nav class="tabs">
+  <div class="tab active" onclick="tab('catalogue')">📦 Catalogue</div>
+  <div class="tab" onclick="tab('fournisseurs')">🏗️ Fournisseurs</div>
+  <div class="tab" onclick="tab('transitaires')">🚢 Transitaires</div>
+  <div class="tab" onclick="tab('simulation')">🧭 Simulation</div>
+</nav>
+
+<div class="wrap">
+
+<div class="settings-panel" id="spanel">
+  <div class="sec-hdr">⚙️ Paramètres globaux</div>
+  <div class="s-grid">
+    <div class="fgrp"><label class="flbl">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
+    <div class="fgrp"><label class="flbl">Fret aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
+    <div class="fgrp"><label class="flbl">Fret maritime (XOF/CBM)</label><input type="number" class="fc" id="s_fm"></div>
+    <div class="fgrp"><label class="flbl">Taux marge cible (%)</label><input type="number" class="fc" id="s_mg" step="0.5"></div>
+    <div class="fgrp"><label class="flbl">TVA (%)</label><input type="number" class="fc" id="s_tv" step="0.5"></div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:8px">
+    <button class="btn btn-primary" onclick="saveSettings()">💾 Enregistrer</button>
+    <button class="btn btn-sec" onclick="toggleSettings()">Fermer</button>
+  </div>
+</div>
+
+<div id="t-catalogue">
+  <div class="stats" id="cat-stats"></div>
+  <div class="toolbar">
+    <div class="search"><input type="text" placeholder="Rechercher..." id="cat-search" oninput="renderCat()"></div>
+    <select class="filt" id="f-cat" onchange="renderCat()">
+      <option value="">Toutes catégories</option>
+      <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
+      <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+    </select>
+    <select class="filt" id="f-four" onchange="renderCat()"><option value="">Tous fournisseurs</option></select>
+    <div class="view-tog">
+      <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille">▦</button>
+      <button class="view-btn" id="vl" onclick="setView('list')" title="Liste">☰</button>
+    </div>
+    <button class="btn btn-primary" onclick="openProdModal()">+ Produit</button>
+  </div>
+  <div id="cat-cont"></div>
+</div>
+
+<div id="t-fournisseurs" style="display:none">
+  <div class="toolbar">
+    <div class="search"><input type="text" placeholder="Rechercher..." id="four-search" oninput="renderFour()"></div>
+    <button class="btn btn-primary" onclick="openFourModal()">+ Fournisseur</button>
+  </div>
+  <div id="four-cont"></div>
+</div>
+
+<div id="t-transitaires" style="display:none">
+  <div class="toolbar">
+    <div class="search"><input type="text" placeholder="Rechercher..." id="tr-search" oninput="renderTrans()"></div>
+    <button class="btn btn-primary" onclick="openTransModal()">+ Transitaire</button>
+  </div>
+  <div id="trans-cont"></div>
+</div>
+
+<div id="t-simulation" style="display:none">
+  <div class="sim-wrap">
+    <div class="sim-form">
+      <div class="sec-hdr">🧭 Paramètres commande</div>
+      <div id="sim-prev" style="display:none" class="prod-prev">
+        <div class="prev-icon" id="sim-ico">📦</div>
+        <div>
+          <div style="font-weight:600;font-size:14px" id="sim-name">—</div>
+          <div style="font-size:11px;color:var(--muted)" id="sim-ref">—</div>
+          <div style="font-size:11px;color:var(--muted)" id="sim-specs">—</div>
+        </div>
+      </div>
+      <div class="fg" style="gap:11px">
+        <div class="fgrp full"><label class="flbl">Produit</label>
+          <select class="fc" id="sim-prod" onchange="simSelProd()"><option value="">— Sélectionner —</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Fournisseur</label>
+          <select class="fc" id="sim-four" onchange="simCalc()"><option value="">— Auto —</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Transitaire</label>
+          <select class="fc" id="sim-trans" onchange="simCalc()"><option value="">— Défaut —</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Quantité</label>
+          <input type="number" class="fc" id="sim-qty" value="1" min="1" oninput="simCalc()">
+        </div>
+        <div class="fgrp"><label class="flbl">Prix vente HT unitaire (XOF)</label>
+          <input type="number" class="fc" id="sim-pv" placeholder="Auto" oninput="simCalc()">
+        </div>
+        <div class="fgrp full"><label class="flbl">Mode livraison</label>
+          <div class="trans-sel">
+            <button class="trans-btn" id="tb-mar" onclick="setSimTrans('Maritime')">🚢 Maritime</button>
+            <button class="trans-btn" id="tb-aer" onclick="setSimTrans('Aérien')">✈️ Aérien</button>
+          </div>
+        </div>
+        <div class="fgrp"><label class="flbl">Assurance</label>
+          <select class="fc" id="sim-ass" onchange="simCalc()">
+            <option value="0">Non</option><option value="1">Oui (1%)</option><option value="2">Oui (2%)</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">TVA</label>
+          <select class="fc" id="sim-tva" onchange="simCalc()">
+            <option value="1">Oui (18%)</option><option value="0">Non</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">Remise (%)</label>
+          <input type="number" class="fc" id="sim-rem" value="0" min="0" max="100" oninput="simCalc()">
+        </div>
+      </div>
+    </div>
+    <div class="sim-result" id="sim-result">
+      <div class="sec-hdr" style="color:#fff">📊 Récapitulatif</div>
+      <div id="sim-rows"><div style="text-align:center;opacity:.4;padding:40px 0;font-size:13px">Sélectionnez un produit</div></div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-grad" onclick="window.print()">🖸️ Export PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="overlay" id="prod-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="pm-title">Nouveau produit</div>
+      <button class="modal-x" onclick="closeMod('prod-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp"><label class="flbl">Référence (auto)</label><input type="text" class="fc" id="p-ref" readonly></div>
+        <div class="fgrp"><label class="flbl">Nom / Désignation *</label><input type="text" class="fc" id="p-nom" oninput="updateSLink()"></div>
+        <div class="fgrp"><label class="flbl">Catégorie *</label>
+          <select class="fc" id="p-cat" onchange="genRef();updateSLink()">
+            <option value="">Sélectionner...</option>
+            <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
+            <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">Fournisseur</label><select class="fc" id="p-four"></select></div>
+        <div class="fgrp"><label class="flbl">Prix EXW</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Devise</label>
+          <select class="fc" id="p-dev" onchange="calcPrev()">
+            <option value="RMB">RMB (¥)</option><option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option><option value="XOF">XOF (F)</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">Longueur (cm)</label><input type="number" class="fc" id="p-l" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Largeur (cm)</label><input type="number" class="fc" id="p-la" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Hauteur (cm)</label><input type="number" class="fc" id="p-h" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Poids (kg)</label><input type="number" class="fc" id="p-poids" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Transport défaut</label>
+          <select class="fc" id="p-trans"><option value="Maritime">Maritime</option><option value="Aérien">Aérien</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Taux marge % (vide=global)</label><input type="number" class="fc" id="p-marge" step="0.5" placeholder="Défaut"></div>
+        <div class="fgrp"><label class="flbl">Remise %</label><input type="number" class="fc" id="p-rem" value="0" step="0.5"></div>
+        <div class="fgrp"><label class="flbl">MOQ</label><input type="number" class="fc" id="p-moq" value="1" min="1"></div>
+        <div class="fgrp full"><label class="flbl">Prix marché concurrent (XOF)</label>
+          <div class="comp-row">
+            <input type="number" class="fc" id="p-conc" placeholder="Saisir manuellement">
+            <a id="p-glink" href="#" target="_blank" class="btn btn-sec btn-sm" title="Rechercher sur Google">🔍 Rechercher</a>
+          </div>
+        </div>
+        <div class="fgrp full"><label class="flbl">Description</label><textarea class="fc" id="p-desc" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl">Spécificités techniques</label><textarea class="fc" id="p-specs" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl">Photos (max 3)</label>
+          <div class="upload-area" onclick="document.getElementById('p-photos-in').click()">📸 Cliquer pour ajouter des photos (PNG, JPG, WebP)</div>
+          <input type="file" id="p-photos-in" accept="image/*" multiple style="display:none" onchange="addPics(this)">
+          <div class="thumbs" id="p-thumbs"></div>
+        </div>
+      </div>
+      <div class="calc-preview" id="calc-prev">
+        <b style="font-size:13px">Aperçu calculs (maritime, marge globale)</b>
+        <div class="calc-grid" id="calc-prev-rows"></div>
+      </div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('prod-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveProd()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="four-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="fm-title">Nouveau fournisseur</div>
+      <button class="modal-x" onclick="closeMod('four-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="f-nom"></div>
+        <div class="fgrp"><label class="flbl">Pays</label><input type="text" class="fc" id="f-pays" placeholder="Chine"></div>
+        <div class="fgrp"><label class="flbl">Contact</label><input type="text" class="fc" id="f-contact"></div>
+        <div class="fgrp"><label class="flbl">WhatsApp</label><input type="text" class="fc" id="f-wa"></div>
+        <div class="fgrp"><label class="flbl">WeChat</label><input type="text" class="fc" id="f-wc"></div>
+        <div class="fgrp"><label class="flbl">Domaine d'activité</label><input type="text" class="fc" id="f-dom"></div>
+        <div class="fgrp"><label class="flbl">Année fondation</label><input type="number" class="fc" id="f-an"></div>
+        <div class="fgrp"><label class="flbl">Évaluation /5</label>
+          <select class="fc" id="f-eval"><option>5</option><option>4</option><option selected>3</option><option>2</option><option>1</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Vérif. Alibaba</label>
+          <select class="fc" id="f-ali"><option>Non disponible</option><option>Vérifié</option><option>Non vérifié</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Lien Alibaba</label><input type="url" class="fc" id="f-ali-url"></div>
+        <div class="fgrp"><label class="flbl">Langues</label><input type="text" class="fc" id="f-lang" placeholder="Chinois, Anglais..."></div>
+        <div class="fgrp"><label class="flbl">Marchés principaux</label><input type="text" class="fc" id="f-mkt"></div>
+        <div class="fgrp full"><label class="flbl">Description activités</label><textarea class="fc" id="f-desc" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl">Logo</label>
+          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏗️ Ajouter le logo</div>
+          <input type="file" id="f-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'f-logo-prev','f-logo-dat')">
+          <div class="thumbs" id="f-logo-prev"></div>
+          <input type="hidden" id="f-logo-dat">
+        </div>
+      </div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('four-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveFour()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="trans-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="tm-title">Nouveau transitaire</div>
+      <button class="modal-x" onclick="closeMod('trans-modal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="t-nom"></div>
+        <div class="fgrp"><label class="flbl">Pays départ</label><input type="text" class="fc" id="t-dep" placeholder="Chine"></div>
+        <div class="fgrp"><label class="flbl">Pays arrivée</label><input type="text" class="fc" id="t-arr" placeholder="Togo"></div>
+        <div class="fgrp"><label class="flbl">Contact</label><input type="text" class="fc" id="t-contact"></div>
+        <div class="fgrp"><label class="flbl">WhatsApp</label><input type="text" class="fc" id="t-wa"></div>
+        <div class="fgrp"><label class="flbl">Téléphone</label><input type="text" class="fc" id="t-tel"></div>
+        <div class="fgrp"><label class="flbl">Type logistique</label>
+          <select class="fc" id="t-type"><option>Maritime</option><option>Aérien</option><option>Routier</option><option>Multimodale</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl">Entreposage (jours)</label><input type="number" class="fc" id="t-ent" value="0"></div>
+        <div class="fgrp"><label class="flbl">Tarif maritime (XOF/CBM)</label><input type="number" class="fc" id="t-mar" placeholder="230000"></div>
+        <div class="fgrp"><label class="flbl">Délai maritime (jours)</label><input type="number" class="fc" id="t-mard"></div>
+        <div class="fgrp"><label class="flbl">Tarif aérien (XOF/kg)</label><input type="number" class="fc" id="t-aer" placeholder="11000"></div>
+        <div class="fgrp"><label class="flbl">Délai aérien (jours)</label><input type="number" class="fc" id="t-aerd"></div>
+        <div class="fgrp"><label class="flbl">Assurance incluse</label>
+          <select class="fc" id="t-ass"><option value="0">Non</option><option value="1">Oui — 1%</option><option value="1.5">Oui — 1.5%</option><option value="2">Oui — 2%</option></select>
+        </div>
+        <div class="fgrp full"><label class="flbl">Logo</label>
+          <div class="upload-area" onclick="document.getElementById('t-logo-in').click()">🚢 Ajouter le logo</div>
+          <input type="file" id="t-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'t-logo-prev','t-logo-dat')">
+          <div class="thumbs" id="t-logo-prev"></div>
+          <input type="hidden" id="t-logo-dat">
+        </div>
+      </div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('trans-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveTrans()">💾 Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t';
+const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tva:18};
+const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
+const EMOJIS={Hydrafacial:'💆','Picolaser/Tatouage':'⚡','Analyse de peau':'🔬','RF Microneedling':'💉',HIFU:'✨'};
+
+const DF=[
+  {id:'F001',nom:'Bailey',pays:'Chine',contact:'',wa:'',wc:'',dom:'Équipement esthétique professionnel',an:'',eval:4,ali:'Non disponible',ali_url:'',lang:'Chinois, Anglais',mkt:'Afrique, Moyen-Orient',desc:'Fournisseur spécialisé en équipements esthétiques et médicaux professionnels.',com:'',logo:''},
+  {id:'F002',nom:'Clara',pays:'Chine',contact:'',wa:'',wc:'',dom:'Équipement esthétique professionnel',an:'',eval:4,ali:'Non disponible',ali_url:'',lang:'Chinois, Anglais',mkt:'Afrique, Europe',desc:'Fournisseur en équipements esthétiques et de beauté professionnels.',com:'',logo:''}
+];
+
+const DP=[
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm'},
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm'},
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm'},
+  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm'},
+  {cat:'Picolaser/Tatouage',fn:'Clara',nom:'PICO équiv. format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm'},
+  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm'},
+  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm'},
+  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm'},
+  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm'},
+  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm'},
+  {cat:'RF Microneedling',fn:'Bailey',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm'},
+  {cat:'RF Microneedling',fn:'Clara',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18×7×4 cm — très léger (160 g)'},
+  {cat:'RF Microneedling',fn:'Bailey',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm'},
+  {cat:'RF Microneedling',fn:'Clara',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm'},
+  {cat:'HIFU',fn:'Bailey',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm'},
+  {cat:'HIFU',fn:'Clara',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm'}
+];
+
+let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime';
+
+function init(){
+  S=JSON.parse(localStorage.getItem(SK)||'null')||{...DS};
+  fours=JSON.parse(localStorage.getItem(FK)||'null');
+  if(!fours||!fours.length)fours=[...DF];
+  prods=JSON.parse(localStorage.getItem(PK)||'null');
+  if(!prods||!prods.length){prods=buildProds();save('p');}
+  trans=JSON.parse(localStorage.getItem(TK)||'[]');
+  document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  loadS();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
+}
+
+function buildProds(){
+  const cc={};let g=0;
+  return DP.map(d=>{
+    g++;cc[d.cat]=(cc[d.cat]||0)+1;
+    const code=CATS[d.cat]||'PRD';
+    const ref=`${code}-${String(cc[d.cat]).padStart(3,'0')}-${String(g).padStart(3,'0')}`;
+    const f=fours.find(x=>x.nom===d.fn);
+    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:[]};
+  });
+}
+
+function save(t){
+  if(t==='p')localStorage.setItem(PK,JSON.stringify(prods));
+  if(t==='f')localStorage.setItem(FK,JSON.stringify(fours));
+  if(t==='t')localStorage.setItem(TK,JSON.stringify(trans));
+  if(t==='s')localStorage.setItem(SK,JSON.stringify(S));
+}
+
+function loadS(){
+  document.getElementById('s_tc').value=S.tauxChange;
+  document.getElementById('s_fa').value=S.tarifAerien;
+  document.getElementById('s_fm').value=S.tarifMaritime;
+  document.getElementById('s_mg').value=S.tauxMarge;
+  document.getElementById('s_tv').value=S.tva;
+}
+
+function saveSettings(){
+  S.tauxChange=parseFloat(document.getElementById('s_tc').value)||95;
+  S.tarifAerien=parseFloat(document.getElementById('s_fa').value)||11000;
+  S.tarifMaritime=parseFloat(document.getElementById('s_fm').value)||230000;
+  S.tauxMarge=parseFloat(document.getElementById('s_mg').value)||35;
+  S.tva=parseFloat(document.getElementById('s_tv').value)||18;
+  save('s');renderCat();toast('Paramètres enregistrés ✓');
+}
+
+function toggleSettings(){document.getElementById('spanel').classList.toggle('open');}
+
+function calc(p,o={}){
+  const tc=S.tauxChange,mg=((o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge))/100);
+  const tr=o.tr||p.tr||'Maritime';
+  const fa=o.fa||S.tarifAerien,fm=o.fm||S.tarifMaritime;
+  let pa=0;
+  if(p.dev==='RMB')pa=p.prix*tc;
+  else if(p.dev==='USD')pa=p.prix*600;
+  else if(p.dev==='EUR')pa=p.prix*655;
+  else pa=p.prix;
+  const cbm=(p.l*p.la*p.h)/1e6;
+  const fret=tr==='Aérien'?p.kg*fa:cbm*fm;
+  const cout=pa+fret;
+  const pvh=cout*(1+mg);
+  const rem=parseFloat(p.rem)||0;
+  const remM=pvh*rem/100;
+  const pnh=pvh-remM;
+  const mn=pnh-cout;
+  const tva=S.tva/100;
+  return{pa,cbm,fret,cout,pvh,remM,pnh,mn,ttc:pnh*(1+tva)};
+}
+
+function N(n){if(isNaN(n)||n==null)return'—';return Math.round(n).toLocaleString('fr-FR')+' XOF';}
+function Nd(n,d=2){return isNaN(n)?'—':n.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:d});}
+
+function tab(name){
+  ['catalogue','fournisseurs','transitaires','simulation'].forEach(t=>{
+    document.getElementById('t-'+t).style.display=t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['catalogue','fournisseurs','transitaires','simulation'][i]===name);
+  });
+}
+
+function setView(v){
+  view=v;
+  document.getElementById('vg').classList.toggle('active',v==='grid');
+  document.getElementById('vl').classList.toggle('active',v==='list');
+  renderCat();
+}
+
+function renderCat(){
+  const q=(document.getElementById('cat-search').value||'').toLowerCase();
+  const fc=document.getElementById('f-cat').value;
+  const ff=document.getElementById('f-four');
+  const curff=ff.value;
+  ff.innerHTML='<option value="">Tous fournisseurs</option>';
+  fours.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.nom;if(f.id===curff)o.selected=true;ff.appendChild(o);});
+  const fv=ff.value;
+  let list=prods.filter(p=>(!q||(p.nom.toLowerCase().includes(q)||p.ref.toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q)))&&(!fc||p.cat===fc)&&(!fv||p.fid===fv));
+  const totalV=prods.reduce((s,p)=>s+calc(p).cout,0);
+  document.getElementById('cat-stats').innerHTML=`
+    <div class="stat"><div class="stat-val">${prods.length}</div><div class="stat-lbl">Produits</div></div>
+    <div class="stat"><div class="stat-val">${list.length}</div><div class="stat-lbl">Affichés</div></div>
+    <div class="stat"><div class="stat-val">${[...new Set(prods.map(p=>p.cat))].length}</div><div class="stat-lbl">Catégories</div></div>
+    <div class="stat"><div class="stat-val" style="font-size:14px">${N(totalV)}</div><div class="stat-lbl">Valeur catalogue</div></div>`;
+  const c=document.getElementById('cat-cont');
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ico">📭</div><h3>Aucun produit trouvé</h3><p>Ajustez vos filtres ou ajoutez un produit.</p></div>';return;}
+  if(view==='grid'){c.innerHTML=`<div class="grid">${list.map(prodCard).join('')}</div>`;}
+  else{c.innerHTML=prodTable(list);}
+}
+
+function prodCard(p){
+  const f=fours.find(x=>x.id===p.fid);
+  const fn=f?f.nom:p.fn||'—';
+  const bc=fn==='Bailey'?'b-bailey':fn==='Clara'?'b-clara':'b-other';
+  const em=EMOJIS[p.cat]||'📦';
+  const img=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" alt="">`:`<span>${em}</span>`;
+  const c=calc(p);
+  return`<div class="card">
+  <div class="card-img">${img}<span class="badge ${bc}">${fn}</span></div>
+  <div class="card-body">
+    <div class="card-ref">${p.ref}</div>
+    <div class="card-title">${p.nom}</div>
+    <div class="card-cat">${p.cat} · ${p.tr==='Aérien'?'✈️':'🚢'} ${p.tr}</div>
+    <div class="card-prices">
+      <div class="pr"><span class="pr-lbl">Achat HT</span><span class="pr-val">${N(c.pa)}</span></div>
+      <div class="pr"><span class="pr-lbl">+ Fret</span><span class="pr-val">${N(c.fret)}</span></div>
+      <div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>
+      <div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>
+      ${p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:''}
+    </div>
+    <div class="card-acts">
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">&#x270F;&#xFE0F;</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">&#x1F5D1;&#xFE0F;</button>
+      <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧭</button>
+    </div>
+  </div></div>`;
+}
+
+function prodTable(list){
+  return`<div class="tbl-wrap"><table>
+  <thead><tr><th>Réf</th><th>Désignation</th><th>Catégorie</th><th>Fournisseur</th><th>CBM</th><th>Poids</th><th>Achat HT</th><th>Fret</th><th>Vente HT</th><th>TTC</th><th>Marché</th><th>Actions</th></tr></thead>
+  <tbody>${list.map(p=>{
+    const f=fours.find(x=>x.id===p.fid);const c=calc(p);
+    return`<tr>
+      <td><code style="font-size:10px">${p.ref}</code></td>
+      <td style="font-weight:500;max-width:180px">${p.nom}</td>
+      <td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>
+      <td>${f?f.nom:p.fn||'—'}</td>
+      <td>${Nd(c.cbm,4)} m³</td>
+      <td>${p.kg} kg</td>
+      <td>${N(c.pa)}</td>
+      <td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>
+      <td>${N(c.pnh)}</td>
+      <td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>
+      <td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">&#x270F;&#xFE0F;</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">&#x1F5D1;&#xFE0F;</button>
+      </div></td>
+    </tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+
+function openProdModal(id=null){
+  editP=id;pics=[];
+  document.getElementById('p-thumbs').innerHTML='';
+  document.getElementById('calc-prev').style.display='none';
+  const sel=document.getElementById('p-four');
+  sel.innerHTML='<option value="">Sélectionner...</option>';
+  fours.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.nom;sel.appendChild(o);});
+  if(id){
+    const p=prods.find(x=>x.id===id);
+    document.getElementById('pm-title').textContent='Modifier le produit';
+    document.getElementById('p-ref').value=p.ref;
+    document.getElementById('p-nom').value=p.nom;
+    document.getElementById('p-cat').value=p.cat;
+    document.getElementById('p-four').value=p.fid;
+    document.getElementById('p-prix').value=p.prix;
+    document.getElementById('p-dev').value=p.dev||'RMB';
+    document.getElementById('p-l').value=p.l;
+    document.getElementById('p-la').value=p.la;
+    document.getElementById('p-h').value=p.h;
+    document.getElementById('p-poids').value=p.kg;
+    document.getElementById('p-trans').value=p.tr;
+    document.getElementById('p-marge').value=p.marge;
+    document.getElementById('p-rem').value=p.rem||0;
+    document.getElementById('p-conc').value=p.conc||'';
+    document.getElementById('p-moq').value=p.moq||1;
+    document.getElementById('p-desc').value=p.desc||'';
+    document.getElementById('p-specs').value=p.specs||'';
+    pics=[...(p.photos||[])];renderThumbs();calcPrev();
+  }else{
+    document.getElementById('pm-title').textContent='Nouveau produit';
+    ['p-ref','p-nom','p-prix','p-l','p-la','p-h','p-poids','p-marge','p-desc','p-specs','p-conc'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('p-cat').value='';
+    document.getElementById('p-trans').value='Maritime';
+    document.getElementById('p-rem').value='0';
+    document.getElementById('p-moq').value='1';
+    document.getElementById('p-dev').value='RMB';
+  }
+  updateSLink();
+  document.getElementById('prod-modal').classList.add('open');
+}
+
+function genRef(){
+  if(editP)return;
+  const cat=document.getElementById('p-cat').value;
+  if(!cat)return;
+  const code=CATS[cat]||'PRD';
+  const cn=prods.filter(p=>p.cat===cat).length+1;
+  const gn=prods.length+1;
+  document.getElementById('p-ref').value=`${code}-${String(cn).padStart(3,'0')}-${String(gn).padStart(3,'0')}`;
+}
+
+function updateSLink(){
+  const n=document.getElementById('p-nom').value;
+  const c=document.getElementById('p-cat').value;
+  const q=encodeURIComponent(`${n||c} prix vente marché FCFA XOF`);
+  document.getElementById('p-glink').href=`https://www.google.com/search?q=${q}`;
+}
+
+function calcPrev(){
+  const prix=parseFloat(document.getElementById('p-prix').value);
+  const l=parseFloat(document.getElementById('p-l').value);
+  const la=parseFloat(document.getElementById('p-la').value);
+  const h=parseFloat(document.getElementById('p-h').value);
+  const kg=parseFloat(document.getElementById('p-poids').value);
+  updateSLink();
+  if(!prix||!l||!la||!h||!kg){document.getElementById('calc-prev').style.display='none';return;}
+  const p={prix,dev:document.getElementById('p-dev').value,l,la,h,kg,tr:'Maritime',marge:document.getElementById('p-marge').value,rem:0};
+  const c=calc(p);
+  document.getElementById('calc-prev').style.display='block';
+  document.getElementById('calc-prev-rows').innerHTML=`
+    <div>CBM: <b>${Nd(c.cbm,4)} m³</b></div>
+    <div>Achat HT: <b>${N(c.pa)}</b></div>
+    <div>Fret maritime: <b>${N(c.fret)}</b></div>
+    <div>Coût total: <b>${N(c.cout)}</b></div>
+    <div>Vente HT: <b>${N(c.pnh)}</b></div>
+    <div>TTC: <b style="color:var(--bleu)">${N(c.ttc)}</b></div>`;
+}
+
+function saveProd(){
+  const nom=document.getElementById('p-nom').value.trim();
+  const cat=document.getElementById('p-cat').value;
+  if(!nom||!cat){toast('Nom et catégorie requis',true);return;}
+  const fid=document.getElementById('p-four').value;
+  const f=fours.find(x=>x.id===fid);
+  const d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
+    dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
+    la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
+    kg:parseFloat(document.getElementById('p-poids').value)||0,tr:document.getElementById('p-trans').value,
+    marge:document.getElementById('p-marge').value,rem:parseFloat(document.getElementById('p-rem').value)||0,
+    conc:document.getElementById('p-conc').value,moq:parseInt(document.getElementById('p-moq').value)||1,
+    desc:document.getElementById('p-desc').value,specs:document.getElementById('p-specs').value,photos:[...pics]};
+  if(editP){const i=prods.findIndex(p=>p.id===editP);prods[i]={...prods[i],...d};toast('Produit mis à jour ✓');}
+  else{d.id='P'+String(Date.now()).slice(-8);d.ref=document.getElementById('p-ref').value||d.id;prods.push(d);toast('Produit ajouté ✓');}
+  save('p');closeMod('prod-modal');renderCat();popSim();
+}
+
+function delProd(id){
+  if(!confirm('Supprimer ce produit ?'))return;
+  prods=prods.filter(p=>p.id!==id);save('p');renderCat();popSim();toast('Supprimé');
+}
+
+function addPics(inp){
+  Array.from(inp.files).slice(0,3-pics.length).forEach(f=>{
+    const r=new FileReader();r.onload=e=>{pics.push(e.target.result);renderThumbs();};r.readAsDataURL(f);
+  });inp.value='';
+}
+function renderThumbs(){
+  document.getElementById('p-thumbs').innerHTML=pics.map((s,i)=>`<div class="thumb"><img src="${s}"><button onclick="pics.splice(${i},1);renderThumbs()">&#x2715;</button></div>`).join('');
+}
+function addLogo(inp,pid,did){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>{
+    document.getElementById(did).value=e.target.result;
+    document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()">&#x2715;</button></div>`;
+  };r.readAsDataURL(f);inp.value='';
+}
+
+function renderFour(){
+  const q=(document.getElementById('four-search').value||'').toLowerCase();
+  const list=fours.filter(f=>!q||f.nom.toLowerCase().includes(q)||(f.pays||'').toLowerCase().includes(q));
+  const c=document.getElementById('four-cont');
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🏗️</div><h3>Aucun fournisseur</h3></div>';return;}
+  c.innerHTML=`<div class="grid">${list.map(f=>{
+    const np=prods.filter(p=>p.fid===f.id).length;
+    const stars='⭐'.repeat(parseInt(f.eval)||0);
+    return`<div class="card">
+      <div class="card-img" style="height:90px">${f.logo?`<img src="${f.logo}" alt="">`:`🏗️`}</div>
+      <div class="card-body">
+        <div class="card-title">${f.nom}</div>
+        <div class="card-cat">${f.pays||''} · ${f.dom||''}</div>
+        <div style="margin:6px 0;font-size:12px">${stars} <span style="color:var(--muted);font-size:11px">${np} produit${np>1?'s':''}</span></div>
+        ${f.wa?`<div style="font-size:11px;color:var(--muted)">📱 ${f.wa}</div>`:''}
+        ${f.ali!=='Non disponible'?`<div style="margin-top:4px"><span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 6px;border-radius:10px;font-size:10px">${f.ali}</span></div>`:''}
+        <div class="card-acts">
+          <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">&#x270F;&#xFE0F; Modifier</button>
+          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">&#x1F5D1;&#xFE0F;</button>
+        </div>
+      </div></div>`;
+  }).join('')}</div>`;
+}
+
+function openFourModal(id=null){
+  editF=id;
+  document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML='';
+  if(id){
+    const f=fours.find(x=>x.id===id);
+    document.getElementById('fm-title').textContent='Modifier le fournisseur';
+    document.getElementById('f-nom').value=f.nom||'';document.getElementById('f-pays').value=f.pays||'';
+    document.getElementById('f-contact').value=f.contact||'';document.getElementById('f-wa').value=f.wa||'';
+    document.getElementById('f-wc').value=f.wc||'';document.getElementById('f-dom').value=f.dom||'';
+    document.getElementById('f-an').value=f.an||'';document.getElementById('f-eval').value=f.eval||3;
+    document.getElementById('f-ali').value=f.ali||'Non disponible';document.getElementById('f-ali-url').value=f.ali_url||'';
+    document.getElementById('f-lang').value=f.lang||'';document.getElementById('f-mkt').value=f.mkt||'';
+    document.getElementById('f-desc').value=f.desc||'';document.getElementById('f-com').value=f.com||'';
+    if(f.logo){document.getElementById('f-logo-dat').value=f.logo;document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}"></div>`;}
+  }else{
+    document.getElementById('fm-title').textContent='Nouveau fournisseur';
+    ['f-nom','f-pays','f-contact','f-wa','f-wc','f-dom','f-an','f-ali-url','f-lang','f-mkt','f-desc','f-com'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('f-eval').value=3;document.getElementById('f-ali').value='Non disponible';
+  }
+  document.getElementById('four-modal').classList.add('open');
+}
+
+function saveFour(){
+  const nom=document.getElementById('f-nom').value.trim();
+  if(!nom){toast('Nom requis',true);return;}
+  const d={nom,pays:document.getElementById('f-pays').value,contact:document.getElementById('f-contact').value,
+    wa:document.getElementById('f-wa').value,wc:document.getElementById('f-wc').value,dom:document.getElementById('f-dom').value,
+    an:document.getElementById('f-an').value,eval:document.getElementById('f-eval').value,
+    ali:document.getElementById('f-ali').value,ali_url:document.getElementById('f-ali-url').value,
+    lang:document.getElementById('f-lang').value,mkt:document.getElementById('f-mkt').value,
+    desc:document.getElementById('f-desc').value,com:document.getElementById('f-com').value,
+    logo:document.getElementById('f-logo-dat').value};
+  if(editF){const i=fours.findIndex(f=>f.id===editF);fours[i]={...fours[i],...d};toast('Fournisseur mis à jour ✓');}
+  else{d.id='F'+String(Date.now()).slice(-6);fours.push(d);toast('Fournisseur ajouté ✓');}
+  save('f');closeMod('four-modal');renderFour();
+}
+
+function delFour(id){
+  if(!confirm('Supprimer ce fournisseur ?'))return;
+  fours=fours.filter(f=>f.id!==id);save('f');renderFour();toast('Supprimé');
+}
+
+function renderTrans(){
+  const q=(document.getElementById('tr-search').value||'').toLowerCase();
+  const list=trans.filter(t=>!q||t.nom.toLowerCase().includes(q));
+  const c=document.getElementById('trans-cont');
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🚢</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
+  c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:`🚢`}</div>
+    <div class="card-body">
+      <div class="card-title">${t.nom}</div>
+      <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
+      <div style="font-size:11px;margin-top:6px;display:flex;flex-direction:column;gap:3px">
+        ${t.mar?`<span>🚢 ${parseInt(t.mar).toLocaleString('fr-FR')} XOF/CBM${t.mard?' · '+t.mard+'j':''}</span>`:''}
+        ${t.aer?`<span>✈️ ${parseInt(t.aer).toLocaleString('fr-FR')} XOF/kg${t.aerd?' · '+t.aerd+'j':''}</span>`:''}
+        ${t.wa?`<span>📱 ${t.wa}</span>`:''}
+      </div>
+      <div class="card-acts">
+        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')">&#x270F;&#xFE0F;</button>
+        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')">&#x1F5D1;&#xFE0F;</button>
+      </div>
+    </div></div>`).join('')}</div>`;
+}
+
+function openTransModal(id=null){
+  editT=id;
+  document.getElementById('t-logo-dat').value='';document.getElementById('t-logo-prev').innerHTML='';
+  if(id){
+    const t=trans.find(x=>x.id===id);
+    document.getElementById('tm-title').textContent='Modifier le transitaire';
+    document.getElementById('t-nom').value=t.nom||'';document.getElementById('t-dep').value=t.dep||'';
+    document.getElementById('t-arr').value=t.arr||'';document.getElementById('t-contact').value=t.contact||'';
+    document.getElementById('t-wa').value=t.wa||'';document.getElementById('t-tel').value=t.tel||'';
+    document.getElementById('t-type').value=t.type||'Maritime';document.getElementById('t-ent').value=t.ent||0;
+    document.getElementById('t-mar').value=t.mar||'';document.getElementById('t-mard').value=t.mard||'';
+    document.getElementById('t-aer').value=t.aer||'';document.getElementById('t-aerd').value=t.aerd||'';
+    document.getElementById('t-ass').value=t.ass||'0';
+    if(t.logo){document.getElementById('t-logo-dat').value=t.logo;document.getElementById('t-logo-prev').innerHTML=`<div class="thumb"><img src="${t.logo}"></div>`;}
+  }else{
+    document.getElementById('tm-title').textContent='Nouveau transitaire';
+    ['t-nom','t-dep','t-arr','t-contact','t-wa','t-tel','t-mar','t-mard','t-aer','t-aerd'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('t-type').value='Maritime';document.getElementById('t-ent').value=0;document.getElementById('t-ass').value='0';
+  }
+  document.getElementById('trans-modal').classList.add('open');
+}
+
+function saveTrans(){
+  const nom=document.getElementById('t-nom').value.trim();
+  if(!nom){toast('Nom requis',true);return;}
+  const d={nom,dep:document.getElementById('t-dep').value,arr:document.getElementById('t-arr').value,
+    contact:document.getElementById('t-contact').value,wa:document.getElementById('t-wa').value,
+    tel:document.getElementById('t-tel').value,type:document.getElementById('t-type').value,
+    ent:document.getElementById('t-ent').value,mar:document.getElementById('t-mar').value,
+    mard:document.getElementById('t-mard').value,aer:document.getElementById('t-aer').value,
+    aerd:document.getElementById('t-aerd').value,ass:document.getElementById('t-ass').value,
+    logo:document.getElementById('t-logo-dat').value};
+  if(editT){const i=trans.findIndex(t=>t.id===editT);trans[i]={...trans[i],...d};toast('Transitaire mis à jour ✓');}
+  else{d.id='T'+String(Date.now()).slice(-6);trans.push(d);toast('Transitaire ajouté ✓');}
+  save('t');closeMod('trans-modal');renderTrans();popSim();
+}
+
+function delTrans(id){
+  if(!confirm('Supprimer ?'))return;
+  trans=trans.filter(t=>t.id!==id);save('t');renderTrans();popSim();toast('Supprimé');
+}
+
+function popSim(){
+  const sp=document.getElementById('sim-prod'),cur=sp.value;
+  sp.innerHTML='<option value="">— Sélectionner —</option>';
+  prods.forEach(p=>{const o=document.createElement('option');o.value=p.id;o.textContent=`${p.ref} — ${p.nom}`;if(p.id===cur)o.selected=true;sp.appendChild(o);});
+  const sf=document.getElementById('sim-four'),curf=sf.value;
+  sf.innerHTML='<option value="">— Auto —</option>';
+  fours.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.nom;if(f.id===curf)o.selected=true;sf.appendChild(o);});
+  const st=document.getElementById('sim-trans'),curt=st.value;
+  st.innerHTML='<option value="">— Défaut —</option>';
+  trans.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.nom;if(t.id===curt)o.selected=true;st.appendChild(o);});
+}
+
+function setSimTrans(m){
+  simTr=m;
+  document.getElementById('tb-mar').classList.toggle('active',m==='Maritime');
+  document.getElementById('tb-aer').classList.toggle('active',m==='Aérien');
+  simCalc();
+}
+
+function simSelProd(){
+  const id=document.getElementById('sim-prod').value;
+  const prev=document.getElementById('sim-prev');
+  if(!id){prev.style.display='none';document.getElementById('sim-rows').innerHTML='<div style="text-align:center;opacity:.4;padding:40px 0;font-size:13px">Sélectionnez un produit</div>';return;}
+  const p=prods.find(x=>x.id===id);
+  prev.style.display='flex';
+  document.getElementById('sim-name').textContent=p.nom;
+  document.getElementById('sim-ref').textContent=p.ref;
+  document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} cm · ${p.kg} kg · ${p.cat}`;
+  const ico=document.getElementById('sim-ico');
+  if(p.photos&&p.photos[0]){ico.innerHTML=`<img src="${p.photos[0]}" style="width:60px;height:60px;object-fit:cover" alt="">`;}
+  else{ico.textContent=EMOJIS[p.cat]||'📦';ico.style.cssText='width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0';}
+  setSimTrans(p.tr||'Maritime');
+  const c=calc(p);
+  document.getElementById('sim-pv').value=Math.round(c.pnh);
+  simCalc();
+}
+
+function simCalc(){
+  const id=document.getElementById('sim-prod').value;
+  if(!id)return;
+  const p=prods.find(x=>x.id===id);
+  const qty=parseInt(document.getElementById('sim-qty').value)||1;
+  const rem=parseFloat(document.getElementById('sim-rem').value)||0;
+  const useTVA=document.getElementById('sim-tva').value==='1';
+  const ass=parseFloat(document.getElementById('sim-ass').value)||0;
+  const tid=document.getElementById('sim-trans').value;
+  const tr=trans.find(x=>x.id===tid);
+  const fa=tr&&tr.aer?parseFloat(tr.aer):S.tarifAerien;
+  const fm=tr&&tr.mar?parseFloat(tr.mar):S.tarifMaritime;
+  const c=calc(p,{tr:simTr,fa,fm});
+  const pvInput=parseFloat(document.getElementById('sim-pv').value);
+  const pvu=pvInput||c.pnh;
+  const remM=pvu*rem/100;
+  const pvn=pvu-remM;
+  const assM=c.cout*ass/100;
+  const tva=useTVA?S.tva/100:0;
+  const ttcU=(pvn+assM)*(1+tva);
+  const totAHT=c.cout*qty;
+  const totVHT=pvn*qty;
+  const totTTC=ttcU*qty;
+  const marge=totVHT-totAHT;
+  document.getElementById('sim-rows').innerHTML=`
+    <div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>
+    <div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>
+    <div class="sim-row"><span>Transport</span><span>${simTr==='Maritime'?'🚢':'✈️'} ${simTr}</span></div>
+    <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbm*qty,4)} m³</span></div>
+    <div class="sim-row"><span>Poids total</span><span>${Nd(p.kg*qty,2)} kg</span></div>
+    <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
+    <div class="sim-row"><span>Achat HT unitaire</span><span>${N(c.pa)}</span></div>
+    <div class="sim-row"><span>Fret unitaire</span><span>${N(c.fret)}</span></div>
+    <div class="sim-row"><span>Coût revient unitaire</span><span>${N(c.cout)}</span></div>
+    ${ass>0?`<div class="sim-row"><span>Assurance (${ass}%)</span><span>${N(assM)}</span></div>`:''}
+    <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
+    <div class="sim-row"><span>Vente HT unitaire</span><span>${N(pvn)}</span></div>
+    ${tva>0?`<div class="sim-row"><span>TVA (${S.tva}%)</span><span>${N(pvn*tva)}</span></div>`:''}
+    <div class="sim-row"><span>TTC unitaire</span><span>${N(ttcU)}</span></div>
+    <hr style="border-color:rgba(255,255,255,.08);margin:6px 0">
+    <div class="sim-row"><span>Total achat HT</span><span>${N(totAHT)}</span></div>
+    <div class="sim-row sim-total"><span>TOTAL TTC</span><span>${N(totTTC)}</span></div>
+    <div class="sim-row sim-marge"><span>Marge brute</span><span>${N(marge)} (${totAHT>0?Nd(marge/totAHT*100,1):0}%)</span></div>`;
+}
+
+function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
+
+function exportCSV(){
+  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Prix RMB','Prix achat HT XOF','CBM m3','Poids kg','Transport','Fret XOF','Coût total XOF','Marge %','Prix vente HT XOF','Remise %','Prix net HT XOF','TVA %','Prix TTC XOF','Prix concurrent XOF'];
+  const rows=prods.map(p=>{
+    const f=fours.find(x=>x.id===p.fid);const c=calc(p);
+    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.prix,Math.round(c.pa),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fret),Math.round(c.cout),p.marge||S.tauxMarge,Math.round(c.pvh),p.rem||0,Math.round(c.pnh),S.tva,Math.round(c.ttc),p.conc||''].join(';');
+  });
+  const csv=[hdr.join(';'),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`GoFlow_Catalogue_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  toast('Export CSV téléchargé ✓');
+}
+
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+function toast(msg,err=false){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.style.borderLeftColor=err?'var(--rouge)':'var(--vert)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+init();
+</script>
+</body>
+</html>
