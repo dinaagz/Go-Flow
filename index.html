@@ -143,6 +143,18 @@ textarea.fc{resize:vertical;min-height:70px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .comp-row{display:flex;gap:6px;align-items:center}
 .comp-row input{flex:1}
+/* Column picker */
+.col-picker-wrap{position:relative}
+.col-picker-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap}
+.col-picker-btn:hover{background:var(--gris)}
+.col-picker-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:150;padding:14px;min-width:240px}
+.col-picker-drop.open{display:block}
+.col-picker-drop .cp-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cp-item{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;padding:5px 8px;border-radius:6px;transition:.15s}
+.cp-item:hover{background:var(--gris)}
+.cp-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--bleu);cursor:pointer}
+.cp-fixed{opacity:.45;pointer-events:none}
 </style>
 </head>
 <body>
@@ -204,6 +216,24 @@ textarea.fc{resize:vertical;min-height:70px}
     <div class="view-tog">
       <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille">▦</button>
       <button class="view-btn" id="vl" onclick="setView('list')" title="Liste">☰</button>
+    </div>
+    <div class="col-picker-wrap" id="cp-wrap">
+      <button class="col-picker-btn" onclick="toggleColPicker()" title="Colonnes visibles">⚙️ Colonnes</button>
+      <div class="col-picker-drop" id="cp-drop">
+        <div class="cp-title">Colonnes obligatoires</div>
+        <div class="cp-grid">
+          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>📷 Photo</label>
+          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>🔖 Réf</label>
+          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>📝 Désignation</label>
+          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>⚡ Actions</label>
+        </div>
+        <div class="cp-title" style="margin-top:12px">Colonnes optionnelles</div>
+        <div class="cp-grid" id="cp-opts"></div>
+        <div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <button class="btn btn-sec btn-sm" style="flex:1" onclick="setAllCols(true)">Tout cocher</button>
+          <button class="btn btn-sec btn-sm" style="flex:1" onclick="setAllCols(false)">Tout décocher</button>
+        </div>
+      </div>
     </div>
     <button class="btn btn-primary" onclick="openProdModal()">+ Produit</button>
   </div>
@@ -526,10 +556,38 @@ const DP=[
   {cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
 ];
 
-let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime';
+const COL_DEFS=[
+  {k:'cat',   lbl:'Catégorie',  def:true},
+  {k:'four',  lbl:'Fournisseur',def:true},
+  {k:'cbm',   lbl:'CBM',        def:false},
+  {k:'poids', lbl:'Poids',      def:false},
+  {k:'achat', lbl:'Achat HT',   def:true},
+  {k:'fret',  lbl:'Fret',       def:false},
+  {k:'vente', lbl:'Vente HT',   def:true},
+  {k:'ttc',   lbl:'Prix TTC',   def:true},
+  {k:'marche',lbl:'Marché',     def:false},
+];
+let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
+
+function initCols(){
+  const saved=JSON.parse(localStorage.getItem('gf_c')||'null');
+  COL_DEFS.forEach(c=>{cols[c.k]=saved??(c.def);if(saved)cols[c.k]=saved[c.k]!==undefined?saved[c.k]:c.def;});
+  const wrap=document.getElementById('cp-opts');
+  wrap.innerHTML=COL_DEFS.map(c=>`<label class="cp-item"><input type="checkbox" ${cols[c.k]?'checked':''} onchange="toggleCol('${c.k}',this.checked)">${c.lbl}</label>`).join('');
+}
+function toggleCol(k,v){cols[k]=v;localStorage.setItem('gf_c',JSON.stringify(cols));renderCat();}
+function setAllCols(v){COL_DEFS.forEach(c=>{cols[c.k]=v;});localStorage.setItem('gf_c',JSON.stringify(cols));document.querySelectorAll('#cp-opts input').forEach(i=>i.checked=v);renderCat();}
+function toggleColPicker(){
+  const d=document.getElementById('cp-drop');d.classList.toggle('open');
+  if(d.classList.contains('open')){
+    const close=e=>{if(!document.getElementById('cp-wrap').contains(e.target)){d.classList.remove('open');document.removeEventListener('click',close);}};
+    setTimeout(()=>document.addEventListener('click',close),10);
+  }
+}
 
 function init(){
   S=JSON.parse(localStorage.getItem(SK)||'null')||{...DS};
+  initCols();
   // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
   const storedVer=parseInt(localStorage.getItem(VK)||'0');
   if(storedVer<DATA_VER){
@@ -680,19 +738,20 @@ function prodCard(p){
     ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
     :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(p);
+  const priceRows=[
+    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat HT</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
+    cols.fret  ?`<div class="pr"><span class="pr-lbl">+ Fret</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
+    cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
+    cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
+    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
+  ].join('');
   return`<div class="card">
   <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
   <div class="card-body">
     <div class="card-ref">${p.ref}</div>
     <div class="card-title">${p.nom}</div>
-    <div class="card-cat">${p.cat} · ${p.tr==='Aérien'?'✈️':'🚢'} ${p.tr}</div>
-    <div class="card-prices">
-      <div class="pr"><span class="pr-lbl">Achat HT</span><span class="pr-val">${N(c.pa)}</span></div>
-      <div class="pr"><span class="pr-lbl">+ Fret</span><span class="pr-val">${N(c.fret)}</span></div>
-      <div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>
-      <div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>
-      ${p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:''}
-    </div>
+    <div class="card-cat">${cols.cat?p.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${p.tr==='Aérien'?'✈️':'🚢'} ${p.tr}</div>
+    ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
@@ -702,30 +761,43 @@ function prodCard(p){
 }
 
 function prodTable(list){
-  return`<div class="tbl-wrap"><table>
-  <thead><tr><th>Photo</th><th>Réf</th><th>Désignation</th><th>Catégorie</th><th>Fournisseur</th><th>CBM</th><th>Poids</th><th>Achat HT</th><th>Fret</th><th>Vente HT</th><th>TTC</th><th>Marché</th><th>Actions</th></tr></thead>
-  <tbody>${list.map(p=>{
+  const C=cols;
+  const ths=['<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
+    C.cat   ?'<th>Catégorie</th>'  :'',
+    C.four  ?'<th>Fournisseur</th>':'',
+    C.cbm   ?'<th>CBM</th>'        :'',
+    C.poids ?'<th>Poids</th>'      :'',
+    C.achat ?'<th>Achat HT</th>'   :'',
+    C.fret  ?'<th>Fret</th>'       :'',
+    C.vente ?'<th>Vente HT</th>'   :'',
+    C.ttc   ?'<th>TTC</th>'        :'',
+    C.marche?'<th>Marché</th>'     :'',
+    '<th>Actions</th>',
+  ].join('');
+  const rows=list.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     return`<tr>
       <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[p.cat]+'</span>'}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${p.nom}</td>
-      <td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>
-      <td>${fourLabel(f)}</td>
-      <td>${Nd(c.cbm,4)} m³</td>
-      <td>${p.kg} kg</td>
-      <td>${N(c.pa)}</td>
-      <td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>
-      <td>${N(c.pnh)}</td>
-      <td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>
-      <td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>
+      ${C.cat   ?`<td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>`:''}
+      ${C.four  ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.cbm   ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
+      ${C.poids ?`<td>${p.kg} kg</td>`:''}
+      ${C.achat ?`<td>${N(c.pa)}</td>`:''}
+      ${C.fret  ?`<td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
+      ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
+        <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
       </div></td>
     </tr>`;
-  }).join('')}</tbody></table></div>`;
+  }).join('');
+  return`<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 /* ---- PRODUCT MODAL ---- */
