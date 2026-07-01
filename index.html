@@ -10,15 +10,19 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);min-height:100vh}
 .grad-bar{height:4px;background:var(--grad)}
+/* HEADER */
 .hdr{background:var(--nuit);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
 .logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .logo-sub{color:rgba(255,255,255,.45);font-size:10px;letter-spacing:2px;text-transform:uppercase;-webkit-text-fill-color:rgba(255,255,255,.45)}
 .hdr-right{display:flex;gap:8px;align-items:center}
+/* TABS */
 .tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto}
 .tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
 .tab:hover{color:var(--bleu)}
 .tab.active{color:var(--nuit);border-bottom-color:var(--bleu)}
+/* CONTENT */
 .wrap{padding:20px 24px;max-width:1400px;margin:0 auto}
+/* BUTTONS */
 .btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
 .btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#007acc}
 .btn-sec{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-sec:hover{background:var(--gris)}
@@ -26,6 +30,7 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .btn-success{background:#d1fae5;color:#059669}
 .btn-grad{background:var(--grad);color:#fff;font-weight:600}
 .btn-sm{padding:6px 10px;font-size:12px;border-radius:6px}
+/* TOOLBAR */
 .toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
 .search{flex:1;min-width:180px;position:relative}
 .search input{width:100%;padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;background:#fff}
@@ -34,14 +39,17 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .view-tog{display:flex;background:var(--gris);border-radius:8px;padding:3px;gap:2px}
 .view-btn{padding:6px 10px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:15px;transition:.2s}
 .view-btn.active{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+/* STATS */
 .stats{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap}
 .stat{background:#fff;border-radius:10px;padding:14px 18px;flex:1;min-width:130px;border:1px solid var(--border)}
 .stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--nuit)}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+/* GRID */
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 @media(max-width:1280px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
+/* CARDS */
 .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:.2s;border:1px solid var(--border)}
 .card:hover{box-shadow:0 4px 16px rgba(0,0,0,.11);transform:translateY(-2px)}
 .card-img{height:150px;background:linear-gradient(135deg,#f0f0f8,#e8e8f0);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
@@ -57,15 +65,18 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .pr-lbl{color:var(--muted)}.pr-val{font-weight:600}
 .pr-ttc{font-size:13px;color:var(--bleu);font-weight:700}
 .card-acts{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+/* TABLE */
 .tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead th{background:var(--nuit);color:#fff;padding:11px 12px;text-align:left;font-weight:500;white-space:nowrap}
 tbody tr{border-bottom:1px solid var(--border)}
 tbody tr:hover{background:#f8f8fc}
 tbody td{padding:10px 12px}
+/* SETTINGS */
 .settings-panel{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid var(--border);display:none}
 .settings-panel.open{display:block}
 .s-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+/* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.open{display:flex}
 .modal{background:#fff;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -82,13 +93,17 @@ tbody td{padding:10px 12px}
 .fc:focus{border-color:var(--bleu)}
 textarea.fc{resize:vertical;min-height:70px}
 .fact{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+/* PHOTO */
 .upload-area{border:2px dashed var(--border);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:.2s;font-size:13px;color:var(--muted)}
 .upload-area:hover{border-color:var(--bleu);background:#f0f8ff}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumb{position:relative;width:68px;height:68px}
 .thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
 .thumb button{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+/* SECTION */
 .sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.cnt-badge{background:var(--bleu);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
+/* SIM */
 .sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
 .sim-form{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)}
@@ -100,16 +115,21 @@ textarea.fc{resize:vertical;min-height:70px}
 .prod-prev{display:flex;gap:14px;background:var(--gris);border-radius:8px;padding:14px;margin-bottom:14px;align-items:flex-start}
 .prev-icon{width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden}
 .prev-icon img{width:100%;height:100%;object-fit:cover}
+/* TRANSPORT SELECTOR */
 .trans-sel{display:flex;gap:8px}
 .trans-btn{flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
 .trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+/* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(100px);opacity:0;transition:.3s;border-left:4px solid var(--vert)}
 .toast.show{transform:translateY(0);opacity:1}
+/* EMPTY */
 .empty{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty .ico{font-size:44px;margin-bottom:10px}
 .empty h3{font-family:'Montserrat',sans-serif;margin-bottom:6px;color:var(--text)}
+/* PREVIEW CALC */
 .calc-preview{background:var(--gris);border-radius:8px;padding:14px;margin-top:14px;font-size:12px;display:none}
 .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+/* PRINT */
 @media print{
   body{background:#fff}
   .hdr,.tabs,.toolbar,.card-acts,.btn,.overlay,.toast,.settings-panel,.hdr-right{display:none!important}
@@ -141,7 +161,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <div class="hdr-right">
     <button class="btn btn-sec btn-sm" onclick="toggleSettings()">⚙️ Paramètres</button>
     <button class="btn btn-sec btn-sm" onclick="exportCSV()">📥 CSV</button>
-    <button class="btn btn-sec btn-sm" onclick="window.print()">🖸️ PDF</button>
+    <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ PDF</button>
   </div>
 </header>
 
@@ -153,13 +173,14 @@ textarea.fc{resize:vertical;min-height:70px}
 
 <nav class="tabs">
   <div class="tab active" onclick="tab('catalogue')">📦 Catalogue</div>
-  <div class="tab" onclick="tab('fournisseurs')">🏗️ Fournisseurs</div>
+  <div class="tab" onclick="tab('fournisseurs')">🏭 Fournisseurs</div>
   <div class="tab" onclick="tab('transitaires')">🚢 Transitaires</div>
-  <div class="tab" onclick="tab('simulation')">🧭 Simulation</div>
+  <div class="tab" onclick="tab('simulation')">🧮 Simulation</div>
 </nav>
 
 <div class="wrap">
 
+<!-- SETTINGS -->
 <div class="settings-panel" id="spanel">
   <div class="sec-hdr">⚙️ Paramètres globaux</div>
   <div class="s-grid">
@@ -175,6 +196,7 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- CATALOGUE -->
 <div id="t-catalogue">
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
@@ -194,6 +216,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <div id="cat-cont"></div>
 </div>
 
+<!-- FOURNISSEURS -->
 <div id="t-fournisseurs" style="display:none">
   <div class="toolbar">
     <div class="search"><input type="text" placeholder="Rechercher..." id="four-search" oninput="renderFour()"></div>
@@ -202,6 +225,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <div id="four-cont"></div>
 </div>
 
+<!-- TRANSITAIRES -->
 <div id="t-transitaires" style="display:none">
   <div class="toolbar">
     <div class="search"><input type="text" placeholder="Rechercher..." id="tr-search" oninput="renderTrans()"></div>
@@ -210,10 +234,11 @@ textarea.fc{resize:vertical;min-height:70px}
   <div id="trans-cont"></div>
 </div>
 
+<!-- SIMULATION -->
 <div id="t-simulation" style="display:none">
   <div class="sim-wrap">
     <div class="sim-form">
-      <div class="sec-hdr">🧭 Paramètres commande</div>
+      <div class="sec-hdr">🧮 Paramètres commande</div>
       <div id="sim-prev" style="display:none" class="prod-prev">
         <div class="prev-icon" id="sim-ico">📦</div>
         <div>
@@ -263,19 +288,20 @@ textarea.fc{resize:vertical;min-height:70px}
       <div class="sec-hdr" style="color:#fff">📊 Récapitulatif</div>
       <div id="sim-rows"><div style="text-align:center;opacity:.4;padding:40px 0;font-size:13px">Sélectionnez un produit</div></div>
       <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-grad" onclick="window.print()">🖸️ Export PDF</button>
+        <button class="btn btn-grad" onclick="window.print()">🖨️ Export PDF</button>
       </div>
     </div>
   </div>
 </div>
 
-</div>
+</div><!-- /wrap -->
 
+<!-- PRODUCT MODAL -->
 <div class="overlay" id="prod-modal">
   <div class="modal">
     <div class="modal-hdr">
       <div class="modal-title" id="pm-title">Nouveau produit</div>
-      <button class="modal-x" onclick="closeMod('prod-modal')">&#x2715;</button>
+      <button class="modal-x" onclick="closeMod('prod-modal')">✕</button>
     </div>
     <div class="modal-body">
       <div class="fg">
@@ -332,13 +358,22 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- FOURNISSEUR MODAL -->
 <div class="overlay" id="four-modal">
   <div class="modal">
     <div class="modal-hdr">
       <div class="modal-title" id="fm-title">Nouveau fournisseur</div>
-      <button class="modal-x" onclick="closeMod('four-modal')">&#x2715;</button>
+      <button class="modal-x" onclick="closeMod('four-modal')">✕</button>
     </div>
     <div class="modal-body">
+      <div style="background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-bottom:16px">
+        <div class="flbl" style="margin-bottom:8px;color:var(--bleu)">🔗 Importer depuis Alibaba</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="url" class="fc" id="f-ali-import" placeholder="https://votrefournisseur.en.alibaba.com/ ou lien produit Alibaba" style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="parseAlibabaUrl()">Importer</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Collez l'URL du store ou d'un produit Alibaba pour pré-remplir automatiquement le formulaire.</div>
+      </div>
       <div class="fg">
         <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="f-nom"></div>
         <div class="fgrp"><label class="flbl">Pays</label><input type="text" class="fc" id="f-pays" placeholder="Chine"></div>
@@ -359,7 +394,7 @@ textarea.fc{resize:vertical;min-height:70px}
         <div class="fgrp full"><label class="flbl">Description activités</label><textarea class="fc" id="f-desc" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl">Logo</label>
-          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏗️ Ajouter le logo</div>
+          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏭 Ajouter le logo</div>
           <input type="file" id="f-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'f-logo-prev','f-logo-dat')">
           <div class="thumbs" id="f-logo-prev"></div>
           <input type="hidden" id="f-logo-dat">
@@ -373,11 +408,12 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- TRANSITAIRE MODAL -->
 <div class="overlay" id="trans-modal">
   <div class="modal">
     <div class="modal-hdr">
       <div class="modal-title" id="tm-title">Nouveau transitaire</div>
-      <button class="modal-x" onclick="closeMod('trans-modal')">&#x2715;</button>
+      <button class="modal-x" onclick="closeMod('trans-modal')">✕</button>
     </div>
     <div class="modal-body">
       <div class="fg">
@@ -426,18 +462,19 @@ const DF=[
   {id:'F002',nom:'Clara',pays:'Chine',contact:'',wa:'',wc:'',dom:'Équipement esthétique professionnel',an:'',eval:4,ali:'Non disponible',ali_url:'',lang:'Chinois, Anglais',mkt:'Afrique, Europe',desc:'Fournisseur en équipements esthétiques et de beauté professionnels.',com:'',logo:''}
 ];
 
+const IMGBASE='https://raw.githubusercontent.com/dinaagz/Go-Flow/main/Produit_devis/1%20';
 const DP=[
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm'},
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm'},
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm'},
-  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm'},
-  {cat:'Picolaser/Tatouage',fn:'Clara',nom:'PICO équiv. format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm'},
-  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm'},
-  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm'},
-  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm'},
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMGBASE+'(1).jpeg'},
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMGBASE+'(2).jpeg'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMGBASE+'(3).jpeg'},
+  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMGBASE+'(4).jpeg'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg',img:IMGBASE+'(5).jpeg'},
+  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm',img:IMGBASE+'(6).jpeg'},
+  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm',img:IMGBASE+'(7).jpeg'},
+  {cat:'Picolaser/Tatouage',fn:'Clara',nom:'PICO équiv. format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm',img:IMGBASE+'(8).jpeg'},
+  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm',img:IMGBASE+'(9).jpeg'},
+  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm',img:IMGBASE+'(10).jpeg'},
+  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm',img:IMGBASE+'(11).jpeg'},
   {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm'},
   {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm'},
   {cat:'RF Microneedling',fn:'Bailey',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm'},
@@ -468,7 +505,7 @@ function buildProds(){
     const code=CATS[d.cat]||'PRD';
     const ref=`${code}-${String(cc[d.cat]).padStart(3,'0')}-${String(g).padStart(3,'0')}`;
     const f=fours.find(x=>x.nom===d.fn);
-    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:[]};
+    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
   });
 }
 
@@ -538,6 +575,7 @@ function setView(v){
   renderCat();
 }
 
+/* ---- CATALOGUE ---- */
 function renderCat(){
   const q=(document.getElementById('cat-search').value||'').toLowerCase();
   const fc=document.getElementById('f-cat').value;
@@ -580,9 +618,9 @@ function prodCard(p){
       ${p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:''}
     </div>
     <div class="card-acts">
-      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">&#x270F;&#xFE0F;</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">&#x1F5D1;&#xFE0F;</button>
-      <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧭</button>
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
+      <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
     </div>
   </div></div>`;
 }
@@ -605,13 +643,14 @@ function prodTable(list){
       <td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>
       <td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>
       <td><div style="display:flex;gap:4px">
-        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">&#x270F;&#xFE0F;</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">&#x1F5D1;&#xFE0F;</button>
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
       </div></td>
     </tr>`;
   }).join('')}</tbody></table></div>`;
 }
 
+/* ---- PRODUCT MODAL ---- */
 function openProdModal(id=null){
   editP=id;pics=[];
   document.getElementById('p-thumbs').innerHTML='';
@@ -713,49 +752,82 @@ function delProd(id){
   prods=prods.filter(p=>p.id!==id);save('p');renderCat();popSim();toast('Supprimé');
 }
 
+/* ---- PHOTOS ---- */
 function addPics(inp){
   Array.from(inp.files).slice(0,3-pics.length).forEach(f=>{
     const r=new FileReader();r.onload=e=>{pics.push(e.target.result);renderThumbs();};r.readAsDataURL(f);
   });inp.value='';
 }
 function renderThumbs(){
-  document.getElementById('p-thumbs').innerHTML=pics.map((s,i)=>`<div class="thumb"><img src="${s}"><button onclick="pics.splice(${i},1);renderThumbs()">&#x2715;</button></div>`).join('');
+  document.getElementById('p-thumbs').innerHTML=pics.map((s,i)=>`<div class="thumb"><img src="${s}"><button onclick="pics.splice(${i},1);renderThumbs()">✕</button></div>`).join('');
 }
 function addLogo(inp,pid,did){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=e=>{
     document.getElementById(did).value=e.target.result;
-    document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()">&#x2715;</button></div>`;
+    document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()">✕</button></div>`;
   };r.readAsDataURL(f);inp.value='';
 }
 
+/* ---- FOURNISSEURS ---- */
 function renderFour(){
   const q=(document.getElementById('four-search').value||'').toLowerCase();
   const list=fours.filter(f=>!q||f.nom.toLowerCase().includes(q)||(f.pays||'').toLowerCase().includes(q));
   const c=document.getElementById('four-cont');
-  if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🏗️</div><h3>Aucun fournisseur</h3></div>';return;}
+  if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🏭</div><h3>Aucun fournisseur</h3></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const stars='⭐'.repeat(parseInt(f.eval)||0);
     return`<div class="card">
-      <div class="card-img" style="height:90px">${f.logo?`<img src="${f.logo}" alt="">`:`🏗️`}</div>
+      <div class="card-img" style="height:90px">${f.logo?`<img src="${f.logo}" alt="">`:'🏭'}</div>
       <div class="card-body">
         <div class="card-title">${f.nom}</div>
         <div class="card-cat">${f.pays||''} · ${f.dom||''}</div>
         <div style="margin:6px 0;font-size:12px">${stars} <span style="color:var(--muted);font-size:11px">${np} produit${np>1?'s':''}</span></div>
         ${f.wa?`<div style="font-size:11px;color:var(--muted)">📱 ${f.wa}</div>`:''}
-        ${f.ali!=='Non disponible'?`<div style="margin-top:4px"><span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 6px;border-radius:10px;font-size:10px">${f.ali}</span></div>`:''}
+        ${f.ali!=='Non disponible'?`<div style="margin-top:4px;display:flex;align-items:center;gap:6px"><span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 6px;border-radius:10px;font-size:10px">${f.ali}</span>${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none">↗ Alibaba</a>`:''}</div>`:''}
+        ${!f.ali_url&&f.ali_url===''?'':f.ali_url&&f.ali==='Non disponible'?`<div style="margin-top:4px"><a href="${f.ali_url}" target="_blank" style="font-size:11px;color:var(--bleu);text-decoration:none">↗ Voir sur Alibaba</a></div>`:''}
         <div class="card-acts">
-          <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">&#x270F;&#xFE0F; Modifier</button>
-          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">&#x1F5D1;&#xFE0F;</button>
+          <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">✏️ Modifier</button>
+          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">🗑️</button>
         </div>
       </div></div>`;
   }).join('')}</div>`;
 }
 
+function parseAlibabaUrl(){
+  const url=document.getElementById('f-ali-import').value.trim();
+  if(!url){toast('Collez un lien Alibaba d\'abord',true);return;}
+  let nom='',aliStatus='Vérifié',aliUrl=url;
+  try{
+    const u=new URL(url);
+    const host=u.hostname;
+    // Pattern: COMPANY.en.alibaba.com
+    const m=host.match(/^([^.]+)\.en\.alibaba\.com$/);
+    if(m){
+      nom=m[1].replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    }
+    // Pattern: www.alibaba.com/... (product or supplier page)
+    if(!nom&&host.includes('alibaba.com')){
+      const pathParts=u.pathname.split('/').filter(Boolean);
+      // Try to find supplier name in path
+      const sup=pathParts.find(p=>p.length>3&&!p.includes('.html')&&isNaN(p));
+      if(sup)nom=sup.replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    }
+  }catch(e){}
+  if(!nom){toast('URL non reconnue — remplissez manuellement le nom',true);document.getElementById('f-ali-url').value=url;return;}
+  document.getElementById('f-nom').value=nom;
+  document.getElementById('f-pays').value='Chine';
+  document.getElementById('f-lang').value='Chinois, Anglais';
+  document.getElementById('f-ali').value=aliStatus;
+  document.getElementById('f-ali-url').value=aliUrl;
+  toast(`Fournisseur "${nom}" importé depuis Alibaba ✓`);
+}
+
 function openFourModal(id=null){
   editF=id;
   document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML='';
+  document.getElementById('f-ali-import').value='';
   if(id){
     const f=fours.find(x=>x.id===id);
     document.getElementById('fm-title').textContent='Modifier le fournisseur';
@@ -795,13 +867,14 @@ function delFour(id){
   fours=fours.filter(f=>f.id!==id);save('f');renderFour();toast('Supprimé');
 }
 
+/* ---- TRANSITAIRES ---- */
 function renderTrans(){
   const q=(document.getElementById('tr-search').value||'').toLowerCase();
   const list=trans.filter(t=>!q||t.nom.toLowerCase().includes(q));
   const c=document.getElementById('trans-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🚢</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
-    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:`🚢`}</div>
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:'🚢'}</div>
     <div class="card-body">
       <div class="card-title">${t.nom}</div>
       <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
@@ -811,8 +884,8 @@ function renderTrans(){
         ${t.wa?`<span>📱 ${t.wa}</span>`:''}
       </div>
       <div class="card-acts">
-        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')">&#x270F;&#xFE0F;</button>
-        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')">&#x1F5D1;&#xFE0F;</button>
+        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')">🗑️</button>
       </div>
     </div></div>`).join('')}</div>`;
 }
@@ -859,6 +932,7 @@ function delTrans(id){
   trans=trans.filter(t=>t.id!==id);save('t');renderTrans();popSim();toast('Supprimé');
 }
 
+/* ---- SIMULATION ---- */
 function popSim(){
   const sp=document.getElementById('sim-prod'),cur=sp.value;
   sp.innerHTML='<option value="">— Sélectionner —</option>';
@@ -888,7 +962,7 @@ function simSelProd(){
   document.getElementById('sim-ref').textContent=p.ref;
   document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} cm · ${p.kg} kg · ${p.cat}`;
   const ico=document.getElementById('sim-ico');
-  if(p.photos&&p.photos[0]){ico.innerHTML=`<img src="${p.photos[0]}" style="width:60px;height:60px;object-fit:cover" alt="">`;}
+  if(p.photos&&p.photos[0]){ico.innerHTML=`<img src="${p.photos[0]}" style="width:60px;height:60px;object-fit:cover" alt="">`; }
   else{ico.textContent=EMOJIS[p.cat]||'📦';ico.style.cssText='width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0';}
   setSimTrans(p.tr||'Maritime');
   const c=calc(p);
@@ -943,6 +1017,7 @@ function simCalc(){
 
 function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
 
+/* ---- EXPORT CSV ---- */
 function exportCSV(){
   const hdr=['Référence','Désignation','Catégorie','Fournisseur','Prix RMB','Prix achat HT XOF','CBM m3','Poids kg','Transport','Fret XOF','Coût total XOF','Marge %','Prix vente HT XOF','Remise %','Prix net HT XOF','TVA %','Prix TTC XOF','Prix concurrent XOF'];
   const rows=prods.map(p=>{
@@ -956,6 +1031,7 @@ function exportCSV(){
   toast('Export CSV téléchargé ✓');
 }
 
+/* ---- UTILS ---- */
 function closeMod(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
 function toast(msg,err=false){
