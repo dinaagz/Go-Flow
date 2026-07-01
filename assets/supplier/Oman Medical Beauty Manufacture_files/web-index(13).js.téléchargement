@@ -1,0 +1,232 @@
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/build/";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(3);
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+	// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  viewMore: 'View More',
+	  buyNow: 'Buy Now',
+	  viewDetail: 'View Detail',
+	  minOrder: '(Min. Order)'
+	};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _react = __webpack_require__(7);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _icbuModLib = __webpack_require__(4);
+
+	var _next = __webpack_require__(6);
+
+	var _reactDotdotdot = __webpack_require__(5);
+
+	var _reactDotdotdot2 = _interopRequireDefault(_reactDotdotdot);
+
+	var _i18nTexts = __webpack_require__(2);
+
+	var _i18nTexts2 = _interopRequireDefault(_i18nTexts);
+
+	__webpack_require__(1);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function IcbuPcRecommendProductCategory(props) {
+	  var data = _icbuModLib.util.getModuleData(props);
+	  var theme = _icbuModLib.util.getGlobalData(props);
+	  var i18nTexts = Object.assign(_i18nTexts2.default, _icbuModLib.util.getI18nTexts(props));
+	  var productList = data.productList || [];
+	  var firstProduct = productList[0] || {};
+
+	  var _ref = window._shopSettings || {},
+	      _ref$linkTarget = _ref.linkTarget,
+	      linkTarget = _ref$linkTarget === undefined ? '_blank' : _ref$linkTarget;
+
+	  return _react2.default.createElement(
+	    _icbuModLib.ModWrapper,
+	    { className: 'module-productRecommendGroup', theme: theme },
+	    data.name && productList.length > 0 && _react2.default.createElement(
+	      _next.Grid.Row,
+	      { type: ['no-wrap', 'no-padding'] },
+	      _react2.default.createElement(
+	        _next.Grid.Col,
+	        { className: 'col-item col-groups', span: 6 },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'group-title', style: { color: theme.backgroundThemeColor }, title: data.name },
+	          _react2.default.createElement(
+	            _reactDotdotdot2.default,
+	            { clamp: 2 },
+	            data.name
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'sub-groups' },
+	          data.children && data.children.slice(0, 7).map(function (item) {
+	            return _react2.default.createElement(
+	              'div',
+	              { className: 'group-item', key: item.id },
+	              _react2.default.createElement(
+	                'a',
+	                { href: item.url, title: item.name, target: linkTarget },
+	                _react2.default.createElement(
+	                  _next.Button,
+	                  { className: 'group-btn', shape: 'ghost', type: 'light' },
+	                  item.name
+	                )
+	              )
+	            );
+	          })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'group-more' },
+	          _react2.default.createElement(
+	            'a',
+	            { href: data.url, target: linkTarget },
+	            _react2.default.createElement(
+	              _next.Button,
+	              { className: 'group-btn', shape: 'ghost', type: 'light', size: 'large' },
+	              i18nTexts.viewMore
+	            )
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        _next.Grid.Col,
+	        { className: 'col-item col-main', span: 9 },
+	        _react2.default.createElement(
+	          _icbuModLib.ProductCard,
+	          { type: 'vertical', size: 'xl', size990: 'large', size720: 'medium', data: firstProduct, i18nTexts: i18nTexts },
+	          _react2.default.createElement(
+	            'a',
+	            { className: 'shop-link', href: firstProduct.url, target: linkTarget },
+	            _react2.default.createElement(
+	              _next.Button,
+	              { className: 'shop-btn', size: 'large' },
+	              firstProduct.market ? i18nTexts.buyNow : i18nTexts.viewDetail
+	            )
+	          )
+	        )
+	      ),
+	      _react2.default.createElement(
+	        _next.Grid.Col,
+	        { className: 'col-item col-sub', span: 9 },
+	        productList.slice(1, 4).map(function (item) {
+	          return _react2.default.createElement(
+	            'div',
+	            { className: 'sub-item', key: item.id },
+	            _react2.default.createElement(_icbuModLib.ProductCard, { size: 'xs', size990: 'xxs', size720: 'xxxs', data: item, i18nTexts: i18nTexts })
+	          );
+	        })
+	      )
+	    )
+	  );
+	}
+
+	exports.default = IcbuPcRecommendProductCategory;
+
+
+	if ((typeof window === 'undefined' ? 'undefined' : _typeof(window)) === "object" && typeof Window !== "undefined") {
+	  window.ShopRender.IcbuPcRecommendProductCategory = function (container, data) {
+	    var moduleData = JSON.parse(data);ReactDOM.render(_react2.default.createElement(IcbuPcRecommendProductCategory, { moduleData: moduleData }), container);
+	  };
+	}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+	module.exports = IcbuModLib;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+	module.exports = IcbuModLib.Dotdotdot;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+	module.exports = Next;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+	module.exports = React;
+
+/***/ })
+/******/ ]);

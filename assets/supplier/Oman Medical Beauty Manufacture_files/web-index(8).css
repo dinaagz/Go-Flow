@@ -1,0 +1,33 @@
+@charset "UTF-8";
+/**
+ * 尺寸 基础尺寸
+ * 命名能在语义的前提下简单就尽量简单, 这里可以是 size-2x, space-2x, size-base ...
+ * 不过可以在语义的前提下做的更精简一些, 于是用了s2, s1等
+ * 可用变量: `$s1 - $s8`
+ * @example scss - 使用
+ *   .element {
+ *     padding: $s1 !default;
+ *   }
+ *
+ * @example css - CSS 输出
+ *   .element {
+ *     padding: 4px !default;
+ *   }
+ */
+.J_module[module-name=icbu-pc-recommendProductSmart] .module-productRecommondSmart .product-action {
+  display: block;
+  margin-top: 60px; }
+  .J_module[module-name=icbu-pc-recommendProductSmart] .module-productRecommondSmart .product-action .action-btn {
+    width: 100%; }
+
+.J_module[module-name=icbu-pc-recommendProductSmart] .module-productRecommondSmart table {
+  width: 100%; }
+  .J_module[module-name=icbu-pc-recommendProductSmart] .module-productRecommondSmart table td {
+    width: 25%;
+    padding: 18px 15px;
+    border: solid 1px #dbe3ef;
+    text-align: center;
+    vertical-align: middle; }
+
+.J_module[module-name=icbu-pc-recommendProductSmart] .module-productRecommondSmart.with-title tr:first-child td {
+  border-top: none; }

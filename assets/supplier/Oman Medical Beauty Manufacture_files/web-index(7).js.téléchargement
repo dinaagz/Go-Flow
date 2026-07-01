@@ -1,0 +1,285 @@
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+
+
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/build/";
+
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(3);
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+	// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  recommendFor: 'Recommend For You',
+	  buyNow: 'Buy Now',
+	  minOrder: '(Min. Order)',
+	  viewDetail: 'View Detail'
+	};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _react = __webpack_require__(7);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _classnames = __webpack_require__(4);
+
+	var _classnames2 = _interopRequireDefault(_classnames);
+
+	var _next = __webpack_require__(6);
+
+	var _icbuModLib = __webpack_require__(5);
+
+	var _i18nTexts = __webpack_require__(2);
+
+	var _i18nTexts2 = _interopRequireDefault(_i18nTexts);
+
+	__webpack_require__(1);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function IcbuPcRecommendProductSmart(props) {
+	  var _util$getModuleData = _icbuModLib.util.getModuleData(props),
+	      productList = _util$getModuleData.products;
+
+	  var _util$getUserConfig = _icbuModLib.util.getUserConfig(props),
+	      _util$getUserConfig$i = _util$getUserConfig.isShowTitle,
+	      isShowTitle = _util$getUserConfig$i === undefined ? true : _util$getUserConfig$i;
+
+	  var i18nTexts = Object.assign(_i18nTexts2.default, _icbuModLib.util.getI18nTexts(props));
+	  var cls = (0, _classnames2.default)({
+	    'module-productRecommondSmart': true,
+	    'with-title': isShowTitle
+	  });
+
+	  var _ref = window._shopSettings || {},
+	      _ref$linkTarget = _ref.linkTarget,
+	      linkTarget = _ref$linkTarget === undefined ? '_blank' : _ref$linkTarget;
+
+	  return _react2.default.createElement(
+	    _icbuModLib.ModWrapper,
+	    {
+	      isShowTitle: isShowTitle,
+	      className: cls,
+	      title: i18nTexts.recommendFor,
+	      isShowContentBorder: false,
+	      theme: _icbuModLib.util.getGlobalData(props)
+	    },
+	    productList && productList.length > 0 && _react2.default.createElement(
+	      'table',
+	      null,
+	      _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	          'td',
+	          { rowSpan: '2', className: 'main product-item' },
+	          _react2.default.createElement(
+	            _icbuModLib.ProductCard,
+	            { type: 'vertical', size: 'large', size990: 'medium', data: productList[0], i18nTexts: i18nTexts },
+	            _react2.default.createElement(
+	              'a',
+	              { className: 'product-action', href: (productList[0] || {}).url, target: linkTarget },
+	              _react2.default.createElement(
+	                _next.Button,
+	                { className: 'action-btn', size: 'large' },
+	                (productList[0] || {}).market ? i18nTexts.buyNow : i18nTexts.viewDetail
+	              )
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'td',
+	          { className: 'sub product-item' },
+	          _react2.default.createElement(_icbuModLib.ProductCard, { type: 'vertical', size: 'small', data: productList[1], i18nTexts: i18nTexts })
+	        ),
+	        _react2.default.createElement(
+	          'td',
+	          { rowSpan: '2', className: 'main product-item' },
+	          _react2.default.createElement(
+	            _icbuModLib.ProductCard,
+	            { type: 'vertical', size: 'large', size990: 'medium', data: productList[3], i18nTexts: i18nTexts },
+	            _react2.default.createElement(
+	              'a',
+	              { className: 'product-action', href: (productList[3] || {}).url, target: linkTarget },
+	              _react2.default.createElement(
+	                _next.Button,
+	                { className: 'action-btn', size: 'large' },
+	                (productList[3] || {}).market ? i18nTexts.buyNow : i18nTexts.viewDetail
+	              )
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'td',
+	          { className: 'sub product-item icbu-hide-720' },
+	          _react2.default.createElement(_icbuModLib.ProductCard, { type: 'vertical', size: 'small', data: productList[4], i18nTexts: i18nTexts })
+	        )
+	      ),
+	      _react2.default.createElement(
+	        'tr',
+	        null,
+	        _react2.default.createElement(
+	          'td',
+	          { className: 'sub product-item' },
+	          _react2.default.createElement(_icbuModLib.ProductCard, { type: 'vertical', size: 'small', data: productList[2], i18nTexts: i18nTexts })
+	        ),
+	        _react2.default.createElement(
+	          'td',
+	          { className: 'sub product-item icbu-hide-720' },
+	          _react2.default.createElement(_icbuModLib.ProductCard, { type: 'vertical', size: 'small', data: productList[5], i18nTexts: i18nTexts })
+	        )
+	      )
+	    )
+	  );
+	}
+
+	exports.default = IcbuPcRecommendProductSmart;
+
+	if ((typeof window === 'undefined' ? 'undefined' : _typeof(window)) === "object" && typeof Window !== "undefined") {
+	  window.ShopRender.IcbuPcRecommendProductSmart = function (container, data) {
+	    var moduleData = JSON.parse(data);ReactDOM.render(_react2.default.createElement(IcbuPcRecommendProductSmart, { moduleData: moduleData }), container);
+	  };
+	}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2017 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg) && arg.length) {
+					var inner = classNames.apply(null, arg);
+					if (inner) {
+						classes.push(inner);
+					}
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			classNames.default = classNames;
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+	module.exports = IcbuModLib;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+	module.exports = Next;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+	module.exports = React;
+
+/***/ })
+/******/ ]);
