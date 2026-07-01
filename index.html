@@ -177,6 +177,46 @@ textarea.fc{resize:vertical;min-height:70px}
 .cp-item:hover{background:var(--gris)}
 .cp-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--bleu);cursor:pointer}
 .cp-fixed{opacity:.45;pointer-events:none}
+/* Market analysis */
+.mkt-section{border-top:1px solid var(--border);padding-top:9px;margin-top:9px}
+.mkt-title{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.mkt-links{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.mkt-btn{display:inline-flex;align-items:center;gap:3px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;text-decoration:none;color:var(--text);transition:.15s;white-space:nowrap;position:relative}
+.mkt-btn:hover{border-color:currentColor;transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.mkt-btn[data-plat="alibaba"]{color:#e8601c}
+.mkt-btn[data-plat="aliexpress"]{color:#e02e24}
+.mkt-btn[data-plat="1688"]{color:#e8601c}
+.mkt-btn[data-plat="amazon"]{color:#f90}
+.mkt-btn[data-plat="amazon"]:hover{border-color:#f90}
+.mkt-btn[data-plat="alibaba"]:hover,.mkt-btn[data-plat="1688"]:hover{border-color:#e8601c}
+.mkt-btn[data-plat="aliexpress"]:hover{border-color:#e02e24}
+.mkt-tooltip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--nuit);color:#fff;font-size:10px;padding:4px 8px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:20}
+.mkt-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--nuit)}
+.mkt-btn:hover .mkt-tooltip{opacity:1}
+.mkt-country-sel{padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-family:'Poppins',sans-serif;font-size:10px;background:#fff;cursor:pointer;outline:none;color:var(--text)}
+.mkt-country-sel:focus{border-color:var(--bleu)}
+/* Modal market section */
+.mkt-modal-section{background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-top:14px}
+.mkt-modal-title{font-size:11px;font-weight:700;color:var(--bleu);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.mkt-modal-links{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.mkt-modal-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;text-decoration:none;color:var(--text);transition:.15s;position:relative}
+.mkt-modal-btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.12)}
+.mkt-modal-btn[data-plat="alibaba"]{color:#e8601c;border-color:#e8601c22}
+.mkt-modal-btn[data-plat="aliexpress"]{color:#e02e24;border-color:#e02e2422}
+.mkt-modal-btn[data-plat="1688"]{color:#e8601c;border-color:#e8601c22}
+.mkt-modal-btn[data-plat="amazon"]{color:#f90;border-color:#f9022222}
+.mkt-modal-btn .mkt-tooltip{bottom:calc(100% + 5px)}
+.mkt-modal-btn:hover .mkt-tooltip{opacity:1}
+/* Table compact market dropdown */
+.mkt-drop-wrap{position:relative;display:inline-block}
+.mkt-drop{display:none;position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--border);border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.13);z-index:160;min-width:150px;padding:6px;white-space:nowrap}
+.mkt-drop.open{display:block}
+.mkt-drop-item{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;color:var(--text);transition:.12s}
+.mkt-drop-item:hover{background:var(--gris)}
+.mkt-drop-item[data-plat="alibaba"]{color:#e8601c}
+.mkt-drop-item[data-plat="aliexpress"]{color:#e02e24}
+.mkt-drop-item[data-plat="1688"]{color:#e8601c}
+.mkt-drop-item[data-plat="amazon"]{color:#f90}
 </style>
 </head>
 <body>
@@ -403,6 +443,7 @@ textarea.fc{resize:vertical;min-height:70px}
         <b style="font-size:13px">Aperçu calculs (maritime, marge globale)</b>
         <div class="calc-grid" id="calc-prev-rows"></div>
       </div>
+      <div id="pm-mkt-section"></div>
       <div class="fact">
         <button class="btn btn-sec" onclick="closeMod('prod-modal')">Annuler</button>
         <button class="btn btn-primary" onclick="saveProd()">💾 Enregistrer</button>
@@ -516,6 +557,73 @@ const EMOJIS={Hydrafacial:'💆','Picolaser/Tatouage':'⚡','Analyse de peau':'�
 
 const RAWBASE='https://raw.githubusercontent.com/dinaagz/Go-Flow/main/';
 const IMG=n=>RAWBASE+'assets/Products%20images/1%20('+n+').jpeg';
+
+/* ---- MARKET ANALYSIS CONFIG ---- */
+const MKT_PLATFORMS={
+  alibaba:  {name:'Alibaba',    flag:'🟠', buildUrl:(q)=>`https://www.alibaba.com/trade/search?SearchText=${encodeURIComponent(q)}`},
+  aliexpress:{name:'AliExpress',flag:'🔴', buildUrl:(q,tld)=>`https://www.aliexpress.${tld||'com'}/w/wholesale-${encodeURIComponent(q).replace(/%20/g,'-')}.html`},
+  '1688':   {name:'1688',       flag:'🟤', buildUrl:(q)=>`https://s.1688.com/selloffer/offerlist.htm?keywords=${encodeURIComponent(q)}`},
+  amazon:   {name:'Amazon',     flag:'🟡', buildUrl:(q,tld)=>`https://www.amazon.${tld||'com'}/s?k=${encodeURIComponent(q)}`},
+};
+const MKT_AMAZON_REGIONS=[
+  {code:'com', label:'USA 🇺🇸'},
+  {code:'fr',  label:'France 🇫🇷'},
+  {code:'de',  label:'Allemagne 🇩🇪'},
+  {code:'co.uk',label:'UK 🇬🇧'},
+  {code:'ae',  label:'Émirats 🇦🇪'},
+  {code:'ca',  label:'Canada 🇨🇦'},
+  {code:'es',  label:'Espagne 🇪🇸'},
+  {code:'it',  label:'Italie 🇮🇹'},
+];
+const MKT_ALI_REGIONS=[
+  {code:'com', label:'Global 🌍'},
+  {code:'fr',  label:'France 🇫🇷'},
+  {code:'es',  label:'Espagne 🇪🇸'},
+  {code:'ru',  label:'Russie 🇷🇺'},
+];
+let mktAmazonTld='com';
+let mktAliTld='com';
+
+function mktSearchUrl(platKey,query,tld){
+  const plat=MKT_PLATFORMS[platKey];
+  if(!plat)return'#';
+  return plat.buildUrl(query,tld);
+}
+
+function mktLinksHtml(prodName,size='sm'){
+  const q=prodName||'';
+  if(!q)return'';
+  const qe=q.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  const amazonSel=`<select class="mkt-country-sel" onchange="mktAmazonTld=this.value" title="Région Amazon">${MKT_AMAZON_REGIONS.map(r=>`<option value="${r.code}"${r.code===mktAmazonTld?' selected':''}>${r.label}</option>`).join('')}</select>`;
+  const aliSel=`<select class="mkt-country-sel" onchange="mktAliTld=this.value" title="Région AliExpress">${MKT_ALI_REGIONS.map(r=>`<option value="${r.code}"${r.code===mktAliTld?' selected':''}>${r.label}</option>`).join('')}</select>`;
+  const btns=[
+    {key:'alibaba',    label:'Alibaba',    icon:'🟠', tld:null},
+    {key:'1688',       label:'1688',       icon:'🟤', tld:null},
+    {key:'aliexpress', label:'AliExpress', icon:'🔴', tld:'mktAliTld'},
+    {key:'amazon',     label:'Amazon',     icon:'🟡', tld:'mktAmazonTld'},
+  ];
+  if(size==='tbl'){
+    const uid='mkt-'+(q.length+Math.random()).toString(36).slice(2,7);
+    const items=btns.map(b=>`<a href="${mktSearchUrl(b.key,q,b.tld?eval(b.tld):undefined)}" target="_blank" rel="noopener noreferrer" class="mkt-drop-item" data-plat="${b.key}" onclick="this.href=mktSearchUrl('${b.key}','${qe}',${b.tld?b.tld:'undefined'})">${b.icon} ${b.label}</a>`).join('');
+    return`<div class="mkt-drop-wrap"><button class="btn btn-sec btn-sm mkt-drop-btn" onclick="toggleMktDrop('${uid}')" title="Analyse de marché">🌐</button><div class="mkt-drop" id="${uid}">${items}</div></div>`;
+  }
+  const cls=size==='modal'?'mkt-modal-btn':'mkt-btn';
+  const btnHtml=btns.map(b=>`<a href="${mktSearchUrl(b.key,q,b.tld?eval(b.tld):undefined)}" target="_blank" rel="noopener noreferrer" class="${cls}" data-plat="${b.key}" onclick="this.href=mktSearchUrl('${b.key}','${qe}',${b.tld?b.tld:'undefined'})">${b.icon} ${b.label}<span class="mkt-tooltip">Rechercher sur ${MKT_PLATFORMS[b.key].name}</span></a>`).join('');
+  if(size==='modal'){
+    return`<div class="mkt-modal-section"><div class="mkt-modal-title">🌐 Analyse de marché — Rechercher sur :</div><div class="mkt-modal-links">${btnHtml}<span style="display:flex;gap:4px;align-items:center;margin-left:6px;font-size:10px;color:var(--muted)">AliEx&nbsp;${aliSel}&nbsp;Amazon&nbsp;${amazonSel}</span></div></div>`;
+  }
+  return`<div class="mkt-section"><div class="mkt-title">🌐 Analyse de marché</div><div class="mkt-links">${btnHtml}</div></div>`;
+}
+
+function toggleMktDrop(uid){
+  const el=document.getElementById(uid);
+  if(!el)return;
+  const open=el.classList.toggle('open');
+  if(open){
+    const close=e=>{if(!el.closest('.mkt-drop-wrap').contains(e.target)){el.classList.remove('open');document.removeEventListener('click',close);}};
+    setTimeout(()=>document.addEventListener('click',close),10);
+  }
+}
 
 // Fournisseurs réels
 const DF=[
@@ -864,6 +972,7 @@ function prodGroupCard(g){
       <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">🧮</button>
     </div>
+    ${mktLinksHtml(w.nom,'sm')}
   </div>
   ${others.length?`<div class="alt-panel" id="ap-${key}"><div class="alt-panel-inner"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Alternatives fournisseurs</div>${altCards}</div></div>`:''}</div>`;
 }
@@ -910,10 +1019,11 @@ function prodGroupTable(groups){
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
       ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
       ${C.marche?`<td style="color:var(--vert)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-      <td class="no-print"><div style="display:flex;gap:4px">
+      <td class="no-print"><div style="display:flex;gap:4px;align-items:center">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">🧮</button>
+        ${mktLinksHtml(w.nom,'tbl')}
       </div></td>
     </tr>`;
     const colCount=4+(Object.values(C).filter(Boolean).length)+1;
@@ -999,6 +1109,7 @@ function prodCard(p){
       <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
     </div>
+    ${mktLinksHtml(p.nom,'sm')}
   </div></div>`;
 }
 
@@ -1039,10 +1150,11 @@ function prodTable(list){
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
       ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
       ${C.marche?`<td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-      <td class="no-print"><div style="display:flex;gap:4px">
+      <td class="no-print"><div style="display:flex;gap:4px;align-items:center">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
+        ${mktLinksHtml(p.nom,'tbl')}
       </div></td>
     </tr>`;
   }).join('');
@@ -1107,6 +1219,8 @@ function updateSLink(){
   const c=document.getElementById('p-cat').value;
   const q=encodeURIComponent(`${n||c} prix vente marché FCFA XOF`);
   document.getElementById('p-glink').href=`https://www.google.com/search?q=${q}`;
+  const mktEl=document.getElementById('pm-mkt-section');
+  if(mktEl)(n||c)?mktEl.innerHTML=mktLinksHtml(n||c,'modal'):mktEl.innerHTML='';
 }
 
 function calcPrev(){
