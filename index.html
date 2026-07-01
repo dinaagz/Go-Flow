@@ -126,7 +126,7 @@ textarea.fc{resize:vertical;min-height:70px}
 /* PRINT */
 @media print{
   body{background:#fff}
-  .hdr,.tabs,.toolbar,.card-acts,.btn,.overlay,.toast,.settings-panel,.hdr-right{display:none!important}
+  .hdr,.tabs,.toolbar,.card-acts,.btn,.overlay,.toast,.settings-panel,.hdr-right,.no-print{display:none!important}
   .ph{display:block!important}
   .wrap{padding:0;max-width:100%}
   .card{break-inside:avoid;box-shadow:none;border:1px solid #ddd}
@@ -339,7 +339,8 @@ textarea.fc{resize:vertical;min-height:70px}
           </select>
         </div>
         <div class="fgrp"><label class="flbl">Fournisseur</label><select class="fc" id="p-four"></select></div>
-        <div class="fgrp"><label class="flbl">Prix EXW</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl">Préacheminement (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — si fourni par le fournisseur" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl">Devise</label>
           <select class="fc" id="p-dev" onchange="calcPrev()">
             <option value="RMB">RMB (¥)</option><option value="USD">USD ($)</option>
@@ -557,15 +558,18 @@ const DP=[
 ];
 
 const COL_DEFS=[
-  {k:'cat',   lbl:'Catégorie',  def:true},
-  {k:'four',  lbl:'Fournisseur',def:true},
-  {k:'cbm',   lbl:'CBM',        def:false},
-  {k:'poids', lbl:'Poids',      def:false},
-  {k:'achat', lbl:'Achat HT',   def:true},
-  {k:'fret',  lbl:'Fret',       def:false},
-  {k:'vente', lbl:'Vente HT',   def:true},
-  {k:'ttc',   lbl:'Prix TTC',   def:true},
-  {k:'marche',lbl:'Marché',     def:false},
+  {k:'cat',   lbl:'Catégorie',         def:true},
+  {k:'four',  lbl:'Fournisseur',       def:true},
+  {k:'cbm',   lbl:'CBM',               def:false},
+  {k:'poids', lbl:'Poids',             def:false},
+  {k:'achat', lbl:'Achat EXW',         def:true},
+  {k:'prach', lbl:'Préacheminement',   def:false},
+  {k:'fret',  lbl:'Fret/Douane',       def:false},
+  {k:'marge', lbl:'Marge',             def:true},
+  {k:'vente', lbl:'Vente HT (EXW+mg)', def:true},
+  {k:'total', lbl:'Prix total HT',     def:false},
+  {k:'ttc',   lbl:'Prix TTC',          def:true},
+  {k:'marche',lbl:'Prix marché',       def:false},
 ];
 let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
 
@@ -622,7 +626,7 @@ function buildProds(){
     const code=CATS[d.cat]||'PRD';
     const ref=`${code}-${String(cc[d.cat]).padStart(3,'0')}-${String(g).padStart(3,'0')}`;
     const f=fours.find(x=>x.nom===d.fn);
-    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
+    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,prach:0,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
   });
 }
 
@@ -652,25 +656,41 @@ function saveSettings(){
 
 function toggleSettings(){document.getElementById('spanel').classList.toggle('open');}
 
+function toXOF(v,dev){
+  if(!v)return 0;
+  const tc=S.tauxChange;
+  if(dev==='RMB')return v*tc;
+  if(dev==='USD')return v*600;
+  if(dev==='EUR')return v*655;
+  return v;
+}
 function calc(p,o={}){
-  const tc=S.tauxChange,mg=((o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge))/100);
+  const mg=((o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge))/100);
   const tr=o.tr||p.tr||'Maritime';
   const fa=o.fa||S.tarifAerien,fm=o.fm||S.tarifMaritime;
-  let pa=0;
-  if(p.dev==='RMB')pa=p.prix*tc;
-  else if(p.dev==='USD')pa=p.prix*600;
-  else if(p.dev==='EUR')pa=p.prix*655;
-  else pa=p.prix;
+  const dev=p.dev||'RMB';
+  // Prix EXW en XOF
+  const pa=toXOF(p.prix,dev);
+  // Préacheminement (inland freight, donné par le fournisseur, même devise que EXW)
+  const prach=toXOF(parseFloat(p.prach)||0,dev);
+  // Fret/Douane : calculé au CBM (maritime) ou au poids (aérien) — à charge du client
   const cbm=(p.l*p.la*p.h)/1e6;
   const fret=tr==='Aérien'?p.kg*fa:cbm*fm;
-  const cout=pa+fret;
-  const pvh=cout*(1+mg);
+  // Marge calculée UNIQUEMENT sur le prix EXW
+  const marge_xof=pa*mg;
+  // Prix de vente HT (EXW + marge)
+  const pvh=pa+marge_xof;
   const rem=parseFloat(p.rem)||0;
   const remM=pvh*rem/100;
-  const pnh=pvh-remM;
-  const mn=pnh-cout;
+  const pnh=pvh-remM;  // prix net de vente HT (après remise sur EXW+marge)
+  // Prix total HT client = vente nette + préacheminement + fret/douane
+  const prix_ht=pnh+prach+fret;
+  // Coût total de revient
+  const cout=pa+prach+fret;
+  // Marge nette = ce qu'on gagne réellement
+  const mn=pnh-pa;
   const tva=S.tva/100;
-  return{pa,cbm,fret,cout,pvh,remM,pnh,mn,ttc:pnh*(1+tva)};
+  return{pa,prach,cbm,fret,marge_xof,pvh,remM,pnh,prix_ht,cout,mn,ttc:prix_ht*(1+tva)};
 }
 
 function N(n){if(isNaN(n)||n==null)return'—';return Math.round(n).toLocaleString('fr-FR')+' XOF';}
@@ -738,10 +758,14 @@ function prodCard(p){
     ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
     :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(p);
+  const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
   const priceRows=[
-    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat HT</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
-    cols.fret  ?`<div class="pr"><span class="pr-lbl">+ Fret</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
+    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
+    cols.prach&&c.prach?`<div class="pr"><span class="pr-lbl">Préacheminement</span><span class="pr-val">${N(c.prach)}</span></div>`:'',
+    cols.fret  ?`<div class="pr"><span class="pr-lbl">Fret/Douane</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
     cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
+    cols.total ?`<div class="pr"><span class="pr-lbl">Prix total HT</span><span class="pr-val">${N(c.prix_ht)}</span></div>`:'',
     cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
     cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
   ].join('');
@@ -763,20 +787,24 @@ function prodCard(p){
 function prodTable(list){
   const C=cols;
   const ths=['<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
-    C.cat   ?'<th>Catégorie</th>'  :'',
-    C.four  ?'<th>Fournisseur</th>':'',
-    C.cbm   ?'<th>CBM</th>'        :'',
-    C.poids ?'<th>Poids</th>'      :'',
-    C.achat ?'<th>Achat HT</th>'   :'',
-    C.fret  ?'<th>Fret</th>'       :'',
-    C.vente ?'<th>Vente HT</th>'   :'',
-    C.ttc   ?'<th>TTC</th>'        :'',
-    C.marche?'<th>Marché</th>'     :'',
-    '<th>Actions</th>',
+    C.cat   ?'<th>Catégorie</th>'       :'',
+    C.four  ?'<th>Fournisseur</th>'     :'',
+    C.cbm   ?'<th>CBM</th>'             :'',
+    C.poids ?'<th>Poids</th>'           :'',
+    C.achat ?'<th>Achat EXW</th>'       :'',
+    C.prach ?'<th>Préacheminement</th>' :'',
+    C.fret  ?'<th>Fret/Douane</th>'     :'',
+    C.marge ?'<th>Marge</th>'           :'',
+    C.vente ?'<th>Vente HT</th>'        :'',
+    C.total ?'<th>Prix total HT</th>'   :'',
+    C.ttc   ?'<th>TTC</th>'             :'',
+    C.marche?'<th>Marché</th>'          :'',
+    '<th class="no-print">Actions</th>',
   ].join('');
   const rows=list.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
+    const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
     return`<tr>
       <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[p.cat]+'</span>'}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
@@ -786,11 +814,14 @@ function prodTable(list){
       ${C.cbm   ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
       ${C.poids ?`<td>${p.kg} kg</td>`:''}
       ${C.achat ?`<td>${N(c.pa)}</td>`:''}
+      ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
       ${C.fret  ?`<td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
+      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
       ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
+      ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
       ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
       ${C.marche?`<td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-      <td><div style="display:flex;gap:4px">
+      <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
@@ -816,6 +847,7 @@ function openProdModal(id=null){
     document.getElementById('p-cat').value=p.cat;
     document.getElementById('p-four').value=p.fid;
     document.getElementById('p-prix').value=p.prix;
+    document.getElementById('p-prach').value=p.prach||'';
     document.getElementById('p-dev').value=p.dev||'RMB';
     document.getElementById('p-l').value=p.l;
     document.getElementById('p-la').value=p.la;
@@ -831,7 +863,7 @@ function openProdModal(id=null){
     pics=[...(p.photos||[])];renderThumbs();calcPrev();
   }else{
     document.getElementById('pm-title').textContent='Nouveau produit';
-    ['p-ref','p-nom','p-prix','p-l','p-la','p-h','p-poids','p-marge','p-desc','p-specs','p-conc'].forEach(x=>document.getElementById(x).value='');
+    ['p-ref','p-nom','p-prix','p-prach','p-l','p-la','p-h','p-poids','p-marge','p-desc','p-specs','p-conc'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('p-cat').value='';
     document.getElementById('p-trans').value='Maritime';
     document.getElementById('p-rem').value='0';
@@ -867,15 +899,17 @@ function calcPrev(){
   const kg=parseFloat(document.getElementById('p-poids').value);
   updateSLink();
   if(!prix||!l||!la||!h||!kg){document.getElementById('calc-prev').style.display='none';return;}
-  const p={prix,dev:document.getElementById('p-dev').value,l,la,h,kg,tr:'Maritime',marge:document.getElementById('p-marge').value,rem:0};
+  const p={prix,prach:parseFloat(document.getElementById('p-prach').value)||0,dev:document.getElementById('p-dev').value,l,la,h,kg,tr:'Maritime',marge:document.getElementById('p-marge').value,rem:0};
   const c=calc(p);
   document.getElementById('calc-prev').style.display='block';
   document.getElementById('calc-prev-rows').innerHTML=`
     <div>CBM: <b>${Nd(c.cbm,4)} m³</b></div>
-    <div>Achat HT: <b>${N(c.pa)}</b></div>
-    <div>Fret maritime: <b>${N(c.fret)}</b></div>
-    <div>Coût total: <b>${N(c.cout)}</b></div>
+    <div>EXW (XOF): <b>${N(c.pa)}</b></div>
+    ${c.prach?`<div>Préacheminement: <b>${N(c.prach)}</b></div>`:''}
+    <div>Fret/Douane: <b>${N(c.fret)}</b></div>
+    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert)">${N(c.marge_xof)}</b></div>
     <div>Vente HT: <b>${N(c.pnh)}</b></div>
+    <div>Prix total HT: <b>${N(c.prix_ht)}</b></div>
     <div>TTC: <b style="color:var(--bleu)">${N(c.ttc)}</b></div>`;
 }
 
@@ -886,6 +920,7 @@ function saveProd(){
   const fid=document.getElementById('p-four').value;
   const f=fours.find(x=>x.id===fid);
   const d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
+    prach:parseFloat(document.getElementById('p-prach').value)||0,
     dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
     la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
     kg:parseFloat(document.getElementById('p-poids').value)||0,tr:document.getElementById('p-trans').value,
@@ -1175,17 +1210,20 @@ function simCalc(){
   const fa=tr&&tr.aer?parseFloat(tr.aer):S.tarifAerien;
   const fm=tr&&tr.mar?parseFloat(tr.mar):S.tarifMaritime;
   const c=calc(p,{tr:simTr,fa,fm});
+  // En simulation, le prix de vente saisi remplace le pvh EXW (la marge est déjà incluse)
   const pvInput=parseFloat(document.getElementById('sim-pv').value);
-  const pvu=pvInput||c.pnh;
-  const remM=pvu*rem/100;
-  const pvn=pvu-remM;
-  const assM=c.cout*ass/100;
+  const pvu=pvInput||c.pnh;  // prix vente EXW+marge, potentiellement override
+  const remM_sim=pvu*rem/100;
+  const pvn=pvu-remM_sim;  // vente nette après remise
+  const prix_total_ht=pvn+c.prach+c.fret;  // prix total client HT
+  const assM=prix_total_ht*ass/100;
   const tva=useTVA?S.tva/100:0;
-  const ttcU=(pvn+assM)*(1+tva);
+  const ttcU=(prix_total_ht+assM)*(1+tva);
+  const marge_u=pvn-c.pa;  // marge sur EXW
   const totAHT=c.cout*qty;
-  const totVHT=pvn*qty;
+  const totPrixHT=prix_total_ht*qty;
   const totTTC=ttcU*qty;
-  const marge=totVHT-totAHT;
+  const totMarge=marge_u*qty;
   const f=fours.find(x=>x.id===p.fid);
   document.getElementById('sim-rows').innerHTML=`
     <div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>
@@ -1195,28 +1233,33 @@ function simCalc(){
     <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbm*qty,4)} m³</span></div>
     <div class="sim-row"><span>Poids total</span><span>${Nd(p.kg*qty,2)} kg</span></div>
     <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
-    <div class="sim-row"><span>Achat HT unitaire</span><span>${N(c.pa)}</span></div>
-    <div class="sim-row"><span>Fret unitaire</span><span>${N(c.fret)}</span></div>
-    <div class="sim-row"><span>Coût revient unitaire</span><span>${N(c.cout)}</span></div>
+    <div class="sim-row"><span>Prix EXW unitaire</span><span>${N(c.pa)}</span></div>
+    ${c.prach?`<div class="sim-row"><span>Préacheminement unitaire</span><span>${N(c.prach)}</span></div>`:''}
+    <div class="sim-row"><span>Fret/Douane unitaire</span><span>${N(c.fret)} ${simTr==='Aérien'?'✈️':'🚢'}</span></div>
+    <div class="sim-row"><span>Coût de revient unitaire</span><span>${N(c.cout)}</span></div>
     ${ass>0?`<div class="sim-row"><span>Assurance (${ass}%)</span><span>${N(assM)}</span></div>`:''}
     <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
-    <div class="sim-row"><span>Vente HT unitaire</span><span>${N(pvn)}</span></div>
-    ${tva>0?`<div class="sim-row"><span>TVA (${S.tva}%)</span><span>${N(pvn*tva)}</span></div>`:''}
+    <div class="sim-row"><span>Marge (sur EXW)</span><span style="color:#4ade80">${N(marge_u)} (${Nd(c.pa>0?marge_u/c.pa*100:0,1)}%)</span></div>
+    <div class="sim-row"><span>Vente HT (EXW + marge)</span><span>${N(pvn)}</span></div>
+    <div class="sim-row"><span>Prix total HT client</span><span style="font-weight:600">${N(prix_total_ht)}</span></div>
+    ${tva>0?`<div class="sim-row"><span>TVA (${S.tva}%)</span><span>${N(prix_total_ht*tva)}</span></div>`:''}
     <div class="sim-row"><span>TTC unitaire</span><span>${N(ttcU)}</span></div>
     <hr style="border-color:rgba(255,255,255,.08);margin:6px 0">
-    <div class="sim-row"><span>Total achat HT</span><span>${N(totAHT)}</span></div>
+    <div class="sim-row"><span>Total coût de revient</span><span>${N(totAHT)}</span></div>
+    <div class="sim-row"><span>Total prix HT client</span><span>${N(totPrixHT)}</span></div>
     <div class="sim-row sim-total"><span>TOTAL TTC</span><span>${N(totTTC)}</span></div>
-    <div class="sim-row sim-marge"><span>Marge brute</span><span>${N(marge)} (${totAHT>0?Nd(marge/totAHT*100,1):0}%)</span></div>`;
+    <div class="sim-row sim-marge"><span>Marge totale (sur EXW)</span><span>${N(totMarge)} (${c.pa>0?Nd(marge_u/c.pa*100,1):0}%)</span></div>`;
 }
 
 function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
 
 /* ---- EXPORT CSV ---- */
 function exportCSV(){
-  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Prix RMB','Prix achat HT XOF','CBM m3','Poids kg','Transport','Fret XOF','Coût total XOF','Marge %','Prix vente HT XOF','Remise %','Prix net HT XOF','TVA %','Prix TTC XOF','Prix concurrent XOF'];
+  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Prix EXW (devise)','Préacheminement (devise)','Devise','Prix EXW XOF','Préacheminement XOF','CBM m3','Poids kg','Transport','Fret/Douane XOF','Coût revient XOF','Marge %','Marge XOF','Vente HT XOF','Remise %','Prix net HT XOF','Prix total HT XOF','TVA %','Prix TTC XOF','Prix marché XOF'];
   const rows=prods.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
-    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.prix,Math.round(c.pa),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fret),Math.round(c.cout),p.marge||S.tauxMarge,Math.round(c.pvh),p.rem||0,Math.round(c.pnh),S.tva,Math.round(c.ttc),p.conc||''].join(';');
+    const mgpct=p.marge||S.tauxMarge;
+    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.prix,p.prach||0,p.dev||'RMB',Math.round(c.pa),Math.round(c.prach),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fret),Math.round(c.cout),mgpct,Math.round(c.marge_xof),Math.round(c.pvh),p.rem||0,Math.round(c.pnh),Math.round(c.prix_ht),S.tva,Math.round(c.ttc),p.conc||''].join(';');
   });
   const csv=[hdr.join(';'),...rows].join('\n');
   const a=document.createElement('a');
