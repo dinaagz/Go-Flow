@@ -169,7 +169,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .col-picker-wrap{position:relative}
 .col-picker-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap}
 .col-picker-btn:hover{background:var(--gris)}
-.col-picker-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:150;padding:14px;min-width:260px}
+.col-picker-drop{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:150;padding:14px;min-width:240px}
 .col-picker-drop.open{display:block}
 .col-picker-drop .cp-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -177,51 +177,6 @@ textarea.fc{resize:vertical;min-height:70px}
 .cp-item:hover{background:var(--gris)}
 .cp-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--bleu);cursor:pointer}
 .cp-fixed{opacity:.45;pointer-events:none}
-/* ===== DEVIS ===== */
-.cart-badge{position:relative}
-.cart-badge-count{position:absolute;top:-6px;right:-8px;background:var(--rouge);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;display:none}
-.strat-btn{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;text-align:center;transition:.2s;line-height:1.5}
-.strat-btn:hover{border-color:var(--bleu)}
-.strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
-.strat-btn small{display:block;font-weight:400;font-size:10px;color:var(--muted);margin-top:2px}
-.strat-btn.active small{color:#5ab4e8}
-.devis-section{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px}
-.devis-section-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px;color:var(--nuit)}
-.cart-item-grid{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);border:1px solid var(--border);transition:.2s}
-.cart-item-grid:hover{box-shadow:0 4px 16px rgba(0,0,0,.11);transform:translateY(-2px)}
-.cart-qty-ctrl{display:flex;align-items:center;gap:4px;margin-top:8px}
-.cart-qty-ctrl button{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:.15s}
-.cart-qty-ctrl button:hover{background:var(--bleu);color:#fff;border-color:var(--bleu)}
-.cart-qty-ctrl input{width:44px;text-align:center;padding:3px 4px;border:1px solid var(--border);border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;outline:none}
-.cart-price-tag{font-size:14px;font-weight:700;color:var(--bleu)}
-.btn-in-cart{background:#d1fae5!important;color:#059669!important;border:1px solid #a7f3d0!important}
-.devis-total-bar{background:var(--nuit);color:#fff;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-around;align-items:center;margin-top:16px;flex-wrap:wrap;gap:12px}
-.devis-total-item{text-align:center;min-width:100px}
-.devis-total-item .val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px}
-.devis-total-item .lbl{font-size:10px;color:rgba(255,255,255,.5);margin-top:2px}
-.devis-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:4px;margin-bottom:24px;flex-wrap:wrap}
-/* ===== PRINT — DEVIS PDF ===== */
-#devis-print-area{display:none}
-.dv-hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1A1A2E;padding-bottom:14px;margin-bottom:18px}
-.dv-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;color:#1A1A2E}
-.dv-meta{font-size:11px;color:#555;text-align:right;line-height:1.6}
-.dv-client-box{background:#f5f5f7;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.7}
-.dv-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
-.dv-table th{background:#1A1A2E;color:#fff;padding:8px 10px;text-align:left;font-weight:600}
-.dv-table td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:middle}
-.dv-table tbody tr:nth-child(even) td{background:#f9f9f9}
-.dv-table tfoot td{border-top:2px solid #1A1A2E}
-.dv-cgs{font-size:9px;color:#999;border-top:1px solid #eee;padding-top:10px;margin-top:16px;line-height:1.6}
-/* Impression devis uniquement quand la classe .printing-devis est active sur body */
-@media print{
-  body.printing-devis .hdr,
-  body.printing-devis .tabs,
-  body.printing-devis .wrap,
-  body.printing-devis .toast,
-  body.printing-devis .overlay,
-  body.printing-devis .ph{display:none!important}
-  body.printing-devis #devis-print-area{display:block!important;padding:24px}
-}
 </style>
 </head>
 <body>
@@ -249,7 +204,6 @@ textarea.fc{resize:vertical;min-height:70px}
   <div class="tab" onclick="tab('fournisseurs')">🏭 Fournisseurs</div>
   <div class="tab" onclick="tab('transitaires')">🚢 Transitaires</div>
   <div class="tab" onclick="tab('simulation')">🧮 Simulation</div>
-  <div class="tab cart-badge" onclick="tab('devis')">📋 Devis<span class="cart-badge-count" id="cart-count" style="display:none">0</span></div>
 </nav>
 
 <div class="wrap">
@@ -392,79 +346,7 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<!-- DEVIS -->
-<div id="t-devis" style="display:none">
-
-  <!-- Infos client -->
-  <div class="devis-section">
-    <div class="devis-section-title">👤 Informations client</div>
-    <div class="fg">
-      <div class="fgrp"><label class="flbl">Nom complet</label><input class="fc" id="dv-nom" placeholder="Jean Dupont" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Entreprise</label><input class="fc" id="dv-ent" placeholder="Beauté Pro SARL" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Email</label><input type="email" class="fc" id="dv-email" placeholder="client@exemple.com" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Téléphone / WhatsApp</label><input class="fc" id="dv-tel" placeholder="+228 ..." oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Adresse</label><input class="fc" id="dv-adr" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Ville / Pays</label><input class="fc" id="dv-ville" placeholder="Lomé, Togo" oninput="saveDevisClient()"></div>
-    </div>
-  </div>
-
-  <!-- Stratégie de prix -->
-  <div class="devis-section">
-    <div class="devis-section-title">💰 Stratégie de prix pour ce devis</div>
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      <button class="strat-btn active" id="strat-marge" onclick="setStrategy('marge_fixe')">
-        📊 Marge fixe<small>Marge cible globale (35%)</small>
-      </button>
-      <button class="strat-btn" id="strat-bas" onclick="setStrategy('prix_bas')">
-        🎯 Prix compétitif<small>Marge minimale (15%)</small>
-      </button>
-      <button class="strat-btn" id="strat-prem" onclick="setStrategy('premium')">
-        ✨ Premium<small>Marge haute (50%)</small>
-      </button>
-    </div>
-    <div id="strat-detail" style="font-size:12px;color:var(--muted);padding:8px 12px;background:var(--gris);border-radius:8px"></div>
-  </div>
-
-  <!-- Panier -->
-  <div class="devis-section">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div class="devis-section-title" style="margin-bottom:0">🛒 Produits sélectionnés &nbsp;<span id="dv-count" style="background:var(--bleu);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;font-family:'Poppins',sans-serif">0</span></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div class="view-tog">
-          <button class="view-btn active" id="dvg" onclick="setDevisView('grid')" title="Grille">▦</button>
-          <button class="view-btn" id="dvl" onclick="setDevisView('list')" title="Liste">☰</button>
-        </div>
-        <div class="col-picker-wrap" id="dv-cp-wrap">
-          <button class="col-picker-btn" onclick="toggleDevisColPicker()">👁 Colonnes devis</button>
-          <div class="col-picker-drop" id="dv-cp-drop" style="min-width:280px">
-            <div class="cp-title">📦 Informations produit</div>
-            <div class="cp-grid" id="dv-cp-prod"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--violet)">🏭 Infos fournisseur</div>
-            <div class="cp-grid" id="dv-cp-four"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--orange)">🚢 Infos transitaire</div>
-            <div class="cp-grid" id="dv-cp-trans"></div>
-            <div class="cp-title" style="margin-top:10px;color:#dc2626">🔒 Données internes (invisible client)</div>
-            <div class="cp-grid" id="dv-cp-prix"></div>
-          </div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="clearCart()">🗑️ Vider</button>
-      </div>
-    </div>
-    <div id="dv-cart-cont"></div>
-    <div id="dv-total-bar"></div>
-  </div>
-
-  <!-- Actions -->
-  <div class="devis-footer">
-    <button class="btn btn-sec" onclick="tab('catalogue')">← Retour catalogue</button>
-    <button class="btn btn-grad" onclick="generateDevisPDF()" style="font-size:14px;padding:12px 28px">📄 Générer le PDF</button>
-  </div>
-</div>
-
 </div><!-- /wrap -->
-
-<!-- ZONE IMPRESSION DEVIS (cachée, injectée avant print) -->
-<div id="devis-print-area"></div>
 
 <!-- PRODUCT MODAL -->
 <div class="overlay" id="prod-modal">
@@ -771,7 +653,7 @@ function init(){
   });
   if(migrated)save('p');
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  loadS();loadDevis();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
+  loadS();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
 }
 
 function buildProds(){
@@ -852,13 +734,12 @@ function N(n){if(isNaN(n)||n==null)return'—';return Math.round(n).toLocaleStri
 function Nd(n,d=2){return isNaN(n)?'—':n.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:d});}
 
 function tab(name){
-  ['catalogue','fournisseurs','transitaires','simulation','devis'].forEach(t=>{
+  ['catalogue','fournisseurs','transitaires','simulation'].forEach(t=>{
     document.getElementById('t-'+t).style.display=t===name?'block':'none';
   });
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['catalogue','fournisseurs','transitaires','simulation','devis'][i]===name);
+    t.classList.toggle('active',['catalogue','fournisseurs','transitaires','simulation'][i]===name);
   });
-  if(name==='devis')renderDevis();
 }
 
 function setView(v){
@@ -1117,7 +998,6 @@ function prodCard(p){
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
-      <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?'✓ Devis':'📋'}</button>
     </div>
   </div></div>`;
 }
@@ -1138,7 +1018,6 @@ function prodTable(list){
     C.ttc   ?'<th>TTC</th>'             :'',
     C.marche?'<th>Marché</th>'          :'',
     '<th class="no-print">Actions</th>',
-    '<th class="no-print">Devis</th>',
   ].join('');
   const rows=list.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
@@ -1164,7 +1043,6 @@ function prodTable(list){
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">🧮</button>
-        <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?'✓':'📋'}</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -1607,417 +1485,6 @@ function exportCSV(){
   a.download=`GoFlow_Catalogue_${new Date().toISOString().slice(0,10)}.csv`;a.click();
   toast('Export CSV téléchargé ✓');
 }
-
-/* ---- UTILS ---- */
-function closeMod(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
-function toast(msg,err=false){
-  const t=document.getElementById('toast');t.textContent=msg;
-  t.style.borderLeftColor=err?'var(--rouge)':'var(--vert)';
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-/* ============================================================
-   MODULE DEVIS — État global + Panier + PDF
-   Séparé intentionnellement de calc() (simulation interne)
-   ============================================================ */
-const DK='gf_d',DCK='gf_dc',DPK='gf_dp';
-let devisCart=[],devisClient={},devisPrefs={},devisView='grid';
-
-const DEVIS_SHOW_DEFS=[
-  {k:'ref',      g:'prod', lbl:'Référence',         def:true},
-  {k:'cat',      g:'prod', lbl:'Catégorie',          def:false},
-  {k:'desc',     g:'prod', lbl:'Description',        def:false},
-  {k:'specs',    g:'prod', lbl:'Spécifications',     def:false},
-  {k:'photos',   g:'prod', lbl:'Photos',             def:true},
-  {k:'fournisseur',g:'four',lbl:'Nom fournisseur',   def:false},
-  {k:'pays_four',g:'four', lbl:'Pays fournisseur',   def:false},
-  {k:'contact_four',g:'four',lbl:'Contact fourn.',   def:false},
-  {k:'transitaire',g:'trans',lbl:'Transitaire',      def:false},
-  {k:'type_fret',g:'trans',lbl:'Type fret',          def:false},
-  {k:'delai',    g:'trans',lbl:'Délai estimé',       def:false},
-  {k:'prix_achat',g:'prix',lbl:'Prix achat EXW',     def:false},
-  {k:'prix_fret',g:'prix', lbl:'Fret/Douane',        def:false},
-  {k:'marge_xof',g:'prix', lbl:'Marge XOF',          def:false},
-];
-
-const DV_SHOW_DEFAULT=Object.fromEntries(DEVIS_SHOW_DEFS.map(d=>[d.k,d.def]));
-const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePrixBas:15,margePremium:50,show:{...DV_SHOW_DEFAULT}};
-
-/* ---- CHARGEMENT / PERSISTANCE ---- */
-function loadDevis(){
-  devisCart=JSON.parse(localStorage.getItem(DK)||'[]');
-  devisClient=JSON.parse(localStorage.getItem(DCK)||'null')||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
-  const saved=JSON.parse(localStorage.getItem(DPK)||'null');
-  devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved,show:{...DV_SHOW_DEFAULT,...(saved.show||{})}}:{...DV_PREFS_DEFAULT,show:{...DV_SHOW_DEFAULT}};
-  updateCartBadge();
-}
-function saveDevisCartLS(){localStorage.setItem(DK,JSON.stringify(devisCart));updateCartBadge();}
-function saveDevisClient(){
-  devisClient={
-    nom:document.getElementById('dv-nom').value,
-    ent:document.getElementById('dv-ent').value,
-    email:document.getElementById('dv-email').value,
-    tel:document.getElementById('dv-tel').value,
-    adr:document.getElementById('dv-adr').value,
-    ville:document.getElementById('dv-ville').value,
-  };
-  localStorage.setItem(DCK,JSON.stringify(devisClient));
-}
-function saveDevisPrefs(){localStorage.setItem(DPK,JSON.stringify(devisPrefs));}
-
-function updateCartBadge(){
-  const n=devisCart.length,el=document.getElementById('cart-count');
-  el.textContent=n;el.style.display=n?'inline-block':'none';
-}
-
-/* ---- CALCUL DEVIS (logique CLIENT — séparée de calc() interne) ---- */
-function calcDevis(item){
-  const p=item.snap;
-  const strat=devisPrefs.strategy;
-  const mg=(strat==='prix_bas'?(devisPrefs.margePrixBas||15):strat==='premium'?(devisPrefs.margePremium||50):(devisPrefs.margeFixe||35))/100;
-  const pa=toXOF(p.prix,p.dev||'RMB');
-  const prach=toXOF(parseFloat(p.prach)||0,p.dev||'RMB');
-  const cbm=(p.l*p.la*p.h)/1e6;
-  const fret=p.tr==='Aérien'?p.kg*S.tarifAerien:cbm*S.tarifMaritime;
-  const marge_xof=pa*mg;
-  const pvh=pa+marge_xof;
-  const prixClientHT=pvh+prach+fret;
-  const prixClientTTC=prixClientHT*(1+S.tva/100);
-  const qty=item.qty||1;
-  return{pa,prach,cbm,fret,marge_xof,pvh,prixClientHT,prixClientTTC,totalHT:prixClientHT*qty,totalTTC:prixClientTTC*qty,mg:mg*100};
-}
-
-/* ---- ACTIONS PANIER ---- */
-function addToCart(pid){
-  const p=prods.find(x=>x.id===pid);if(!p)return;
-  const existing=devisCart.find(x=>x.pid===pid);
-  if(existing){existing.qty++;saveDevisCartLS();renderCat();toast(p.nom+' : quantité +1 dans le devis ✓');return;}
-  const f=fours.find(x=>x.id===p.fid);
-  const t0=trans.length?trans[0]:null;
-  devisCart.push({
-    cid:'C'+String(Date.now()).slice(-8),pid,qty:1,
-    snap:{
-      nom:p.nom,ref:p.ref,cat:p.cat,fid:p.fid,fn:p.fn,
-      prix:p.prix,prach:p.prach||0,dev:p.dev||'RMB',
-      l:p.l,la:p.la,h:p.h,kg:p.kg,tr:p.tr,
-      photos:p.photos||[],desc:p.desc||'',specs:p.specs||'',
-      four_nom:f?f.nom:'',four_pays:f?f.pays:'',four_contact:f?f.contact:'',
-      trans_nom:t0?t0.nom:'',trans_type:t0?t0.type:'',
-      trans_delai:t0?(p.tr==='Aérien'?t0.aerd:t0.mard)||'':''
-    }
-  });
-  saveDevisCartLS();renderCat();toast('📋 '+p.nom+' ajouté au devis ✓');
-}
-
-function removeFromCart(cid){
-  devisCart=devisCart.filter(x=>x.cid!==cid);
-  saveDevisCartLS();renderDevisCart();
-}
-
-function updateCartQty(cid,qty){
-  const item=devisCart.find(x=>x.cid===cid);if(!item)return;
-  item.qty=Math.max(1,parseInt(qty)||1);
-  saveDevisCartLS();
-}
-
-function clearCart(){
-  if(!devisCart.length)return;
-  if(!confirm('Vider entièrement le panier de devis ?'))return;
-  devisCart=[];saveDevisCartLS();renderDevisCart();toast('Panier vidé');
-}
-
-function isInCart(pid){return devisCart.some(x=>x.pid===pid);}
-
-/* ---- STRATÉGIE DE PRIX ---- */
-function setStrategy(s){
-  devisPrefs.strategy=s;saveDevisPrefs();
-  ['strat-marge','strat-bas','strat-prem'].forEach(id=>document.getElementById(id).classList.remove('active'));
-  const map={marge_fixe:'strat-marge',prix_bas:'strat-bas',premium:'strat-prem'};
-  document.getElementById(map[s]).classList.add('active');
-  const msgs={
-    marge_fixe:`Marge fixe de ${devisPrefs.margeFixe||35}% sur le prix EXW — stratégie standard.`,
-    prix_bas:`Prix compétitif : marge réduite à ${devisPrefs.margePrixBas||15}% pour maximiser les ventes.`,
-    premium:`Position premium : marge de ${devisPrefs.margePremium||50}% pour clientèle haut de gamme.`
-  };
-  document.getElementById('strat-detail').textContent=msgs[s]||'';
-  renderDevisCart();
-}
-
-/* ---- VUE GRILLE / LISTE ---- */
-function setDevisView(v){
-  devisView=v;
-  document.getElementById('dvg').classList.toggle('active',v==='grid');
-  document.getElementById('dvl').classList.toggle('active',v==='list');
-  renderDevisCart();
-}
-
-/* ---- SÉLECTEUR DE COLONNES DEVIS ---- */
-function initDevisColPicker(){
-  const grpIds={prod:'dv-cp-prod',four:'dv-cp-four',trans:'dv-cp-trans',prix:'dv-cp-prix'};
-  Object.values(grpIds).forEach(id=>document.getElementById(id).innerHTML='');
-  DEVIS_SHOW_DEFS.forEach(c=>{
-    const el=document.createElement('label');el.className='cp-item';
-    el.innerHTML=`<input type="checkbox" ${devisPrefs.show[c.k]?'checked':''} onchange="toggleDevisCol('${c.k}',this.checked)">${c.lbl}`;
-    document.getElementById(grpIds[c.g]).appendChild(el);
-  });
-}
-
-function toggleDevisCol(k,v){devisPrefs.show[k]=v;saveDevisPrefs();renderDevisCart();}
-
-function toggleDevisColPicker(){
-  const d=document.getElementById('dv-cp-drop');d.classList.toggle('open');
-  if(d.classList.contains('open')){
-    const close=e=>{if(!document.getElementById('dv-cp-wrap').contains(e.target)){d.classList.remove('open');document.removeEventListener('click',close);}};
-    setTimeout(()=>document.addEventListener('click',close),10);
-  }
-}
-
-/* ---- RENDU DE L'ONGLET DEVIS ---- */
-function renderDevis(){
-  document.getElementById('dv-nom').value=devisClient.nom||'';
-  document.getElementById('dv-ent').value=devisClient.ent||'';
-  document.getElementById('dv-email').value=devisClient.email||'';
-  document.getElementById('dv-tel').value=devisClient.tel||'';
-  document.getElementById('dv-adr').value=devisClient.adr||'';
-  document.getElementById('dv-ville').value=devisClient.ville||'';
-  initDevisColPicker();
-  setStrategy(devisPrefs.strategy||'marge_fixe');
-  renderDevisCart();
-}
-
-function renderDevisCart(){
-  document.getElementById('dv-count').textContent=devisCart.length;
-  const cont=document.getElementById('dv-cart-cont');
-  if(!devisCart.length){
-    cont.innerHTML=`<div class="empty"><div class="ico">🛒</div><h3>Panier vide</h3><p>Cliquez sur 📋 dans le Catalogue pour ajouter des produits.</p></div>`;
-    document.getElementById('dv-total-bar').innerHTML='';return;
-  }
-  cont.innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
-  renderDevisTotal();
-}
-
-function buildDevisGrid(){
-  return`<div class="grid">${devisCart.map(item=>{
-    const c=calcDevis(item),p=item.snap;
-    const em=EMOJIS[p.cat]||'📦';
-    const imgHtml=p.photos&&p.photos[0]
-      ?`<img src="${p.photos[0]}" alt="${p.nom}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none;font-size:44px">${em}</div>`
-      :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
-    return`<div class="cart-item-grid">
-      <div class="card-img" style="height:130px">${imgHtml}</div>
-      <div class="card-body">
-        <div class="card-ref">${p.ref}</div>
-        <div class="card-title">${p.nom}</div>
-        <div class="card-cat">${p.cat} · ${p.tr==='Aérien'?'✈️':'🚢'}</div>
-        ${devisPrefs.show.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">🏭 ${p.fn}</div>`:''}
-        ${devisPrefs.show.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">🚢 ${p.trans_nom}</div>`:''}
-        <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
-          <div class="cart-price-tag">${N(c.prixClientHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">HT/u</small></div>
-          <div style="font-size:11px;color:var(--bleu);font-weight:600">${N(c.prixClientTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
-        </div>
-        <div class="cart-qty-ctrl">
-          <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
-          <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
-          <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${N(c.totalHT)}</span>
-        </div>
-        <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">🗑️ Retirer du devis</button>
-      </div></div>`;
-  }).join('')}</div>`;
-}
-
-function buildDevisTable(){
-  const SH=devisPrefs.show;
-  const ths=[
-    SH.photos?'<th>Photo</th>':'',
-    '<th>Désignation</th>',
-    SH.ref?'<th>Réf</th>':'',
-    SH.cat?'<th>Catégorie</th>':'',
-    SH.fournisseur?'<th>Fournisseur</th>':'',
-    SH.pays_four?'<th>Pays</th>':'',
-    SH.contact_four?'<th>Contact</th>':'',
-    SH.transitaire?'<th>Transitaire</th>':'',
-    SH.type_fret?'<th>Mode</th>':'',
-    SH.delai?'<th>Délai</th>':'',
-    SH.prix_achat?'<th>Achat EXW</th>':'',
-    SH.prix_fret?'<th>Fret</th>':'',
-    SH.marge_xof?'<th>Marge</th>':'',
-    '<th>Prix HT/u</th>','<th>Prix TTC/u</th>',
-    '<th>Qté</th>','<th>Total HT</th>',
-    '<th class="no-print">Actions</th>',
-  ].join('');
-  const rows=devisCart.map(item=>{
-    const c=calcDevis(item),p=item.snap;
-    const imgSrc=p.photos&&p.photos[0];
-    return`<tr>
-      ${SH.photos?`<td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" loading="lazy">`:EMOJIS[p.cat]||'📦'}</td>`:''}
-      <td style="font-weight:500;max-width:160px">
-        ${p.nom}
-        ${SH.desc&&p.desc?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${p.desc.slice(0,80)}${p.desc.length>80?'...':''}</div>`:''}
-        ${SH.specs&&p.specs?`<div style="font-size:10px;color:#aaa">${p.specs.slice(0,60)}</div>`:''}
-      </td>
-      ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
-      ${SH.cat?`<td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>`:''}
-      ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
-      ${SH.pays_four?`<td style="font-size:12px">${p.four_pays||'—'}</td>`:''}
-      ${SH.contact_four?`<td style="font-size:12px">${p.four_contact||'—'}</td>`:''}
-      ${SH.transitaire?`<td style="font-size:12px">${p.trans_nom||'—'}</td>`:''}
-      ${SH.type_fret?`<td>${p.tr==='Aérien'?'✈️ Aérien':'🚢 Maritime'}</td>`:''}
-      ${SH.delai?`<td style="font-size:12px">${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
-      ${SH.prix_achat?`<td style="font-size:11px">${N(c.pa)}</td>`:''}
-      ${SH.prix_fret?`<td style="font-size:11px">${N(c.fret)}</td>`:''}
-      ${SH.marge_xof?`<td style="color:var(--vert);font-size:11px">${N(c.marge_xof)}</td>`:''}
-      <td style="font-weight:600">${N(c.prixClientHT)}</td>
-      <td style="color:var(--bleu);font-weight:600">${N(c.prixClientTTC)}</td>
-      <td><div class="cart-qty-ctrl" style="margin:0">
-        <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
-        <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
-        <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-      </div></td>
-      <td style="font-weight:700">${N(c.totalHT)}</td>
-      <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">🗑️</button></td>
-    </tr>`;
-  }).join('');
-  return`<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
-}
-
-function dvQty(cid,qty){
-  updateCartQty(cid,qty);
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
-  renderDevisTotal();
-}
-
-function renderDevisTotal(){
-  if(!devisCart.length){document.getElementById('dv-total-bar').innerHTML='';return;}
-  const totQty=devisCart.reduce((s,i)=>s+i.qty,0);
-  const totMarge=devisCart.reduce((s,i)=>s+calcDevis(i).marge_xof*i.qty,0);
-  const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
-  const totTTC=devisCart.reduce((s,i)=>s+calcDevis(i).totalTTC,0);
-  document.getElementById('dv-total-bar').innerHTML=`
-    <div class="devis-total-bar">
-      <div class="devis-total-item"><div class="val">${totQty}</div><div class="lbl">Unités</div></div>
-      <div class="devis-total-item"><div class="val" style="color:var(--vert)">${N(totMarge)}</div><div class="lbl">Marge totale</div></div>
-      <div class="devis-total-item"><div class="val">${N(totHT)}</div><div class="lbl">Total HT</div></div>
-      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${N(totTTC)}</div><div class="lbl">TOTAL TTC CLIENT</div></div>
-    </div>`;
-}
-
-/* ---- GÉNÉRATION PDF (impression navigateur via template HTML dédié) ---- */
-function generateDevisPDF(){
-  if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
-  const now=new Date();
-  const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
-  const SH=devisPrefs.show;
-  const stratNames={marge_fixe:'Marge fixe ('+devisPrefs.margeFixe+'%)',prix_bas:'Prix compétitif ('+devisPrefs.margePrixBas+'%)',premium:'Premium ('+devisPrefs.margePremium+'%)'};
-  // Bloc client
-  const cl=devisClient;
-  const clientHtml=[
-    cl.nom||cl.ent?`<strong>${[cl.nom,cl.ent].filter(Boolean).join(' — ')}</strong>`:'',
-    cl.email?`✉️ ${cl.email}`:'',
-    cl.tel?`📱 ${cl.tel}`:'',
-    cl.adr?`📍 ${cl.adr}`:'',
-    cl.ville||''
-  ].filter(Boolean).join('<br>')||'<span style="color:#999;font-style:italic">Aucune information client</span>';
-  // En-têtes colonnes
-  const colH=[
-    SH.photos?'<th>Photo</th>':'',
-    '<th>Désignation</th>',
-    SH.ref?'<th>Réf.</th>':'',
-    SH.cat?'<th>Catégorie</th>':'',
-    SH.fournisseur?'<th>Fournisseur</th>':'',
-    SH.pays_four?'<th>Pays</th>':'',
-    SH.contact_four?'<th>Contact</th>':'',
-    SH.transitaire?'<th>Transitaire</th>':'',
-    SH.type_fret?'<th>Mode</th>':'',
-    SH.delai?'<th>Délai</th>':'',
-    SH.prix_achat?'<th>Achat EXW</th>':'',
-    SH.prix_fret?'<th>Fret</th>':'',
-    SH.marge_xof?'<th>Marge</th>':'',
-    '<th>Prix HT/u</th>','<th>Prix TTC/u</th>','<th>Qté</th>','<th style="white-space:nowrap">Total HT</th>',
-  ].join('');
-  const nbCols=colH.split('<th').length-1;
-  // Lignes
-  const rowsHtml=devisCart.map(item=>{
-    const c=calcDevis(item),p=item.snap;
-    const imgCell=SH.photos?`<td style="text-align:center">${p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`:EMOJIS[p.cat]||'📦'}</td>`:'';
-    const descDetail=[SH.desc&&p.desc?`<div style="font-size:9px;color:#666;margin-top:2px">${p.desc.slice(0,100)}</div>`:'',SH.specs&&p.specs?`<div style="font-size:9px;color:#aaa">${p.specs.slice(0,80)}</div>`:''].join('');
-    return`<tr>
-      ${imgCell}
-      <td><strong>${p.nom}</strong>${descDetail}</td>
-      ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
-      ${SH.cat?`<td>${p.cat}</td>`:''}
-      ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
-      ${SH.pays_four?`<td>${p.four_pays||'—'}</td>`:''}
-      ${SH.contact_four?`<td>${p.four_contact||'—'}</td>`:''}
-      ${SH.transitaire?`<td>${p.trans_nom||'—'}</td>`:''}
-      ${SH.type_fret?`<td>${p.tr==='Aérien'?'Aérien':'Maritime'}</td>`:''}
-      ${SH.delai?`<td>${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
-      ${SH.prix_achat?`<td>${N(c.pa)}</td>`:''}
-      ${SH.prix_fret?`<td>${N(c.fret)}</td>`:''}
-      ${SH.marge_xof?`<td>${N(c.marge_xof)}</td>`:''}
-      <td style="font-weight:600;white-space:nowrap">${N(c.prixClientHT)}</td>
-      <td style="font-weight:600;white-space:nowrap;color:#0066cc">${N(c.prixClientTTC)}</td>
-      <td style="text-align:center">${item.qty}</td>
-      <td style="font-weight:700;white-space:nowrap">${N(c.totalHT)}</td>
-    </tr>`;
-  }).join('');
-  const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
-  const totTTC=devisCart.reduce((s,i)=>s+calcDevis(i).totalTTC,0);
-  // Injecter dans la zone d'impression
-  document.body.classList.add('printing-devis');
-  document.getElementById('devis-print-area').innerHTML=`
-    <div class="dv-hdr">
-      <div>
-        <div class="dv-logo">Go.Flow</div>
-        <div style="font-size:11px;color:#555;margin-top:4px">Go Group · Lomé, Togo</div>
-        <div style="font-size:11px;color:#555">globalgo.tg@gmail.com · +228 96 02 39 03</div>
-      </div>
-      <div class="dv-meta">
-        <div style="font-size:16px;font-weight:800;color:#1A1A2E">DEVIS N° ${ref}</div>
-        <div>Date : ${dateFr}</div>
-        <div>Stratégie : ${stratNames[devisPrefs.strategy||'marge_fixe']||'—'}</div>
-        <div style="margin-top:6px;font-size:10px;color:#aaa">Valable 30 jours</div>
-      </div>
-    </div>
-    <div class="dv-client-box">
-      <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Destinataire</div>
-      ${clientHtml}
-    </div>
-    <table class="dv-table">
-      <thead><tr>${colH}</tr></thead>
-      <tbody>${rowsHtml}</tbody>
-      <tfoot>
-        <tr style="background:#f5f5f7">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT</td>
-          <td colspan="2" style="font-weight:700;font-size:13px;white-space:nowrap">${N(totHT)}</td>
-        </tr>
-        <tr>
-          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">TVA (${S.tva}%)</td>
-          <td colspan="2" style="font-size:12px">${N(totTTC-totHT)}</td>
-        </tr>
-        <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC</td>
-          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${N(totTTC)}</td>
-        </tr>
-      </tfoot>
-    </table>
-    <div class="dv-cgs">
-      <strong>Conditions générales de vente :</strong>
-      Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission.
-      Les prix sont exprimés en Francs CFA (XOF). La TVA applicable est de ${S.tva}%.
-      Les délais de livraison sont estimatifs et peuvent varier selon le mode de transport et les conditions douanières.
-      Toute commande confirmée vaut acceptation des présentes conditions.
-      Le paiement s'effectue selon les modalités convenues avec Go Group.
-      <br><br>
-      <strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em>
-    </div>`;
-  window.print();
-  document.body.classList.remove('printing-devis');
-}
-
-/* ---- FIN MODULE DEVIS ---- */
 
 /* ---- UTILS ---- */
 function closeMod(id){document.getElementById(id).classList.remove('open');}
