@@ -10,19 +10,15 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);min-height:100vh}
 .grad-bar{height:4px;background:var(--grad)}
-/* HEADER */
 .hdr{background:var(--nuit);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
 .logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .logo-sub{color:rgba(255,255,255,.45);font-size:10px;letter-spacing:2px;text-transform:uppercase;-webkit-text-fill-color:rgba(255,255,255,.45)}
 .hdr-right{display:flex;gap:8px;align-items:center}
-/* TABS */
 .tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto}
 .tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
 .tab:hover{color:var(--bleu)}
 .tab.active{color:var(--nuit);border-bottom-color:var(--bleu)}
-/* CONTENT */
 .wrap{padding:20px 24px;max-width:1400px;margin:0 auto}
-/* BUTTONS */
 .btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
 .btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#007acc}
 .btn-sec{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-sec:hover{background:var(--gris)}
@@ -30,7 +26,6 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .btn-success{background:#d1fae5;color:#059669}
 .btn-grad{background:var(--grad);color:#fff;font-weight:600}
 .btn-sm{padding:6px 10px;font-size:12px;border-radius:6px}
-/* TOOLBAR */
 .toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
 .search{flex:1;min-width:180px;position:relative}
 .search input{width:100%;padding:9px 14px 9px 36px;border:1px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;background:#fff}
@@ -39,23 +34,22 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .view-tog{display:flex;background:var(--gris);border-radius:8px;padding:3px;gap:2px}
 .view-btn{padding:6px 10px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:15px;transition:.2s}
 .view-btn.active{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-/* STATS */
 .stats{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap}
 .stat{background:#fff;border-radius:10px;padding:14px 18px;flex:1;min-width:130px;border:1px solid var(--border)}
 .stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:var(--nuit)}
 .stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
-/* GRID */
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 @media(max-width:1280px){.grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
-/* CARDS */
 .card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:.2s;border:1px solid var(--border)}
 .card:hover{box-shadow:0 4px 16px rgba(0,0,0,.11);transform:translateY(-2px)}
-.card-img{height:150px;background:linear-gradient(135deg,#f0f0f8,#e8e8f0);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
-.card-img img{width:100%;height:100%;object-fit:cover}
-.badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff}
-.b-bailey{background:var(--bleu)}.b-clara{background:var(--violet)}.b-other{background:var(--orange)}
+.card-img{height:160px;background:linear-gradient(135deg,#f0f0f8,#e8e8f0);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:.3s}
+.card-img img:hover{transform:scale(1.04)}
+.card-img-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;backdrop-filter:blur(4px)}
+.b-yateli{background:rgba(0,153,255,.85)}.b-oman{background:rgba(119,51,255,.85)}.b-other{background:rgba(255,102,0,.85)}
 .card-body{padding:14px}
 .card-ref{font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:3px}
 .card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;line-height:1.3}
@@ -65,18 +59,15 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .pr-lbl{color:var(--muted)}.pr-val{font-weight:600}
 .pr-ttc{font-size:13px;color:var(--bleu);font-weight:700}
 .card-acts{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-/* TABLE */
 .tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
 thead th{background:var(--nuit);color:#fff;padding:11px 12px;text-align:left;font-weight:500;white-space:nowrap}
 tbody tr{border-bottom:1px solid var(--border)}
 tbody tr:hover{background:#f8f8fc}
 tbody td{padding:10px 12px}
-/* SETTINGS */
 .settings-panel{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;border:1px solid var(--border);display:none}
 .settings-panel.open{display:block}
 .s-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
-/* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay.open{display:flex}
 .modal{background:#fff;border-radius:16px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -93,17 +84,14 @@ tbody td{padding:10px 12px}
 .fc:focus{border-color:var(--bleu)}
 textarea.fc{resize:vertical;min-height:70px}
 .fact{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
-/* PHOTO */
 .upload-area{border:2px dashed var(--border);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:.2s;font-size:13px;color:var(--muted)}
 .upload-area:hover{border-color:var(--bleu);background:#f0f8ff}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumb{position:relative;width:68px;height:68px}
 .thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
 .thumb button{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
-/* SECTION */
 .sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .cnt-badge{background:var(--bleu);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
-/* SIM */
 .sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
 .sim-form{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)}
@@ -113,22 +101,28 @@ textarea.fc{resize:vertical;min-height:70px}
 .sim-total{font-weight:700;font-size:15px;color:var(--jaune)}
 .sim-marge{color:var(--vert)}
 .prod-prev{display:flex;gap:14px;background:var(--gris);border-radius:8px;padding:14px;margin-bottom:14px;align-items:flex-start}
-.prev-icon{width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden}
+.prev-icon{width:70px;height:70px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden}
 .prev-icon img{width:100%;height:100%;object-fit:cover}
-/* TRANSPORT SELECTOR */
 .trans-sel{display:flex;gap:8px}
 .trans-btn{flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
 .trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
-/* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(100px);opacity:0;transition:.3s;border-left:4px solid var(--vert)}
 .toast.show{transform:translateY(0);opacity:1}
-/* EMPTY */
 .empty{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty .ico{font-size:44px;margin-bottom:10px}
 .empty h3{font-family:'Montserrat',sans-serif;margin-bottom:6px;color:var(--text)}
-/* PREVIEW CALC */
 .calc-preview{background:var(--gris);border-radius:8px;padding:14px;margin-top:14px;font-size:12px;display:none}
 .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+/* Supplier card */
+.four-logo{width:56px;height:56px;border-radius:10px;object-fit:contain;background:#f8f8fc;padding:4px;border:1px solid var(--border);flex-shrink:0}
+.four-card-hdr{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.four-info{flex:1;min-width:0}
+.info-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:3px}
+.info-row a{color:var(--bleu);text-decoration:none}
+.devis-btn{display:inline-flex;align-items:center;gap:4px;background:#fff3cd;color:#856404;border:1px solid #ffc107;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.2s}
+.devis-btn:hover{background:#ffc107;color:#fff}
+/* Import Alibaba box */
+.ali-import-box{background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-bottom:16px}
 /* PRINT */
 @media print{
   body{background:#fff}
@@ -366,18 +360,19 @@ textarea.fc{resize:vertical;min-height:70px}
       <button class="modal-x" onclick="closeMod('four-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div style="background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-bottom:16px">
+      <div class="ali-import-box">
         <div class="flbl" style="margin-bottom:8px;color:var(--bleu)">🔗 Importer depuis Alibaba</div>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="url" class="fc" id="f-ali-import" placeholder="https://votrefournisseur.en.alibaba.com/ ou lien produit Alibaba" style="flex:1">
           <button class="btn btn-primary btn-sm" onclick="parseAlibabaUrl()">Importer</button>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">Collez l'URL du store ou d'un produit Alibaba pour pré-remplir automatiquement le formulaire.</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">Collez l'URL du store Alibaba pour pré-remplir automatiquement.</div>
       </div>
       <div class="fg">
         <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="f-nom"></div>
+        <div class="fgrp"><label class="flbl">Contact (nom)</label><input type="text" class="fc" id="f-contact"></div>
         <div class="fgrp"><label class="flbl">Pays</label><input type="text" class="fc" id="f-pays" placeholder="Chine"></div>
-        <div class="fgrp"><label class="flbl">Contact</label><input type="text" class="fc" id="f-contact"></div>
+        <div class="fgrp"><label class="flbl">Email</label><input type="email" class="fc" id="f-email"></div>
         <div class="fgrp"><label class="flbl">WhatsApp</label><input type="text" class="fc" id="f-wa"></div>
         <div class="fgrp"><label class="flbl">WeChat</label><input type="text" class="fc" id="f-wc"></div>
         <div class="fgrp"><label class="flbl">Domaine d'activité</label><input type="text" class="fc" id="f-dom"></div>
@@ -385,16 +380,18 @@ textarea.fc{resize:vertical;min-height:70px}
         <div class="fgrp"><label class="flbl">Évaluation /5</label>
           <select class="fc" id="f-eval"><option>5</option><option>4</option><option selected>3</option><option>2</option><option>1</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Vérif. Alibaba</label>
+        <div class="fgrp"><label class="flbl">Statut Alibaba</label>
           <select class="fc" id="f-ali"><option>Non disponible</option><option>Vérifié</option><option>Non vérifié</option></select>
         </div>
         <div class="fgrp"><label class="flbl">Lien Alibaba</label><input type="url" class="fc" id="f-ali-url"></div>
+        <div class="fgrp"><label class="flbl">Lien Devis (PDF URL)</label><input type="url" class="fc" id="f-devis" placeholder="https://..."></div>
         <div class="fgrp"><label class="flbl">Langues</label><input type="text" class="fc" id="f-lang" placeholder="Chinois, Anglais..."></div>
         <div class="fgrp"><label class="flbl">Marchés principaux</label><input type="text" class="fc" id="f-mkt"></div>
         <div class="fgrp full"><label class="flbl">Description activités</label><textarea class="fc" id="f-desc" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
-        <div class="fgrp full"><label class="flbl">Logo</label>
-          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏭 Ajouter le logo</div>
+        <div class="fgrp full"><label class="flbl">Logo (URL ou upload)</label>
+          <input type="url" class="fc" id="f-logo-url" placeholder="https://... (URL directe du logo)" style="margin-bottom:6px" oninput="previewLogoUrl()">
+          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏭 Ou uploader un logo depuis votre appareil</div>
           <input type="file" id="f-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'f-logo-prev','f-logo-dat')">
           <div class="thumbs" id="f-logo-prev"></div>
           <input type="hidden" id="f-logo-dat">
@@ -457,32 +454,72 @@ const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tva:
 const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
 const EMOJIS={Hydrafacial:'💆','Picolaser/Tatouage':'⚡','Analyse de peau':'🔬','RF Microneedling':'💉',HIFU:'✨'};
 
+const RAWBASE='https://raw.githubusercontent.com/dinaagz/Go-Flow/main/';
+const IMG=n=>RAWBASE+'assets/Products%20images/1%20('+n+').jpeg';
+
+// Fournisseurs réels
 const DF=[
-  {id:'F001',nom:'Bailey',pays:'Chine',contact:'',wa:'',wc:'',dom:'Équipement esthétique professionnel',an:'',eval:4,ali:'Non disponible',ali_url:'',lang:'Chinois, Anglais',mkt:'Afrique, Moyen-Orient',desc:'Fournisseur spécialisé en équipements esthétiques et médicaux professionnels.',com:'',logo:''},
-  {id:'F002',nom:'Clara',pays:'Chine',contact:'',wa:'',wc:'',dom:'Équipement esthétique professionnel',an:'',eval:4,ali:'Non disponible',ali_url:'',lang:'Chinois, Anglais',mkt:'Afrique, Europe',desc:'Fournisseur en équipements esthétiques et de beauté professionnels.',com:'',logo:''}
+  {
+    id:'F001',
+    nom:'Shaanxi Yateli Technology Limited',
+    contact:'Bailey',
+    email:'bailey@hkyateli.com',
+    pays:'Chine',
+    wa:'+86 187 9265 6926',
+    wc:'+852 46655289',
+    dom:'Équipement esthétique & médical professionnel',
+    an:'',eval:4,
+    ali:'Vérifié',
+    ali_url:'https://yatelihk.m.en.alibaba.com/',
+    lang:'Chinois, Anglais',
+    mkt:'Afrique, Moyen-Orient, Europe',
+    desc:'Fabricant spécialisé en équipements esthétiques et médicaux professionnels. Référence Alibaba : yatelihk.',
+    com:'',
+    logo:RAWBASE+'assets/supplier/Logo%20Yateli.avif',
+    devis:RAWBASE+'assets/Quotes/Quotes_Shaanxi%20Yateli%20Technology%20Limited.pdf'
+  },
+  {
+    id:'F002',
+    nom:'Oman Medical Beauty Manufacture',
+    contact:'Clara Xiang',
+    email:'clara@omancn.com',
+    pays:'Chine',
+    wa:'+86 173 9193 0659',
+    wc:'+852 46655289',
+    dom:'Équipement esthétique & beauté professionnels',
+    an:'',eval:4,
+    ali:'Vérifié',
+    ali_url:'https://omanbeauty.en.alibaba.com/',
+    lang:'Chinois, Anglais',
+    mkt:'Afrique, Europe, Asie',
+    desc:'Fabricant d\'équipements esthétiques et de beauté professionnels. Référence Alibaba : omanbeauty.',
+    com:'',
+    logo:RAWBASE+'assets/supplier/logo%20Oman%20Beauty.png',
+    devis:RAWBASE+'assets/Quotes/Quotes_Oman%20Medical%20Beauty%20Manufacture.pdf'
+  }
 ];
 
-const IMGBASE='https://raw.githubusercontent.com/dinaagz/Go-Flow/main/Produit_devis/1%20';
+// Mapping correct images <-> produits (basé sur analyse visuelle)
 const DP=[
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMGBASE+'(1).jpeg'},
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMGBASE+'(2).jpeg'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMGBASE+'(3).jpeg'},
-  {cat:'Hydrafacial',fn:'Bailey',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMGBASE+'(4).jpeg'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg',img:IMGBASE+'(5).jpeg'},
-  {cat:'Hydrafacial',fn:'Clara',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm',img:IMGBASE+'(6).jpeg'},
-  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm',img:IMGBASE+'(7).jpeg'},
-  {cat:'Picolaser/Tatouage',fn:'Clara',nom:'PICO équiv. format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm',img:IMGBASE+'(8).jpeg'},
-  {cat:'Picolaser/Tatouage',fn:'Bailey',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm',img:IMGBASE+'(9).jpeg'},
-  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm',img:IMGBASE+'(10).jpeg'},
-  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm',img:IMGBASE+'(11).jpeg'},
-  {cat:'Analyse de peau',fn:'Bailey',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm'},
-  {cat:'Analyse de peau',fn:'Clara',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm'},
-  {cat:'RF Microneedling',fn:'Bailey',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm'},
-  {cat:'RF Microneedling',fn:'Clara',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18×7×4 cm — très léger (160 g)'},
-  {cat:'RF Microneedling',fn:'Bailey',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm'},
-  {cat:'RF Microneedling',fn:'Clara',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm'},
-  {cat:'HIFU',fn:'Bailey',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm'},
-  {cat:'HIFU',fn:'Clara',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm'}
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49x54x92 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54x122x60 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54x122x60 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65x62x122 cm (50 kg) + masque 55x48x46 cm (5 kg)',img:IMG(5)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65x62x122 cm (50 kg) + masque 5 kg',img:IMG(10)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54x51x101 cm',img:IMG(5)},
+  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57x52x55 cm',img:IMG(8)},
+  {cat:'Picolaser/Tatouage',fn:'Oman Medical Beauty Manufacture',nom:'Picolaser ND YAG format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57x52x55 cm',img:IMG(8)},
+  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43x57x56 cm',img:IMG(4)},
+  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56x65x57 cm',img:IMG(3)},
+  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68x62x55 cm',img:IMG(3)},
+  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68x59x44 cm',img:IMG(7)},
+  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67x59x44 cm',img:IMG(7)},
+  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24x38x43 cm',img:IMG(2)},
+  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18x7x4 cm — très léger (160 g)',img:IMG(2)},
+  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50x50x103 cm',img:IMG(1)},
+  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50x50x103 cm',img:IMG(1)},
+  {cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66x59x55 cm',img:IMG(9)},
+  {cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62x55x56 cm',img:IMG(9)}
 ];
 
 let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime';
@@ -490,9 +527,20 @@ let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid'
 function init(){
   S=JSON.parse(localStorage.getItem(SK)||'null')||{...DS};
   fours=JSON.parse(localStorage.getItem(FK)||'null');
-  if(!fours||!fours.length)fours=[...DF];
+  if(!fours||!fours.length)fours=DF.map(f=>({...f}));
   prods=JSON.parse(localStorage.getItem(PK)||'null');
   if(!prods||!prods.length){prods=buildProds();save('p');}
+  // Mise à jour silencieuse des fournisseurs par défaut si données manquantes
+  fours.forEach((f,i)=>{
+    const df=DF.find(d=>d.id===f.id);
+    if(df){
+      if(!f.email)f.email=df.email;
+      if(!f.devis)f.devis=df.devis;
+      if(!f.logo||f.logo==='')f.logo=df.logo;
+      if(!f.ali_url)f.ali_url=df.ali_url;
+    }
+  });
+  save('f');
   trans=JSON.parse(localStorage.getItem(TK)||'[]');
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   loadS();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
@@ -597,15 +645,32 @@ function renderCat(){
   else{c.innerHTML=prodTable(list);}
 }
 
+function fourLabel(f){
+  if(!f)return'—';
+  if(f.nom.includes('Yateli'))return'Yateli';
+  if(f.nom.includes('Oman'))return'Oman';
+  return f.nom.split(' ')[0];
+}
+
+function fourBadgeClass(f){
+  if(!f)return'b-other';
+  if(f.nom.includes('Yateli'))return'b-yateli';
+  if(f.nom.includes('Oman'))return'b-oman';
+  return'b-other';
+}
+
 function prodCard(p){
   const f=fours.find(x=>x.id===p.fid);
-  const fn=f?f.nom:p.fn||'—';
-  const bc=fn==='Bailey'?'b-bailey':fn==='Clara'?'b-clara':'b-other';
+  const lbl=fourLabel(f);
+  const bc=fourBadgeClass(f);
   const em=EMOJIS[p.cat]||'📦';
-  const img=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" alt="">`:`<span>${em}</span>`;
+  const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
+  const imgHtml=imgSrc
+    ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` + '<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
+    :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(p);
   return`<div class="card">
-  <div class="card-img">${img}<span class="badge ${bc}">${fn}</span></div>
+  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
   <div class="card-body">
     <div class="card-ref">${p.ref}</div>
     <div class="card-title">${p.nom}</div>
@@ -627,14 +692,16 @@ function prodCard(p){
 
 function prodTable(list){
   return`<div class="tbl-wrap"><table>
-  <thead><tr><th>Réf</th><th>Désignation</th><th>Catégorie</th><th>Fournisseur</th><th>CBM</th><th>Poids</th><th>Achat HT</th><th>Fret</th><th>Vente HT</th><th>TTC</th><th>Marché</th><th>Actions</th></tr></thead>
+  <thead><tr><th>Photo</th><th>Réf</th><th>Désignation</th><th>Catégorie</th><th>Fournisseur</th><th>CBM</th><th>Poids</th><th>Achat HT</th><th>Fret</th><th>Vente HT</th><th>TTC</th><th>Marché</th><th>Actions</th></tr></thead>
   <tbody>${list.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
+    const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     return`<tr>
+      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[p.cat]+'</span>'}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${p.nom}</td>
       <td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>
-      <td>${f?f.nom:p.fn||'—'}</td>
+      <td>${fourLabel(f)}</td>
       <td>${Nd(c.cbm,4)} m³</td>
       <td>${p.kg} kg</td>
       <td>${N(c.pa)}</td>
@@ -768,25 +835,71 @@ function addLogo(inp,pid,did){
     document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()">✕</button></div>`;
   };r.readAsDataURL(f);inp.value='';
 }
+function previewLogoUrl(){
+  const url=document.getElementById('f-logo-url').value.trim();
+  const prev=document.getElementById('f-logo-prev');
+  const dat=document.getElementById('f-logo-dat');
+  if(url){dat.value=url;prev.innerHTML=`<div class="thumb"><img src="${url}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><text y=%221em%22 font-size=%2230%22>🏭</text></svg>'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;}
+  else{dat.value='';prev.innerHTML='';}
+}
+
+/* ---- ALIBABA IMPORT ---- */
+function parseAlibabaUrl(){
+  const url=document.getElementById('f-ali-import').value.trim();
+  if(!url){toast('Collez un lien Alibaba d\'abord',true);return;}
+  let nom='',aliUrl=url;
+  try{
+    const u=new URL(url);
+    const host=u.hostname;
+    const m=host.match(/^([^.]+)\.(?:m\.)?en\.alibaba\.com$/);
+    if(m){
+      nom=m[1].replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    }
+    if(!nom&&host.includes('alibaba.com')){
+      const pathParts=u.pathname.split('/').filter(Boolean);
+      const sup=pathParts.find(p=>p.length>3&&!p.includes('.html')&&isNaN(p));
+      if(sup)nom=sup.replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    }
+  }catch(e){}
+  if(!nom){toast('URL non reconnue — remplissez le nom manuellement',true);document.getElementById('f-ali-url').value=url;return;}
+  document.getElementById('f-nom').value=nom;
+  document.getElementById('f-pays').value='Chine';
+  document.getElementById('f-lang').value='Chinois, Anglais';
+  document.getElementById('f-ali').value='Vérifié';
+  document.getElementById('f-ali-url').value=aliUrl;
+  toast(`"${nom}" importé depuis Alibaba ✓`);
+}
 
 /* ---- FOURNISSEURS ---- */
 function renderFour(){
   const q=(document.getElementById('four-search').value||'').toLowerCase();
-  const list=fours.filter(f=>!q||f.nom.toLowerCase().includes(q)||(f.pays||'').toLowerCase().includes(q));
+  const list=fours.filter(f=>!q||f.nom.toLowerCase().includes(q)||(f.pays||'').toLowerCase().includes(q)||(f.contact||'').toLowerCase().includes(q));
   const c=document.getElementById('four-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🏭</div><h3>Aucun fournisseur</h3></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const stars='⭐'.repeat(parseInt(f.eval)||0);
+    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${f.nom}" onerror="this.style.display='none'">`:`<div style="width:56px;height:56px;border-radius:10px;background:var(--gris);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏭</div>`;
     return`<div class="card">
-      <div class="card-img" style="height:90px">${f.logo?`<img src="${f.logo}" alt="">`:'🏭'}</div>
       <div class="card-body">
-        <div class="card-title">${f.nom}</div>
-        <div class="card-cat">${f.pays||''} · ${f.dom||''}</div>
-        <div style="margin:6px 0;font-size:12px">${stars} <span style="color:var(--muted);font-size:11px">${np} produit${np>1?'s':''}</span></div>
-        ${f.wa?`<div style="font-size:11px;color:var(--muted)">📱 ${f.wa}</div>`:''}
-        ${f.ali!=='Non disponible'?`<div style="margin-top:4px;display:flex;align-items:center;gap:6px"><span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 6px;border-radius:10px;font-size:10px">${f.ali}</span>${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none">↗ Alibaba</a>`:''}</div>`:''}
-        ${!f.ali_url&&f.ali_url===''?'':f.ali_url&&f.ali==='Non disponible'?`<div style="margin-top:4px"><a href="${f.ali_url}" target="_blank" style="font-size:11px;color:var(--bleu);text-decoration:none">↗ Voir sur Alibaba</a></div>`:''}
+        <div class="four-card-hdr">
+          ${logoEl}
+          <div class="four-info">
+            <div class="card-title" style="font-size:14px">${f.nom}</div>
+            <div style="font-size:11px;color:var(--muted)">${f.pays||''}</div>
+            <div style="margin-top:3px">${stars} <span style="font-size:10px;color:var(--muted)">${np} produit${np>1?'s':''}</span></div>
+          </div>
+        </div>
+        ${f.contact?`<div class="info-row">👤 <b>${f.contact}</b></div>`:''}
+        ${f.email?`<div class="info-row">✉️ <a href="mailto:${f.email}">${f.email}</a></div>`:''}
+        ${f.wa?`<div class="info-row">📱 <a href="https://wa.me/${f.wa.replace(/\D/g,'')}">${f.wa}</a></div>`:''}
+        ${f.wc?`<div class="info-row">💬 WeChat : ${f.wc}</div>`:''}
+        ${f.dom?`<div class="info-row" style="margin-top:4px">🏭 ${f.dom}</div>`:''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
+          ${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
+          ${f.devis?`<a href="${f.devis}" target="_blank" class="devis-btn">📄 Devis PDF</a>`:''}
+        </div>
         <div class="card-acts">
           <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">✏️ Modifier</button>
           <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">🗑️</button>
@@ -795,53 +908,43 @@ function renderFour(){
   }).join('')}</div>`;
 }
 
-function parseAlibabaUrl(){
-  const url=document.getElementById('f-ali-import').value.trim();
-  if(!url){toast('Collez un lien Alibaba d\'abord',true);return;}
-  let nom='',aliStatus='Vérifié',aliUrl=url;
-  try{
-    const u=new URL(url);
-    const host=u.hostname;
-    // Pattern: COMPANY.en.alibaba.com
-    const m=host.match(/^([^.]+)\.en\.alibaba\.com$/);
-    if(m){
-      nom=m[1].replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    }
-    // Pattern: www.alibaba.com/... (product or supplier page)
-    if(!nom&&host.includes('alibaba.com')){
-      const pathParts=u.pathname.split('/').filter(Boolean);
-      // Try to find supplier name in path
-      const sup=pathParts.find(p=>p.length>3&&!p.includes('.html')&&isNaN(p));
-      if(sup)nom=sup.replace(/[-_]/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    }
-  }catch(e){}
-  if(!nom){toast('URL non reconnue — remplissez manuellement le nom',true);document.getElementById('f-ali-url').value=url;return;}
-  document.getElementById('f-nom').value=nom;
-  document.getElementById('f-pays').value='Chine';
-  document.getElementById('f-lang').value='Chinois, Anglais';
-  document.getElementById('f-ali').value=aliStatus;
-  document.getElementById('f-ali-url').value=aliUrl;
-  toast(`Fournisseur "${nom}" importé depuis Alibaba ✓`);
-}
-
 function openFourModal(id=null){
   editF=id;
-  document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML='';
+  document.getElementById('f-logo-dat').value='';
+  document.getElementById('f-logo-prev').innerHTML='';
+  document.getElementById('f-logo-url').value='';
   document.getElementById('f-ali-import').value='';
   if(id){
     const f=fours.find(x=>x.id===id);
     document.getElementById('fm-title').textContent='Modifier le fournisseur';
-    document.getElementById('f-nom').value=f.nom||'';document.getElementById('f-pays').value=f.pays||'';
-    document.getElementById('f-contact').value=f.contact||'';document.getElementById('f-wa').value=f.wa||'';
-    document.getElementById('f-wc').value=f.wc||'';document.getElementById('f-dom').value=f.dom||'';
-    document.getElementById('f-an').value=f.an||'';document.getElementById('f-eval').value=f.eval||3;
-    document.getElementById('f-ali').value=f.ali||'Non disponible';document.getElementById('f-ali-url').value=f.ali_url||'';
-    document.getElementById('f-lang').value=f.lang||'';document.getElementById('f-mkt').value=f.mkt||'';
-    document.getElementById('f-desc').value=f.desc||'';document.getElementById('f-com').value=f.com||'';
-    if(f.logo){document.getElementById('f-logo-dat').value=f.logo;document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}"></div>`;}
+    document.getElementById('f-nom').value=f.nom||'';
+    document.getElementById('f-contact').value=f.contact||'';
+    document.getElementById('f-pays').value=f.pays||'';
+    document.getElementById('f-email').value=f.email||'';
+    document.getElementById('f-wa').value=f.wa||'';
+    document.getElementById('f-wc').value=f.wc||'';
+    document.getElementById('f-dom').value=f.dom||'';
+    document.getElementById('f-an').value=f.an||'';
+    document.getElementById('f-eval').value=f.eval||3;
+    document.getElementById('f-ali').value=f.ali||'Non disponible';
+    document.getElementById('f-ali-url').value=f.ali_url||'';
+    document.getElementById('f-devis').value=f.devis||'';
+    document.getElementById('f-lang').value=f.lang||'';
+    document.getElementById('f-mkt').value=f.mkt||'';
+    document.getElementById('f-desc').value=f.desc||'';
+    document.getElementById('f-com').value=f.com||'';
+    if(f.logo){
+      document.getElementById('f-logo-dat').value=f.logo;
+      if(f.logo.startsWith('http')){
+        document.getElementById('f-logo-url').value=f.logo;
+        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}" onerror="this.style.display='none'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;
+      }else{
+        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}"><button onclick="document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;
+      }
+    }
   }else{
     document.getElementById('fm-title').textContent='Nouveau fournisseur';
-    ['f-nom','f-pays','f-contact','f-wa','f-wc','f-dom','f-an','f-ali-url','f-lang','f-mkt','f-desc','f-com'].forEach(x=>document.getElementById(x).value='');
+    ['f-nom','f-contact','f-pays','f-email','f-wa','f-wc','f-dom','f-an','f-ali-url','f-devis','f-lang','f-mkt','f-desc','f-com'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('f-eval').value=3;document.getElementById('f-ali').value='Non disponible';
   }
   document.getElementById('four-modal').classList.add('open');
@@ -850,13 +953,16 @@ function openFourModal(id=null){
 function saveFour(){
   const nom=document.getElementById('f-nom').value.trim();
   if(!nom){toast('Nom requis',true);return;}
-  const d={nom,pays:document.getElementById('f-pays').value,contact:document.getElementById('f-contact').value,
+  const logoVal=document.getElementById('f-logo-dat').value||document.getElementById('f-logo-url').value;
+  const d={nom,contact:document.getElementById('f-contact').value,pays:document.getElementById('f-pays').value,
+    email:document.getElementById('f-email').value,
     wa:document.getElementById('f-wa').value,wc:document.getElementById('f-wc').value,dom:document.getElementById('f-dom').value,
     an:document.getElementById('f-an').value,eval:document.getElementById('f-eval').value,
     ali:document.getElementById('f-ali').value,ali_url:document.getElementById('f-ali-url').value,
+    devis:document.getElementById('f-devis').value,
     lang:document.getElementById('f-lang').value,mkt:document.getElementById('f-mkt').value,
     desc:document.getElementById('f-desc').value,com:document.getElementById('f-com').value,
-    logo:document.getElementById('f-logo-dat').value};
+    logo:logoVal};
   if(editF){const i=fours.findIndex(f=>f.id===editF);fours[i]={...fours[i],...d};toast('Fournisseur mis à jour ✓');}
   else{d.id='F'+String(Date.now()).slice(-6);fours.push(d);toast('Fournisseur ajouté ✓');}
   save('f');closeMod('four-modal');renderFour();
@@ -874,7 +980,7 @@ function renderTrans(){
   const c=document.getElementById('trans-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🚢</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
-    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:'🚢'}</div>
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:' 🚢'}</div>
     <div class="card-body">
       <div class="card-title">${t.nom}</div>
       <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
@@ -960,10 +1066,13 @@ function simSelProd(){
   prev.style.display='flex';
   document.getElementById('sim-name').textContent=p.nom;
   document.getElementById('sim-ref').textContent=p.ref;
-  document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} cm · ${p.kg} kg · ${p.cat}`;
+  document.getElementById('sim-specs').textContent=`${p.l}x${p.la}x${p.h} cm · ${p.kg} kg · ${p.cat}`;
   const ico=document.getElementById('sim-ico');
-  if(p.photos&&p.photos[0]){ico.innerHTML=`<img src="${p.photos[0]}" style="width:60px;height:60px;object-fit:cover" alt="">`; }
-  else{ico.textContent=EMOJIS[p.cat]||'📦';ico.style.cssText='width:60px;height:60px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0';}
+  if(p.photos&&p.photos[0]){
+    ico.innerHTML=`<img src="${p.photos[0]}" style="width:70px;height:70px;object-fit:cover" alt="" onerror="this.parentElement.textContent='${EMOJIS[p.cat]||'📦'}'">`,
+  }else{
+    ico.textContent=EMOJIS[p.cat]||'📦';
+  }
   setSimTrans(p.tr||'Maritime');
   const c=calc(p);
   document.getElementById('sim-pv').value=Math.round(c.pnh);
@@ -994,8 +1103,10 @@ function simCalc(){
   const totVHT=pvn*qty;
   const totTTC=ttcU*qty;
   const marge=totVHT-totAHT;
+  const f=fours.find(x=>x.id===p.fid);
   document.getElementById('sim-rows').innerHTML=`
     <div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>
+    <div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>
     <div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>
     <div class="sim-row"><span>Transport</span><span>${simTr==='Maritime'?'🚢':'✈️'} ${simTr}</span></div>
     <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbm*qty,4)} m³</span></div>
