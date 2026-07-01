@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Go.Flow — Console Import Go Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -969,6 +971,7 @@ function prodGroupCard(g){
         <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.ttc)} TTC</div>
       </div>
       <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
+      <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${isInCart(p.id)?'✓':'📋'}</button>
     </div>`;
   }).join('');
   return`<div class="card">
@@ -982,6 +985,7 @@ function prodGroupCard(g){
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">🧮</button>
+      <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?'✓ Devis':'📋'}</button>
     </div>
   </div>
   ${others.length?`<div class="alt-panel" id="ap-${key}"><div class="alt-panel-inner"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Alternatives fournisseurs</div>${altCards}</div></div>`:''}</div>`;
@@ -1033,6 +1037,7 @@ function prodGroupTable(groups){
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">🧮</button>
+        <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?'✓':'📋'}</button>
       </div></td>
     </tr>`;
     const colCount=4+(Object.values(C).filter(Boolean).length)+1;
@@ -1056,7 +1061,7 @@ function prodGroupTable(groups){
         ${C.total ?`<td>${N(cp.prix_ht)}</td>`:''}
         ${C.ttc   ?`<td style="color:var(--bleu)">${N(cp.ttc)}</td>`:''}
         ${C.marche?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-        <td class="no-print"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button></td>
+        <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?'✓':'📋'}</button></div></td>
       </tr>`;
     }).join('');
     return winRow+altRows;
@@ -1606,15 +1611,6 @@ function exportCSV(){
   a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
   a.download=`GoFlow_Catalogue_${new Date().toISOString().slice(0,10)}.csv`;a.click();
   toast('Export CSV téléchargé ✓');
-}
-
-/* ---- UTILS ---- */
-function closeMod(id){document.getElementById(id).classList.remove('open');}
-document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
-function toast(msg,err=false){
-  const t=document.getElementById('toast');t.textContent=msg;
-  t.style.borderLeftColor=err?'var(--rouge)':'var(--vert)';
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
 
 /* ============================================================
