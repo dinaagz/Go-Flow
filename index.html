@@ -449,7 +449,8 @@ textarea.fc{resize:vertical;min-height:70px}
 <div class="toast" id="toast"></div>
 
 <script>
-const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t';
+const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
+const DATA_VER=3;
 const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tva:18};
 const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
 const EMOJIS={Hydrafacial:'💆','Picolaser/Tatouage':'⚡','Analyse de peau':'🔬','RF Microneedling':'💉',HIFU:'✨'};
@@ -529,6 +530,13 @@ let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid'
 
 function init(){
   S=JSON.parse(localStorage.getItem(SK)||'null')||{...DS};
+  // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
+  const storedVer=parseInt(localStorage.getItem(VK)||'0');
+  if(storedVer<DATA_VER){
+    localStorage.removeItem(PK);
+    localStorage.removeItem(FK);
+    localStorage.setItem(VK,DATA_VER);
+  }
   fours=JSON.parse(localStorage.getItem(FK)||'null');
   if(!fours||!fours.length)fours=DF.map(f=>({...f}));
   prods=JSON.parse(localStorage.getItem(PK)||'null');
