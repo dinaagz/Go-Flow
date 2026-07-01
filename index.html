@@ -143,6 +143,28 @@ textarea.fc{resize:vertical;min-height:70px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .comp-row{display:flex;gap:6px;align-items:center}
 .comp-row input{flex:1}
+/* Grouped view */
+.grp-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;backdrop-filter:blur(4px);cursor:pointer;transition:.2s}
+.grp-count-badge:hover{background:var(--bleu)}
+.alt-panel{overflow:hidden;max-height:0;transition:max-height .35s ease}
+.alt-panel.open{max-height:800px}
+.alt-panel-inner{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.alt-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--gris);font-size:12px}
+.alt-card.is-winner{border-color:var(--vert);background:#f0fff8}
+.alt-card-img{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.alt-card-info{flex:1;min-width:0}
+.alt-card-nom{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alt-card-prix{font-size:11px;color:var(--muted)}
+.alt-promote-btn{padding:4px 10px;border:1px solid var(--bleu);border-radius:6px;background:#fff;color:var(--bleu);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:.2s}
+.alt-promote-btn:hover{background:var(--bleu);color:#fff}
+.winner-tag{font-size:9px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.5px}
+/* Table accordion rows */
+.tbl-alt-row{background:#f8f8fc}
+.tbl-alt-row td{font-size:11px;padding:6px 12px!important}
+.expand-cell{cursor:pointer;user-select:none}
+/* Grouped toolbar */
+.grp-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
+.grp-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
 /* Column picker */
 .col-picker-wrap{position:relative}
 .col-picker-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap}
@@ -217,6 +239,12 @@ textarea.fc{resize:vertical;min-height:70px}
       <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille">▦</button>
       <button class="view-btn" id="vl" onclick="setView('list')" title="Liste">☰</button>
     </div>
+    <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques">⊞ Grouper</button>
+    <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" style="display:none">
+      <option value="prix_bas">🏷️ Prix bas</option>
+      <option value="meilleure_qualite">⭐ Meilleure qualité</option>
+      <option value="meilleur_rapport">⚖️ Meilleur rapport</option>
+    </select>
     <div class="col-picker-wrap" id="cp-wrap">
       <button class="col-picker-btn" onclick="toggleColPicker()" title="Colonnes visibles">⚙️ Colonnes</button>
       <div class="col-picker-drop" id="cp-drop">
@@ -536,25 +564,25 @@ const DF=[
 // img5=Hydrafacial dome LED, img6=Hydrafacial 17en1, img7=Skin grand ecran,
 // img8=Pico grand SANO, img9=HIFU, img10=Hydrafacial dome+lit LED, img11=Pico compact SANO
 const DP=[
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMG(5)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg',img:IMG(10)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm',img:IMG(5)},
-  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
-  {cat:'Picolaser/Tatouage',fn:'Oman Medical Beauty Manufacture',nom:'Picolaser ND YAG format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
-  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm',img:IMG(4)},
-  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm',img:IMG(3)},
-  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm',img:IMG(3)},
-  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm',img:IMG(7)},
-  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm',img:IMG(7)},
-  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm',img:IMG(2)},
-  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18×7×4 cm — très léger (160 g)',img:IMG(2)},
-  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
-  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
-  {cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm',img:IMG(9)},
-  {cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
+  {grp:'hydrafacial-14en1',   cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMG(6)},
+  {grp:'hydrafacial-17en1',   cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
+  {grp:'hydrafacial-17en1',   cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
+  {grp:'hydrafacial-dome-led',cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMG(5)},
+  {grp:'hydrafacial-dome-led',cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg',img:IMG(10)},
+  {grp:'hydrafacial-compact',  cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm',img:IMG(5)},
+  {grp:'picolaser-grand',      cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
+  {grp:'picolaser-grand',      cat:'Picolaser/Tatouage',fn:'Oman Medical Beauty Manufacture',nom:'Picolaser ND YAG format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
+  {grp:'picolaser-compact',    cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm',img:IMG(4)},
+  {grp:'skin-compact-13',      cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm',img:IMG(3)},
+  {grp:'skin-compact-13',      cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm',img:IMG(3)},
+  {grp:'skin-grand-15',        cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm',img:IMG(7)},
+  {grp:'skin-grand-15',        cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm',img:IMG(7)},
+  {grp:'rf-stylo',             cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm',img:IMG(2)},
+  {grp:'rf-stylo',             cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18×7×4 cm — très léger (160 g)',img:IMG(2)},
+  {grp:'rf-chariot',           cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
+  {grp:'rf-chariot',           cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
+  {grp:'hifu',                 cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm',img:IMG(9)},
+  {grp:'hifu',                 cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
 ];
 
 const COL_DEFS=[
@@ -572,6 +600,8 @@ const COL_DEFS=[
   {k:'marche',lbl:'Prix marché',       def:false},
 ];
 let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
+let grouped=false,stratPrix='prix_bas',winOverrides={};
+const WK='gf_win';
 
 function initCols(){
   const saved=JSON.parse(localStorage.getItem('gf_c')||'null');
@@ -615,6 +645,13 @@ function init(){
   });
   save('f');
   trans=JSON.parse(localStorage.getItem(TK)||'[]');
+  winOverrides=JSON.parse(localStorage.getItem(WK)||'{}');
+  // Silent migration: add grp field to products that lack it
+  let migrated=false;
+  prods.forEach(p=>{
+    if(!p.grp){const dp=DP.find(d=>d.fn===p.fn&&d.nom===p.nom);if(dp&&dp.grp){p.grp=dp.grp;migrated=true;}}
+  });
+  if(migrated)save('p');
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   loadS();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
 }
@@ -626,7 +663,7 @@ function buildProds(){
     const code=CATS[d.cat]||'PRD';
     const ref=`${code}-${String(cc[d.cat]).padStart(3,'0')}-${String(g).padStart(3,'0')}`;
     const f=fours.find(x=>x.nom===d.fn);
-    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,fid:f?f.id:'',fn:d.fn,prix:d.prix,prach:0,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
+    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,grp:d.grp||'',fid:f?f.id:'',fn:d.fn,prix:d.prix,prach:0,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
   });
 }
 
@@ -730,8 +767,189 @@ function renderCat(){
     <div class="stat"><div class="stat-val" style="font-size:14px">${N(totalV)}</div><div class="stat-lbl">Valeur catalogue</div></div>`;
   const c=document.getElementById('cat-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="ico">📭</div><h3>Aucun produit trouvé</h3><p>Ajustez vos filtres ou ajoutez un produit.</p></div>';return;}
-  if(view==='grid'){c.innerHTML=`<div class="grid">${list.map(prodCard).join('')}</div>`;}
-  else{c.innerHTML=prodTable(list);}
+  if(grouped){
+    const groups=groupList(list);
+    if(view==='grid'){c.innerHTML=`<div class="grid">${groups.map(g=>prodGroupCard(g)).join('')}</div>`;}
+    else{c.innerHTML=prodGroupTable(groups);}
+  }else{
+    if(view==='grid'){c.innerHTML=`<div class="grid">${list.map(prodCard).join('')}</div>`;}
+    else{c.innerHTML=prodTable(list);}
+  }
+}
+
+/* ---- GROUPING ---- */
+function toggleGrouped(){
+  grouped=!grouped;
+  document.getElementById('grp-btn').classList.toggle('active',grouped);
+  document.getElementById('strat-sel').style.display=grouped?'':'none';
+  renderCat();
+}
+function setStratPrix(v){stratPrix=v;renderCat();}
+
+function groupList(list){
+  const map={};
+  list.forEach(p=>{
+    const key=p.grp||('__solo_'+p.id);
+    if(!map[key])map[key]=[];
+    map[key].push(p);
+  });
+  return Object.values(map).map(prods=>({key:prods[0].grp||('__solo_'+prods[0].id),prods,winner:selectWinner(prods[0].grp||('__solo_'+prods[0].id),prods)}));
+}
+
+function selectWinner(key,prods){
+  if(prods.length===1)return prods[0];
+  if(winOverrides[key]){const ov=prods.find(p=>p.id===winOverrides[key]);if(ov)return ov;}
+  if(stratPrix==='prix_bas')return prods.reduce((b,p)=>calc(p).pa<calc(b).pa?p:b);
+  if(stratPrix==='meilleure_qualite')return prods.reduce((b,p)=>{
+    const fp=fours.find(x=>x.id===p.fid),fb=fours.find(x=>x.id===b.fid);
+    return(parseInt(fp&&fp.eval||0)||0)>(parseInt(fb&&fb.eval||0)||0)?p:b;
+  });
+  // meilleur_rapport: highest margin %
+  return prods.reduce((b,p)=>{const cp=calc(p),cb=calc(b);return(cp.pa>0?cp.marge_xof/cp.pa:0)>(cb.pa>0?cb.marge_xof/cb.pa:0)?p:b;});
+}
+
+function setWinner(key,prodId,event){
+  if(event)event.stopPropagation();
+  winOverrides[key]=prodId;
+  localStorage.setItem(WK,JSON.stringify(winOverrides));
+  renderCat();toast('Fournisseur sélectionné comme gagnant ✓');
+}
+
+function toggleAccordion(key){
+  const panel=document.getElementById('ap-'+CSS.escape(key));
+  if(panel)panel.classList.toggle('open');
+}
+
+function prodGroupCard(g){
+  const{key,prods:gps,winner:w}=g;
+  const others=gps.filter(p=>p.id!==w.id);
+  const f=fours.find(x=>x.id===w.fid);
+  const lbl=fourLabel(f);const bc=fourBadgeClass(f);
+  const em=EMOJIS[w.cat]||'📦';
+  const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
+  const imgHtml=imgSrc
+    ?`<img src="${imgSrc}" alt="${w.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
+    :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
+  const c=calc(w);
+  const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
+  const escapedKey=key.replace(/'/g,"\\'");
+  const priceRows=[
+    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
+    cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
+    cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
+  ].join('');
+  const altCards=others.map(p=>{
+    const fp=fours.find(x=>x.id===p.fid);
+    const cp=calc(p);
+    const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" class="alt-card-img" loading="lazy" onerror="this.style.display='none'">`:'<span style="font-size:20px;width:38px;text-align:center">'+EMOJIS[p.cat]+'</span>';
+    return`<div class="alt-card">
+      ${pimg}
+      <div class="alt-card-info">
+        <div class="alt-card-nom">${p.nom}</div>
+        <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.ttc)} TTC</div>
+      </div>
+      <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
+    </div>`;
+  }).join('');
+  return`<div class="card">
+  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:''}</div>
+  <div class="card-body">
+    <div class="card-ref">${w.ref}</div>
+    <div class="card-title">${w.nom}</div>
+    <div class="card-cat">${cols.cat?w.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${w.tr==='Aérien'?'✈️':'🚢'} ${w.tr}</div>
+    ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
+    <div class="card-acts">
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
+      <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">🧮</button>
+    </div>
+  </div>
+  ${others.length?`<div class="alt-panel" id="ap-${key}"><div class="alt-panel-inner"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Alternatives fournisseurs</div>${altCards}</div></div>`:''}</div>`;
+}
+
+function prodGroupTable(groups){
+  const C=cols;
+  const ths=['<th></th>','<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
+    C.cat   ?'<th>Catégorie</th>'       :'',
+    C.four  ?'<th>Fournisseur</th>'     :'',
+    C.cbm   ?'<th>CBM</th>'             :'',
+    C.poids ?'<th>Poids</th>'           :'',
+    C.achat ?'<th>Achat EXW</th>'       :'',
+    C.prach ?'<th>Préacheminement</th>' :'',
+    C.fret  ?'<th>Fret/Douane</th>'     :'',
+    C.marge ?'<th>Marge</th>'           :'',
+    C.vente ?'<th>Vente HT</th>'        :'',
+    C.total ?'<th>Prix total HT</th>'   :'',
+    C.ttc   ?'<th>TTC</th>'             :'',
+    C.marche?'<th>Marché</th>'          :'',
+    '<th class="no-print">Actions</th>',
+  ].join('');
+  const rows=groups.map(g=>{
+    const{key,prods:gps,winner:w}=g;
+    const others=gps.filter(p=>p.id!==w.id);
+    const f=fours.find(x=>x.id===w.fid);const c=calc(w);
+    const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
+    const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
+    const escapedKey=key.replace(/'/g,"\\'");
+    const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives">▶</button>`:'';
+    const winRow=`<tr>
+      <td class="no-print">${expandBtn}</td>
+      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[w.cat]+'</span>'}</td>
+      <td><code style="font-size:10px">${w.ref}</code></td>
+      <td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span style="font-size:9px;background:var(--bleu);color:#fff;padding:1px 5px;border-radius:8px;margin-left:4px">+${others.length}</span>`:''}</td>
+      ${C.cat   ?`<td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${w.cat}</span></td>`:''}
+      ${C.four  ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.cbm   ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
+      ${C.poids ?`<td>${w.kg} kg</td>`:''}
+      ${C.achat ?`<td>${N(c.pa)}</td>`:''}
+      ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
+      ${C.fret  ?`<td>${N(c.fret)} ${w.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
+      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
+      ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
+      ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      <td class="no-print"><div style="display:flex;gap:4px">
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
+        <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">🧮</button>
+      </div></td>
+    </tr>`;
+    const colCount=4+(Object.values(C).filter(Boolean).length)+1;
+    const altRows=others.map(p=>{
+      const fp=fours.find(x=>x.id===p.fid);const cp=calc(p);
+      const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" loading="lazy">`:'<span style="font-size:16px">'+EMOJIS[p.cat]+'</span>';
+      return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
+        <td></td>
+        <td>${pimg}</td>
+        <td><code style="font-size:9px">${p.ref}</code></td>
+        <td style="color:var(--muted)">${p.nom}</td>
+        ${C.cat   ?`<td></td>`:''}
+        ${C.four  ?`<td>${fourLabel(fp)}</td>`:''}
+        ${C.cbm   ?`<td>${Nd(cp.cbm,4)}</td>`:''}
+        ${C.poids ?`<td>${p.kg} kg</td>`:''}
+        ${C.achat ?`<td>${N(cp.pa)}</td>`:''}
+        ${C.prach ?`<td>${cp.prach?N(cp.prach):'—'}</td>`:''}
+        ${C.fret  ?`<td>${N(cp.fret)}</td>`:''}
+        ${C.marge ?`<td style="color:var(--vert)">${N(cp.marge_xof)}</td>`:''}
+        ${C.vente ?`<td>${N(cp.pnh)}</td>`:''}
+        ${C.total ?`<td>${N(cp.prix_ht)}</td>`:''}
+        ${C.ttc   ?`<td style="color:var(--bleu)">${N(cp.ttc)}</td>`:''}
+        ${C.marche?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+        <td class="no-print"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button></td>
+      </tr>`;
+    }).join('');
+    return winRow+altRows;
+  }).join('');
+  return`<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function toggleGroupTblRow(key,btn){
+  const rows=document.querySelectorAll('#tbl-alt-'+CSS.escape(key));
+  const open=rows.length&&rows[0].style.display!=='none';
+  rows.forEach(r=>r.style.display=open?'none':'');
+  if(btn)btn.textContent=open?'▶':'▼';
 }
 
 function fourLabel(f){
