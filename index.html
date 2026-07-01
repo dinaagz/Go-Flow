@@ -499,27 +499,30 @@ const DF=[
   }
 ];
 
-// Mapping correct images <-> produits (basé sur analyse visuelle)
+// Mapping correct images ↔ produits (basé sur analyse visuelle)
+// img1=RF chariot, img2=RF stylo, img3=Skin compact dome, img4=Pico compact SL,
+// img5=Hydrafacial dome LED, img6=Hydrafacial 17en1, img7=Skin grand ecran,
+// img8=Pico grand SANO, img9=HIFU, img10=Hydrafacial dome+lit LED, img11=Pico compact SANO
 const DP=[
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49x54x92 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54x122x60 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54x122x60 cm',img:IMG(6)},
-  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65x62x122 cm (50 kg) + masque 55x48x46 cm (5 kg)',img:IMG(5)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65x62x122 cm (50 kg) + masque 5 kg',img:IMG(10)},
-  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54x51x101 cm',img:IMG(5)},
-  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57x52x55 cm',img:IMG(8)},
-  {cat:'Picolaser/Tatouage',fn:'Oman Medical Beauty Manufacture',nom:'Picolaser ND YAG format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57x52x55 cm',img:IMG(8)},
-  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43x57x56 cm',img:IMG(4)},
-  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56x65x57 cm',img:IMG(3)},
-  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68x62x55 cm',img:IMG(3)},
-  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68x59x44 cm',img:IMG(7)},
-  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67x59x44 cm',img:IMG(7)},
-  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24x38x43 cm',img:IMG(2)},
-  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18x7x4 cm — très léger (160 g)',img:IMG(2)},
-  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50x50x103 cm',img:IMG(1)},
-  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50x50x103 cm',img:IMG(1)},
-  {cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66x59x55 cm',img:IMG(9)},
-  {cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62x55x56 cm',img:IMG(9)}
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
+  {cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMG(5)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:7390,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 5 kg',img:IMG(10)},
+  {cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial compact écran tactile',l:54,la:51,h:101,kg:48,prix:4198,tr:'Maritime',specs:'54×51×101 cm',img:IMG(5)},
+  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser grand modèle écran 15.6"',l:57,la:52,h:55,kg:35,prix:8999,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
+  {cat:'Picolaser/Tatouage',fn:'Oman Medical Beauty Manufacture',nom:'Picolaser ND YAG format 15.6"',l:57,la:52,h:55,kg:35,prix:10109,tr:'Maritime',specs:'57×52×55 cm',img:IMG(8)},
+  {cat:'Picolaser/Tatouage',fn:'Shaanxi Yateli Technology Limited',nom:'Picolaser compact écran tactile',l:43,la:57,h:56,kg:24.5,prix:3000,tr:'Maritime',specs:'43×57×56 cm',img:IMG(4)},
+  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis compact 13.3"',l:56,la:65,h:57,kg:11,prix:4500,tr:'Maritime',specs:'56×65×57 cm',img:IMG(3)},
+  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis compact 13.3"',l:68,la:62,h:55,kg:10,prix:5558,tr:'Maritime',specs:'68×62×55 cm',img:IMG(3)},
+  {cat:'Analyse de peau',fn:'Shaanxi Yateli Technology Limited',nom:'Skin Analysis grand écran 15.6"',l:68,la:59,h:44,kg:18,prix:5500,tr:'Maritime',specs:'68×59×44 cm',img:IMG(7)},
+  {cat:'Analyse de peau',fn:'Oman Medical Beauty Manufacture',nom:'Skin Analysis grand écran 15.6"',l:67,la:59,h:44,kg:20,prix:5829,tr:'Maritime',specs:'67×59×44 cm',img:IMG(7)},
+  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle stylo portable',l:24,la:38,h:43,kg:4,prix:1500,tr:'Maritime',specs:'24×38×43 cm',img:IMG(2)},
+  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle stylo portable',l:18,la:7,h:4,kg:0.16,prix:2025,tr:'Aérien',specs:'18×7×4 cm — très léger (160 g)',img:IMG(2)},
+  {cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
+  {cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
+  {cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm',img:IMG(9)},
+  {cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
 ];
 
 let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime';
@@ -666,7 +669,7 @@ function prodCard(p){
   const em=EMOJIS[p.cat]||'📦';
   const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` + '<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
+    ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
     :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(p);
   return`<div class="card">
@@ -980,7 +983,7 @@ function renderTrans(){
   const c=document.getElementById('trans-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="ico">🚢</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
-    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:' 🚢'}</div>
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:'🚢'}</div>
     <div class="card-body">
       <div class="card-title">${t.nom}</div>
       <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
@@ -1066,10 +1069,10 @@ function simSelProd(){
   prev.style.display='flex';
   document.getElementById('sim-name').textContent=p.nom;
   document.getElementById('sim-ref').textContent=p.ref;
-  document.getElementById('sim-specs').textContent=`${p.l}x${p.la}x${p.h} cm · ${p.kg} kg · ${p.cat}`;
+  document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} cm · ${p.kg} kg · ${p.cat}`;
   const ico=document.getElementById('sim-ico');
   if(p.photos&&p.photos[0]){
-    ico.innerHTML=`<img src="${p.photos[0]}" style="width:70px;height:70px;object-fit:cover" alt="" onerror="this.parentElement.textContent='${EMOJIS[p.cat]||'📦'}'">`,
+    ico.innerHTML=`<img src="${p.photos[0]}" style="width:70px;height:70px;object-fit:cover" alt="" onerror="this.parentElement.textContent='${EMOJIS[p.cat]||'📦'}'">`;
   }else{
     ico.textContent=EMOJIS[p.cat]||'📦';
   }
