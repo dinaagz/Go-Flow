@@ -216,6 +216,11 @@ textarea.fc{resize:vertical;min-height:70px}
 .dv-table tbody tr:nth-child(even) td{background:#f9f9f9}
 .dv-table tfoot td{border-top:2px solid #1A1A2E}
 .dv-cgs{font-size:9px;color:#999;border-top:1px solid #eee;padding-top:10px;margin-top:16px;line-height:1.6}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fx-spin{display:inline-block;animation:spin .7s linear infinite;font-style:normal;line-height:1}
+.fx-status{font-size:11px;margin-top:5px;min-height:16px}
+.fx-box{background:linear-gradient(135deg,#f0f8ff,#f5f0ff);border:1px solid #c8d8f0;border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:520px){.fx-box{grid-template-columns:1fr}}
 /* Impression devis uniquement quand la classe .printing-devis est active sur body */
 @media print{
   body.printing-devis .hdr,
@@ -439,6 +444,30 @@ textarea.fc{resize:vertical;min-height:70px}
       <span style="font-size:12px;font-weight:600">%</span>
     </div>
     <div id="strat-detail" style="font-size:12px;color:var(--muted);padding:8px 12px;background:var(--gris);border-radius:8px"></div>
+  </div>
+
+  <!-- Devise du devis -->
+  <div class="devis-section">
+    <div class="devis-section-title">💱 Devise du devis client</div>
+    <div class="fx-box">
+      <div class="fgrp">
+        <label class="flbl">Devise de présentation</label>
+        <select class="fc" id="dv-dev" onchange="onDevisDevChange()">
+          <option value="XOF">XOF — Franc CFA (F)</option>
+          <option value="USD">USD — Dollar américain ($)</option>
+          <option value="EUR">EUR — Euro (€)</option>
+          <option value="RMB">RMB — Yuan chinois (¥)</option>
+        </select>
+      </div>
+      <div class="fgrp">
+        <label class="flbl" id="dv-taux-lbl">XOF pour 1 F CFA</label>
+        <div style="position:relative">
+          <input type="number" class="fc" id="dv-taux" step="0.01" value="1" min="0.001" oninput="onDevisTauxChange()">
+          <em id="dv-fx-spin" class="fx-spin" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:16px">⟳</em>
+        </div>
+        <div id="dv-fx-msg" class="fx-status"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Panier -->
@@ -1633,6 +1662,8 @@ function exportCSV(){
    ============================================================ */
 const DK='gf_d',DCK='gf_dc',DPK='gf_dp';
 let devisCart=[],devisClient={},devisPrefs={},devisView='grid';
+let devisFX={dev:'XOF',taux:1};
+let fxCache={rates:null,ts:0};
 
 const DEVIS_SHOW_DEFS=[
   // Infos produit
@@ -1666,6 +1697,7 @@ function loadDevis(){
   devisClient=JSON.parse(localStorage.getItem(DCK)||'null')||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
   const saved=JSON.parse(localStorage.getItem(DPK)||'null');
   devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved,show:{...DV_SHOW_DEFAULT,...(saved.show||{})}}:{...DV_PREFS_DEFAULT,show:{...DV_SHOW_DEFAULT}};
+  if(saved&&saved.fx){devisFX={dev:saved.fx.dev||'XOF',taux:saved.fx.taux||1};}
   updateCartBadge();
 }
 function saveDevisCartLS(){localStorage.setItem(DK,JSON.stringify(devisCart));updateCartBadge();}
@@ -1685,12 +1717,80 @@ function saveDevisPrefs(){
     const el=document.getElementById('strat-perso-val');
     if(el)devisPrefs.margePerso=parseFloat(el.value)||35;
   }
+  devisPrefs.fx={dev:devisFX.dev,taux:devisFX.taux};
   localStorage.setItem(DPK,JSON.stringify(devisPrefs));
 }
 
 function updateCartBadge(){
   const n=devisCart.length,el=document.getElementById('cart-count');
   el.textContent=n;el.style.display=n?'inline-block':'none';
+}
+
+/* ---- TAUX DE CHANGE (API + cache 1h) ---- */
+async function fetchFXRates(){
+  const now=Date.now();
+  if(fxCache.rates&&(now-fxCache.ts)<3600000)return fxCache.rates;
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/USD');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d.rates)throw new Error('Réponse invalide');
+    fxCache={rates:d.rates,ts:now};
+    return d.rates;
+  }catch(e){console.warn('FX API:',e);return null;}
+}
+
+function xofPer(dev,rates){
+  if(dev==='XOF')return 1;
+  const fb={USD:600,EUR:655.957,RMB:S.tauxChange};
+  if(!rates)return fb[dev]||1;
+  const xpu=rates.XOF||600;
+  const code=dev==='RMB'?'CNY':dev;
+  const dpu=rates[code]||1;
+  return xpu/dpu;
+}
+
+const DV_SYM={XOF:'F',USD:'$',EUR:'€',RMB:'¥'};
+const DV_NAMES={XOF:'F CFA',USD:'USD ($)',EUR:'EUR (€)',RMB:'RMB (¥)'};
+
+function toDevisDev(xof){return(devisFX.dev==='XOF'||!devisFX.taux)?xof:xof/devisFX.taux;}
+
+function Ndv(xof){
+  const v=toDevisDev(xof);
+  if(devisFX.dev==='XOF')return N(v);
+  const sym=DV_SYM[devisFX.dev]||devisFX.dev;
+  return sym+' '+v.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+async function onDevisDevChange(){
+  const dev=document.getElementById('dv-dev').value;
+  devisFX.dev=dev;
+  const spin=document.getElementById('dv-fx-spin');
+  const msg=document.getElementById('dv-fx-msg');
+  const inp=document.getElementById('dv-taux');
+  document.getElementById('dv-taux-lbl').textContent='XOF pour 1 '+(DV_NAMES[dev]||dev);
+  if(dev==='XOF'){
+    inp.value=1;devisFX.taux=1;msg.innerHTML='';
+    renderDevisCart();saveDevisPrefs();return;
+  }
+  spin.style.display='inline';inp.value='';
+  msg.innerHTML='<span style="color:var(--muted)">Récupération du taux en cours…</span>';
+  const rates=await fetchFXRates();
+  spin.style.display='none';
+  const t=xofPer(dev,rates);
+  inp.value=t.toFixed(4);devisFX.taux=t;
+  if(rates){
+    const hm=new Date(fxCache.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    msg.innerHTML=`<span style="color:var(--vert)">✓ Taux marché (${hm}) — modifiable librement</span>`;
+  }else{
+    msg.innerHTML=`<span style="color:#b45309">⚠️ API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
+  }
+  renderDevisCart();saveDevisPrefs();
+}
+
+function onDevisTauxChange(){
+  const v=parseFloat(document.getElementById('dv-taux').value);
+  if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu)">✏️ Taux saisi manuellement</span>`;renderDevisCart();}
 }
 
 /* ---- CALCUL DEVIS (logique CLIENT — séparée de calc() interne) ---- */
@@ -1816,6 +1916,13 @@ function renderDevis(){
   document.getElementById('dv-ville').value=devisClient.ville||'';
   const persoEl=document.getElementById('strat-perso-val');
   if(persoEl)persoEl.value=devisPrefs.margePerso||35;
+  // Restaurer l'UI devise
+  const devSel=document.getElementById('dv-dev');
+  if(devSel)devSel.value=devisFX.dev;
+  const tauxInp=document.getElementById('dv-taux');
+  if(tauxInp)tauxInp.value=devisFX.dev==='XOF'?1:devisFX.taux;
+  const lbl=document.getElementById('dv-taux-lbl');
+  if(lbl)lbl.textContent='XOF pour 1 '+(DV_NAMES[devisFX.dev]||devisFX.dev);
   initDevisColPicker();
   setStrategy(devisPrefs.strategy||'marge_fixe');
   renderDevisCart();
@@ -1848,14 +1955,14 @@ function buildDevisGrid(){
         ${devisPrefs.show.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">🏭 ${p.fn}</div>`:''}
         ${devisPrefs.show.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">🚢 ${p.trans_nom}</div>`:''}
         <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
-          <div class="cart-price-tag">${N(c.prixClientHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">HT/u</small></div>
-          <div style="font-size:11px;color:var(--bleu);font-weight:600">${N(c.prixClientTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
+          <div class="cart-price-tag">${Ndv(c.prixClientHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">HT/u</small></div>
+          <div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.prixClientTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
         </div>
         <div class="cart-qty-ctrl">
           <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
           <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
           <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${N(c.totalHT)}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.totalHT)}</span>
         </div>
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">🗑️ Retirer du devis</button>
       </div></div>`;
@@ -1878,11 +1985,11 @@ function buildDevisTable(){
     SH.delai?'<th>Délai</th>':'',
     SH.dev_source?'<th>Prix devise</th>':'',
     SH.prix_exw?'<th>EXW (XOF)</th>':'',
-    SH.prix_ht?'<th>Prix HT/u</th>':'',
+    SH.prix_ht?`<th>Prix HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     SH.douane?'<th>Douane est.</th>':'',
     SH.tva?`<th>TVA (${S.tva}%)</th>`:'',
-    SH.prix_ttc?'<th>Prix TTC/u</th>':'',
-    '<th>Qté</th>','<th>Total HT</th>',
+    SH.prix_ttc?`<th>Prix TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
+    '<th>Qté</th>',`<th>Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
     '<th class="no-print">Actions</th>',
   ].join('');
   const rows=devisCart.map(item=>{
@@ -1903,16 +2010,16 @@ function buildDevisTable(){
       ${SH.delai?`<td style="font-size:12px">${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-size:11px;font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
       ${SH.prix_exw?`<td style="font-size:11px">${N(c.pa)}</td>`:''}
-      ${SH.prix_ht?`<td style="font-weight:600">${N(c.prixClientHT)}</td>`:''}
+      ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.prixClientHT)}</td>`:''}
       ${SH.douane?`<td style="font-size:11px;color:#b45309">${N(c.douane)}</td>`:''}
-      ${SH.tva?`<td style="font-size:11px;color:#6b7280">${N(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu);font-weight:600">${N(c.prixClientTTC)}</td>`:''}
+      ${SH.tva?`<td style="font-size:11px;color:#6b7280">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
+      ${SH.prix_ttc?`<td style="color:var(--bleu);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
       <td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
         <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
       </div></td>
-      <td style="font-weight:700">${N(c.totalHT)}</td>
+      <td style="font-weight:700">${Ndv(c.totalHT)}</td>
       <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -1932,14 +2039,15 @@ function renderDevisTotal(){
   const totMarge=devisCart.reduce((s,i)=>s+calcDevis(i).marge_xof*i.qty,0);
   const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
   const totTTC=devisCart.reduce((s,i)=>s+calcDevis(i).totalTTC,0);
+  const devLabel=devisFX.dev!=='XOF'?` (${devisFX.dev})`:'';
   document.getElementById('dv-total-bar').innerHTML=`
     <div class="devis-total-bar">
       <div class="devis-total-item"><div class="val">${totQty}</div><div class="lbl">Unités</div></div>
-      <div class="devis-total-item"><div class="val" style="color:var(--vert)">${N(totMarge)}</div><div class="lbl">Marge totale</div></div>
-      <div class="devis-total-item"><div class="val">${N(totHT)}</div><div class="lbl">Sous-total HT</div></div>
+      <div class="devis-total-item"><div class="val" style="color:var(--vert)">${N(totMarge)}</div><div class="lbl">Marge (XOF)</div></div>
+      <div class="devis-total-item"><div class="val">${Ndv(totHT)}</div><div class="lbl">Sous-total HT${devLabel}</div></div>
       ${SH.tva?`
-      <div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${N(totTTC-totHT)}</div><div class="lbl">TVA (${S.tva}%)</div></div>
-      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${N(totTTC)}</div><div class="lbl">TOTAL TTC CLIENT</div></div>
+      <div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totTTC-totHT)}</div><div class="lbl">TVA (${S.tva}%)${devLabel}</div></div>
+      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${Ndv(totTTC)}</div><div class="lbl">TOTAL TTC CLIENT${devLabel}</div></div>
       `:''}
     </div>`;
 }
@@ -1982,11 +2090,11 @@ function generateDevisPDF(){
     SH.delai?'<th>Délai</th>':'',
     SH.dev_source?'<th>Prix devise</th>':'',
     SH.prix_exw?'<th>EXW (XOF)</th>':'',
-    SH.prix_ht?'<th>Prix HT/u</th>':'',
+    SH.prix_ht?`<th>Prix HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     SH.douane?'<th>Douane est.*</th>':'',
     SH.tva?`<th>TVA (${S.tva}%)</th>`:'',
-    SH.prix_ttc?'<th>Prix TTC/u</th>':'',
-    '<th>Qté</th>','<th style="white-space:nowrap">Total HT</th>',
+    SH.prix_ttc?`<th>Prix TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
+    '<th>Qté</th>',`<th style="white-space:nowrap">Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
   ].join('');
   const nbCols=colH.split('<th').length-1;
   // Lignes
@@ -2008,12 +2116,12 @@ function generateDevisPDF(){
       ${SH.delai?`<td>${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
       ${SH.prix_exw?`<td>${N(c.pa)}</td>`:''}
-      ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${N(c.prixClientHT)}</td>`:''}
+      ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.prixClientHT)}</td>`:''}
       ${SH.douane?`<td style="color:#b45309;white-space:nowrap">${N(c.douane)}</td>`:''}
-      ${SH.tva?`<td style="color:#6b7280;white-space:nowrap">${N(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:600;white-space:nowrap;color:#0066cc">${N(c.prixClientTTC)}</td>`:''}
+      ${SH.tva?`<td style="color:#6b7280;white-space:nowrap">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
+      ${SH.prix_ttc?`<td style="font-weight:600;white-space:nowrap;color:#0066cc">${Ndv(c.prixClientTTC)}</td>`:''}
       <td style="text-align:center">${item.qty}</td>
-      <td style="font-weight:700;white-space:nowrap">${N(c.totalHT)}</td>
+      <td style="font-weight:700;white-space:nowrap">${Ndv(c.totalHT)}</td>
     </tr>`;
   }).join('');
   const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
@@ -2044,28 +2152,28 @@ function generateDevisPDF(){
       <tfoot>
         ${SH.tva?`
         <tr style="background:#f5f5f7">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT</td>
-          <td colspan="2" style="font-weight:700;font-size:13px;white-space:nowrap">${N(totHT)}</td>
+          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
+          <td colspan="2" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
         <tr>
           <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">TVA (${S.tva}%)</td>
-          <td colspan="2" style="font-size:12px">${N(totTTC-totHT)}</td>
+          <td colspan="2" style="font-size:12px">${Ndv(totTTC-totHT)}</td>
         </tr>
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC</td>
-          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${N(totTTC)}</td>
+          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
+          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC)}</td>
         </tr>
         `:`
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-1}" style="text-align:right;font-weight:700;font-size:13px">TOTAL HT</td>
-          <td style="font-weight:800;font-size:15px;white-space:nowrap">${N(totHT)}</td>
+          <td colspan="${nbCols-1}" style="text-align:right;font-weight:700;font-size:13px">TOTAL HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
+          <td style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
         `}
       </tfoot>
     </table>
     <div class="dv-cgs">
       <strong>Conditions générales :</strong><br>
-      Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en Francs CFA (XOF). <strong>Taux de change du jour appliqué</strong> — de légères variations peuvent être constatées au moment de la commande.<br>
+      Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en ${devisFX.dev==='XOF'?'Francs CFA (XOF)':devisFX.dev+' — convertis depuis XOF'}. ${devisFX.dev!=='XOF'?`<strong>Taux de change appliqué : 1 ${devisFX.dev} = ${Nd(devisFX.taux,4)} XOF</strong> (taux indicatif) — `:'<strong>Taux de change du jour appliqué</strong> — '}de légères variations peuvent être constatées au moment de la commande.<br>
       <strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant HT</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>
       ${showDouaneNote?`<strong>Frais de douane (*) :</strong> Les frais de douane figurant sur ce devis sont des <em>estimations</em>. Le montant définitif pourra différer légèrement. Ces frais sont entièrement à la <strong>charge du client</strong> et devront être réglés au maximum <strong>2 jours</strong> après que le transitaire notifie la livraison effective des colis à son niveau.<br>`:''}
       <strong>Post-acheminement :</strong> Les frais de livraison locale (post-acheminement) sont également à la charge du client et ne sont pas inclus dans ce devis.<br>
