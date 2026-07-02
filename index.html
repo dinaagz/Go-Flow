@@ -180,8 +180,10 @@ textarea.fc{resize:vertical;min-height:70px}
 .cp-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--bleu);cursor:pointer}
 .cp-fixed{opacity:.45;pointer-events:none}
 /* ===== DEVIS ===== */
-.cart-badge{position:relative}
-.cart-badge-count{position:absolute;top:-6px;right:-8px;background:var(--rouge);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;display:none}
+.hdr-cart{position:relative;display:inline-flex}
+.hdr-cart-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;transition:.2s}
+.hdr-cart-btn:hover{background:rgba(255,255,255,.2)}
+.hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
 .strat-btn{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;text-align:center;transition:.2s;line-height:1.5}
 .strat-btn:hover{border-color:var(--bleu)}
 .strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
@@ -237,6 +239,10 @@ textarea.fc{resize:vertical;min-height:70px}
     <button class="btn btn-sec btn-sm" onclick="toggleSettings()">⚙️ Paramètres</button>
     <button class="btn btn-sec btn-sm" onclick="exportCSV()">📥 CSV</button>
     <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ PDF</button>
+    <div class="hdr-cart">
+      <button class="hdr-cart-btn" onclick="tab('devis')">📋 Devis</button>
+      <span class="hdr-cart-count" id="cart-count" style="display:none">0</span>
+    </div>
   </div>
 </header>
 
@@ -251,7 +257,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <div class="tab" onclick="tab('fournisseurs')">🏭 Fournisseurs</div>
   <div class="tab" onclick="tab('transitaires')">🚢 Transitaires</div>
   <div class="tab" onclick="tab('simulation')">🧮 Simulation</div>
-  <div class="tab cart-badge" onclick="tab('devis')">📋 Devis<span class="cart-badge-count" id="cart-count" style="display:none">0</span></div>
+  <div class="tab" onclick="tab('devis')">📋 Devis</div>
 </nav>
 
 <div class="wrap">
