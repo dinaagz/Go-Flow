@@ -30,6 +30,20 @@ Aucun serveur, aucune base de données — tout fonctionne en localStorage et s'
 - Colonnes optionnelles (à cocher) : Catégorie · Fournisseur · CBM · Poids · Achat EXW · Préacheminement · Fret/Douane · Marge · Vente HT · Prix total HT · TTC · Prix marché
 - Filtres : recherche texte, catégorie, fournisseur
 - La colonne **Actions est masquée à l'impression** (PDF propre)
+- **Mode Groupé** : regroupe les produits identiques de différents fournisseurs pour éviter la redondance visuelle
+
+### ⊞ Regroupement par fournisseur (Mode Groupé)
+
+Activé via le bouton **"⊞ Grouper"** dans la toolbar du catalogue :
+
+- Les 19 produits sont regroupés en **11 groupes** selon une clé `grp` (ex. `hydrafacial-17en1`, `rf-chariot`, `hifu`…)
+- Un seul produit "gagnant" est affiché par groupe selon la **stratégie prix** choisie :
+  - 🏷️ **Prix bas** — fournisseur le moins cher (défaut)
+  - ⭐ **Meilleure qualité** — fournisseur avec la meilleure évaluation
+  - ⚖️ **Meilleur rapport** — meilleur ratio marge/prix
+- **Vue grille** : badge `+N fournisseurs` sur l'image → clic pour ouvrir l'accordéon avec les alternatives et un bouton **Choisir** pour promouvoir un fournisseur
+- **Vue tableau** : bouton ▶/▼ pour afficher les lignes alternatives avec bouton **Choisir**
+- Le choix manuel est sauvegardé en `localStorage` (`gf_win`) et persisté entre sessions
 
 ### 💰 Calcul des prix
 La marge est calculée **uniquement sur le prix EXW** :
@@ -102,7 +116,7 @@ Go-Flow/
 
 - HTML5 / CSS3 / JavaScript vanilla (aucune dépendance)
 - Polices : Montserrat + Poppins (Google Fonts)
-- Persistance : `localStorage` (clés `gf_s`, `gf_p`, `gf_f`, `gf_t`)
+- Persistance : `localStorage` (clés `gf_s`, `gf_p`, `gf_f`, `gf_t`, `gf_c`, `gf_win`)
 - Images : URLs raw GitHub CDN
 - Déploiement : [Vercel](https://vercel.com)
 
