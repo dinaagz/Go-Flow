@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Go-Flow — Graphify</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <style>
+    :root {
+      --nuit:    #1A1A2E;
+      --surface: #16213E;
+      --card:    #0F3460;
+      --rouge:   #E94560;
+      --orange:  #F5A623;
+      --vert:    #27AE60;
+      --bleu:    #2980B9;
+      --violet:  #8E44AD;
+      --cyan:    #1ABC9C;
+      --text:    #E8E8F0;
+      --muted:   #7F8C8D;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--nuit);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--card);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--rouge); }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .controls {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #1a4a7a; }
+
+    #legend {
+      background: var(--surface);
+      border-bottom: 1px solid var(--card);
+      padding: 8px 24px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    #graph {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .node circle {
+      cursor: pointer;
+      stroke-width: 2;
+      transition: r 0.15s;
+    }
+
+    .node circle:hover { stroke-width: 3; }
+
+    .node text {
+      font-size: 11px;
+      fill: var(--text);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .link {
+      fill: none;
+      stroke: rgba(255,255,255,0.12);
+      stroke-width: 1.5;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: var(--surface);
+      border: 1px solid var(--card);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      max-width: 280px;
+      line-height: 1.6;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .tooltip strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 13px; }
+    .tooltip .tt-type { color: var(--muted); font-size: 11px; }
+    .tooltip .tt-count { color: var(--orange); font-size: 11px; }
+
+    .node--collapsed circle { opacity: 0.7; }
+
+    #info-bar {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15,52,96,0.85);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: var(--muted);
+      backdrop-filter: blur(6px);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="logo">Go<span>-</span>Flow <span style="font-size:14px;font-weight:400;color:var(--muted)">/ graphify</span></div>
+      <div class="subtitle">Arborescence du répertoire courant &mdash; visualisation interactive</div>
+    </div>
+    <div class="controls">
+      <button onclick="expandAll()">Tout déplier</button>
+      <button onclick="collapseAll()">Tout replier</button>
+      <button onclick="resetZoom()">Réinitialiser la vue</button>
+    </div>
+  </header>
+
+  <div id="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div>Dossier</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2980B9"></div>HTML</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#27AE60"></div>Markdown</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E94560"></div>PDF</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8E44AD"></div>Image</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1ABC9C"></div>Archive</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7F8C8D"></div>Texte / Autre</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E67E22"></div>CSS / JS</div>
+  </div>
+
+  <div id="graph">
+    <div class="tooltip" id="tooltip"></div>
+    <div id="info-bar">Cliquez sur un dossier pour le déplier / replier &nbsp;·&nbsp; Molette pour zoomer &nbsp;·&nbsp; Glissez pour déplacer</div>
+  </div>
+
+<script>
+// ─── Data: directory tree ──────────────────────────────────────────────────
+const treeData = {
+  name: "Go-Flow",
+  type: "root",
+  children: [
+    { name: "index.html", type: "html", desc: "Application principale (2 088 lignes) — Catalogue, Fournisseurs, Simulation, Devis" },
+    { name: "README.md", type: "md", desc: "Documentation du projet (Markdown)" },
+    { name: "CONTEXTE_PROJET_GOGROUP_DEVIS.md", type: "md", desc: "Document de transfert de contexte (FR)" },
+    {
+      name: "assets",
+      type: "dir",
+      children: [
+        {
+          name: "Products images",
+          type: "dir",
+          desc: "11 photos produits JPEG",
+          children: [
+            { name: "1 (1).jpeg", type: "image" },
+            { name: "1 (2).jpeg", type: "image" },
+            { name: "1 (3).jpeg", type: "image" },
+            { name: "1 (4).jpeg", type: "image" },
+            { name: "1 (5).jpeg", type: "image" },
+            { name: "1 (6).jpeg", type: "image" },
+            { name: "1 (7).jpeg", type: "image" },
+            { name: "1 (8).jpeg", type: "image" },
+            { name: "1 (9).jpeg", type: "image" },
+            { name: "1 (10).jpeg", type: "image" },
+            { name: "1 (11).jpeg", type: "image" },
+          ]
+        },
+        {
+          name: "Quotes",
+          type: "dir",
+          desc: "Devis fournisseurs PDF",
+          children: [
+            { name: "Quotes_Oman Medical Beauty Manufacture.pdf", type: "pdf", desc: "Devis Oman Medical Beauty" },
+            { name: "Quotes_Shaanxi Yateli Technology Limited.pdf", type: "pdf", desc: "Devis Shaanxi Yateli" },
+          ]
+        },
+        { name: "supplier.zip", type: "archive", desc: "Archive compressée des données fournisseurs" },
+        {
+          name: "supplier",
+          type: "dir",
+          desc: "Pages et contacts fournisseurs",
+          children: [
+            { name: "Contact Oman Medical Beauty Manufac.txt", type: "text", desc: "Coordonnées — Oman Medical Beauty (Clara)" },
+            { name: "Contact Shaanxi Yateli Technology L.txt", type: "text", desc: "Coordonnées — Shaanxi Yateli (Bailey)" },
+            { name: "Logo Yateli.avif", type: "image", desc: "Logo Yateli (format AVIF)" },
+            { name: "logo Oman Beauty.png", type: "image", desc: "Logo Oman Beauty (format PNG)" },
+            { name: "Oman Medical Beauty Manufacture.html", type: "html", desc: "Snapshot de la page Alibaba — Oman Medical Beauty" },
+            {
+              name: "Oman Medical Beauty Manufacture_files",
+              type: "dir",
+              desc: "Ressources de la page Alibaba (images, CSS, JS)",
+              children: [
+                { name: "AccioLauncher.css", type: "css" },
+                { name: "AccioLauncher.js.téléchargement", type: "js" },
+                { name: "Fy23ICBUSearchBar.css", type: "css" },
+                { name: "Fy23ICBUSearchBar.js.téléchargement", type: "js" },
+                { name: "… (images produits Alibaba ×50+)", type: "image", desc: "Images produits Alibaba et vignettes catalogue" },
+              ]
+            },
+            { name: "Shaanxi Yateli Technology Limited.html", type: "html", desc: "Snapshot de la page Alibaba — Shaanxi Yateli" },
+            {
+              name: "Shaanxi Yateli Technology Limited_files",
+              type: "dir",
+              desc: "Ressources de la page Alibaba (images, CSS, JS)",
+              children: [
+                { name: "… (CSS, JS, images ×50+)", type: "text", desc: "Ressources statiques Alibaba" },
+              ]
+            },
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+// ─── Color mapping ─────────────────────────────────────────────────────────
+const COLOR = {
+  root:    "#E94560",
+  dir:     "#F5A623",
+  html:    "#2980B9",
+  md:      "#27AE60",
+  pdf:     "#C0392B",
+  image:   "#8E44AD",
+  archive: "#1ABC9C",
+  text:    "#7F8C8D",
+  css:     "#E67E22",
+  js:      "#E67E22",
+  default: "#95A5A6",
+};
+
+function nodeColor(d) { return COLOR[d.data.type] || COLOR.default; }
+
+function typeLabel(t) {
+  const map = { root:"Racine", dir:"Dossier", html:"HTML", md:"Markdown",
+                pdf:"PDF", image:"Image", archive:"Archive", text:"Texte",
+                css:"CSS", js:"JavaScript" };
+  return map[t] || t;
+}
+
+// ─── Layout dimensions ─────────────────────────────────────────────────────
+const container = document.getElementById("graph");
+let W = container.clientWidth;
+let H = container.clientHeight;
+const margin = { top: 30, right: 160, bottom: 30, left: 80 };
+
+const svg = d3.select("#graph").append("svg")
+  .attr("width", "100%")
+  .attr("height", "100%");
+
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+const zoom = d3.zoom()
+  .scaleExtent([0.2, 3])
+  .on("zoom", e => g.attr("transform", e.transform));
+
+svg.call(zoom);
+
+// ─── Tree setup ────────────────────────────────────────────────────────────
+const treeLayout = d3.tree().nodeSize([28, 230]);
+
+let root = d3.hierarchy(treeData);
+root.x0 = H / 2;
+root.y0 = 0;
+
+// Collapse nodes deeper than depth 2 initially
+root.descendants().forEach(d => {
+  if (d.depth >= 2 && d.children) {
+    d._children = d.children;
+    d.children = null;
+  }
+});
+
+update(root);
+
+// ─── Update function ────────────────────────────────────────────────────────
+function update(source) {
+  const duration = 350;
+  const nodes = root.descendants();
+  const links = root.links();
+
+  treeLayout(root);
+
+  // ── Nodes ──
+  const node = g.selectAll("g.node")
+    .data(nodes, d => d.id || (d.id = Math.random().toString(36).slice(2)));
+
+  const nodeEnter = node.enter().append("g")
+    .attr("class", "node")
+    .attr("transform", `translate(${source.y0},${source.x0})`)
+    .on("click", (event, d) => { toggle(d); update(d); })
+    .on("mouseover", showTooltip)
+    .on("mousemove", moveTooltip)
+    .on("mouseout", hideTooltip);
+
+  const isLeaf = d => !d.children && !d._children;
+
+  nodeEnter.append("circle")
+    .attr("r", 0)
+    .attr("fill", nodeColor)
+    .attr("stroke", d => d3.color(nodeColor(d)).brighter(0.6))
+    .attr("stroke-width", 2);
+
+  nodeEnter.append("text")
+    .attr("dy", "0.31em")
+    .attr("x", d => isLeaf(d) ? 10 : -10)
+    .attr("text-anchor", d => isLeaf(d) ? "start" : "end")
+    .text(d => {
+      const max = 30;
+      return d.data.name.length > max ? d.data.name.slice(0, max) + "…" : d.data.name;
+    })
+    .style("fill-opacity", 0);
+
+  const nodeUpdate = nodeEnter.merge(node);
+
+  nodeUpdate.transition().duration(duration)
+    .attr("transform", d => `translate(${d.y},${d.x})`);
+
+  nodeUpdate.select("circle")
+    .transition().duration(duration)
+    .attr("r", d => d.data.type === "root" ? 10 : d._children ? 8 : isLeaf(d) ? 5 : 7)
+    .attr("fill", nodeColor)
+    .attr("stroke-dasharray", d => d._children ? "4,2" : "none");
+
+  nodeUpdate.select("text")
+    .transition().duration(duration)
+    .style("fill-opacity", 1)
+    .attr("x", d => isLeaf(d) ? 10 : -10)
+    .attr("text-anchor", d => isLeaf(d) ? "start" : "end");
+
+  const nodeExit = node.exit().transition().duration(duration)
+    .attr("transform", `translate(${source.y},${source.x})`)
+    .remove();
+
+  nodeExit.select("circle").attr("r", 0);
+  nodeExit.select("text").style("fill-opacity", 0);
+
+  // ── Links ──
+  const link = g.selectAll("path.link")
+    .data(links, d => d.target.id);
+
+  const linkEnter = link.enter().insert("path", "g")
+    .attr("class", "link")
+    .attr("d", () => {
+      const o = { x: source.x0, y: source.y0 };
+      return diagonal({ source: o, target: o });
+    });
+
+  linkEnter.merge(link)
+    .transition().duration(duration)
+    .attr("d", diagonal);
+
+  link.exit().transition().duration(duration)
+    .attr("d", () => {
+      const o = { x: source.x, y: source.y };
+      return diagonal({ source: o, target: o });
+    })
+    .remove();
+
+  nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
+}
+
+function diagonal(d) {
+  return `M ${d.source.y} ${d.source.x}
+          C ${(d.source.y + d.target.y) / 2} ${d.source.x},
+            ${(d.source.y + d.target.y) / 2} ${d.target.x},
+            ${d.target.y} ${d.target.x}`;
+}
+
+function toggle(d) {
+  if (d.children) {
+    d._children = d.children;
+    d.children = null;
+  } else {
+    d.children = d._children;
+    d._children = null;
+  }
+}
+
+// ─── Tooltip ───────────────────────────────────────────────────────────────
+const tooltip = document.getElementById("tooltip");
+
+function showTooltip(event, d) {
+  const childCount = (d.children || d._children || []).length;
+  let html = `<strong>${d.data.name}</strong>`;
+  html += `<div class="tt-type">Type : ${typeLabel(d.data.type)}</div>`;
+  if (d.data.desc) html += `<div style="margin-top:4px;color:#BDC3C7;font-size:11px">${d.data.desc}</div>`;
+  if (childCount) html += `<div class="tt-count">${childCount} élément(s) enfant${childCount > 1 ? 's' : ''}</div>`;
+  if (d._children) html += `<div style="color:var(--orange);font-size:11px">▶ Cliquer pour déplier</div>`;
+  if (d.children && d.depth > 0) html += `<div style="color:var(--orange);font-size:11px">▼ Cliquer pour replier</div>`;
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = "1";
+  moveTooltip(event);
+}
+
+function moveTooltip(event) {
+  const cx = container.getBoundingClientRect();
+  let x = event.clientX - cx.left + 14;
+  let y = event.clientY - cx.top - 10;
+  if (x + 290 > cx.width) x -= 300;
+  tooltip.style.left = x + "px";
+  tooltip.style.top  = y + "px";
+}
+
+function hideTooltip() {
+  tooltip.style.opacity = "0";
+}
+
+// ─── Controls ──────────────────────────────────────────────────────────────
+function expandAll() {
+  root.descendants().forEach(d => {
+    if (d._children) { d.children = d._children; d._children = null; }
+  });
+  update(root);
+  setTimeout(fitView, 400);
+}
+
+function collapseAll() {
+  root.descendants().forEach(d => {
+    if (d.depth > 0 && d.children) { d._children = d.children; d.children = null; }
+  });
+  update(root);
+  setTimeout(fitView, 400);
+}
+
+function fitView() {
+  const bounds = g.node().getBBox();
+  const cW = container.clientWidth;
+  const cH = container.clientHeight;
+  const scale = Math.min(0.95 * cW / bounds.width, 0.95 * cH / bounds.height, 1.5);
+  const tx = (cW - scale * bounds.width) / 2 - scale * bounds.x;
+  const ty = (cH - scale * bounds.height) / 2 - scale * bounds.y;
+  svg.transition().duration(500).call(
+    zoom.transform,
+    d3.zoomIdentity.translate(tx, ty).scale(scale)
+  );
+}
+
+function resetZoom() {
+  svg.transition().duration(400).call(
+    zoom.transform,
+    d3.zoomIdentity.translate(margin.left, H / 2)
+  );
+}
+
+// Initial centering
+setTimeout(() => {
+  const bounds = g.node().getBBox();
+  const cW = container.clientWidth;
+  const cH = container.clientHeight;
+  const scale = Math.min(0.9 * cW / bounds.width, 0.9 * cH / bounds.height, 1);
+  const tx = (cW - scale * bounds.width) / 2 - scale * bounds.x;
+  const ty = (cH - scale * bounds.height) / 2 - scale * bounds.y;
+  svg.call(
+    zoom.transform,
+    d3.zoomIdentity.translate(tx, ty).scale(scale)
+  );
+}, 50);
+</script>
+</body>
+</html>
