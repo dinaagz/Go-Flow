@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-:root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
+:root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--bleu-t:#006ACC;--vert-t:#007A47;--orange-t:#C2500A;--rouge-t:#D6103A;--ok:#065F46;--ok-bg:#d1fae5;--ok-brd:#a7f3d0;--err:#B91C1C;--err-bg:#fee2e2;--err-bg2:#fecaca;--err-solid:#dc2626;--warn:#856404;--warn-bg:#fff3cd;--warn-brd:#ffc107;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);min-height:100vh}
 .grad-bar{height:4px;background:var(--grad)}
@@ -18,15 +18,15 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .hdr-right{display:flex;gap:8px;align-items:center}
 .tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto;position:sticky;top:64px;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;font-family:'Poppins',sans-serif;white-space:nowrap;transition:.2s}
-.tab:hover{color:var(--bleu)}
+.tab:hover{color:var(--bleu-t)}
 .tab.active{color:var(--nuit);border-bottom-color:var(--bleu)}
 .wrap{padding:20px 24px;max-width:1400px;margin:0 auto}
 .btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
-.btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#007acc}
+.btn-primary{background:var(--bleu-t);color:#fff}.btn-primary:hover{background:#005CB3}
 .btn-sec{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-sec:hover{background:var(--gris)}
-.btn-danger{background:#fee2e2;color:#dc2626}.btn-danger:hover{background:#fecaca}
-.btn-success{background:#d1fae5;color:#059669}
-.btn-grad{background:var(--grad);color:#fff;font-weight:600}
+.btn-danger{background:var(--err-bg);color:var(--err)}.btn-danger:hover{background:var(--err-bg2)}
+.btn-success{background:var(--ok-bg);color:var(--ok)}
+.btn-grad{background:linear-gradient(var(--nuit),var(--nuit)) padding-box,var(--grad) border-box;border:2px solid transparent;color:#fff;font-weight:600}
 .btn-sm{padding:6px 10px;font-size:12px;border-radius:6px}
 .toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
 .search{flex:1;min-width:180px;position:relative}
@@ -51,7 +51,7 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .card-img img:hover{transform:scale(1.04)}
 .card-img-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
 .badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;backdrop-filter:blur(4px)}
-.b-yateli{background:rgba(0,153,255,.85)}.b-oman{background:rgba(119,51,255,.85)}.b-other{background:rgba(255,102,0,.85)}
+.b-yateli{background:rgba(0,106,204,.92)}.b-oman{background:rgba(99,32,230,.92)}.b-other{background:rgba(194,80,10,.92)}
 .card-body{padding:14px}
 .card-ref{font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:3px}
 .card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;line-height:1.3}
@@ -59,7 +59,7 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .card-prices{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:3px}
 .pr{display:flex;justify-content:space-between;align-items:center;font-size:11px}
 .pr-lbl{color:var(--muted)}.pr-val{font-weight:600}
-.pr-ttc{font-size:13px;color:var(--bleu);font-weight:700}
+.pr-ttc{font-size:13px;color:var(--bleu-t);font-weight:700}
 .card-acts{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -91,9 +91,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumb{position:relative;width:68px;height:68px}
 .thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
-.thumb button{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.thumb button{position:absolute;top:-5px;right:-5px;background:var(--err-solid);color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
 .sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.cnt-badge{background:var(--bleu);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
+.cnt-badge{background:var(--bleu-t);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
 .sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
 .sim-form{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)}
@@ -107,7 +107,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .prev-icon img{width:100%;height:100%;object-fit:cover}
 .trans-sel{display:flex;gap:8px}
 .trans-btn{flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
-.trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 .toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:300;transform:translateY(100px);opacity:0;transition:.3s;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;gap:9px}
 .toast::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--toast-dot,var(--vert));flex-shrink:0}
 .toast.show{transform:translateY(0);opacity:1}
@@ -121,9 +121,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .four-card-hdr{display:flex;gap:12px;align-items:center;margin-bottom:10px}
 .four-info{flex:1;min-width:0}
 .info-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:3px}
-.info-row a{color:var(--bleu);text-decoration:none}
-.devis-btn{display:inline-flex;align-items:center;gap:4px;background:#fff3cd;color:#856404;border:1px solid #ffc107;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.2s}
-.devis-btn:hover{background:#ffc107;color:#fff}
+.info-row a{color:var(--bleu-t);text-decoration:none}
+.devis-btn{display:inline-flex;align-items:center;gap:4px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.2s}
+.devis-btn:hover{background:var(--warn-brd);color:var(--nuit)}
 /* Import Alibaba box */
 .ali-import-box{background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-bottom:16px}
 /* PRINT */
@@ -148,7 +148,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .comp-row input{flex:1}
 /* Grouped view */
 .grp-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;backdrop-filter:blur(4px);cursor:pointer;transition:.2s}
-.grp-count-badge:hover{background:var(--bleu)}
+.grp-count-badge:hover{background:var(--bleu-t)}
 .alt-panel{overflow:hidden;max-height:0;transition:max-height .35s ease}
 .alt-panel.open{max-height:800px}
 .alt-panel-inner{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
@@ -158,16 +158,16 @@ textarea.fc{resize:vertical;min-height:70px}
 .alt-card-info{flex:1;min-width:0}
 .alt-card-nom{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .alt-card-prix{font-size:11px;color:var(--muted)}
-.alt-promote-btn{padding:4px 10px;border:1px solid var(--bleu);border-radius:6px;background:#fff;color:var(--bleu);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:.2s}
-.alt-promote-btn:hover{background:var(--bleu);color:#fff}
-.winner-tag{font-size:9px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.5px}
+.alt-promote-btn{padding:4px 10px;border:1px solid var(--bleu-t);border-radius:6px;background:#fff;color:var(--bleu-t);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:.2s}
+.alt-promote-btn:hover{background:var(--bleu-t);color:#fff}
+.winner-tag{font-size:9px;font-weight:700;color:var(--vert-t);text-transform:uppercase;letter-spacing:.5px}
 /* Table accordion rows */
 .tbl-alt-row{background:#f8f8fc}
 .tbl-alt-row td{font-size:11px;padding:6px 12px!important}
 .expand-cell{cursor:pointer;user-select:none}
 /* Grouped toolbar */
 .grp-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
-.grp-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.grp-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 /* Column picker */
 .col-picker-wrap{position:relative}
 .col-picker-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap}
@@ -184,12 +184,12 @@ textarea.fc{resize:vertical;min-height:70px}
 .hdr-cart{position:relative;display:inline-flex}
 .hdr-cart-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;transition:.2s}
 .hdr-cart-btn:hover{background:rgba(255,255,255,.2)}
-.hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
+.hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge-t);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
 .strat-btn{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;text-align:center;transition:.2s;line-height:1.5}
 .strat-btn:hover{border-color:var(--bleu)}
-.strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 .strat-btn small{display:block;font-weight:400;font-size:10px;color:var(--muted);margin-top:2px}
-.strat-btn.active small{color:#5ab4e8}
+.strat-btn.active small{color:var(--bleu-t)}
 .devis-section{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px}
 .devis-section-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px;color:var(--nuit)}
 .cart-item-grid{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);border:1px solid var(--border);transition:.2s}
@@ -198,8 +198,8 @@ textarea.fc{resize:vertical;min-height:70px}
 .cart-qty-ctrl button{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:.15s}
 .cart-qty-ctrl button:hover{background:var(--bleu);color:#fff;border-color:var(--bleu)}
 .cart-qty-ctrl input{width:44px;text-align:center;padding:3px 4px;border:1px solid var(--border);border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;outline:none}
-.cart-price-tag{font-size:14px;font-weight:700;color:var(--bleu)}
-.btn-in-cart{background:#d1fae5!important;color:#059669!important;border:1px solid #a7f3d0!important}
+.cart-price-tag{font-size:14px;font-weight:700;color:var(--bleu-t)}
+.btn-in-cart{background:var(--ok-bg)!important;color:var(--ok)!important;border:1px solid var(--ok-brd)!important}
 .devis-total-bar{background:var(--nuit);color:#fff;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-around;align-items:center;margin-top:16px;flex-wrap:wrap;gap:12px}
 .devis-total-item{text-align:center;min-width:100px}
 .devis-total-item .val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px}
@@ -495,11 +495,11 @@ textarea.fc{resize:vertical;min-height:70px}
           <div class="col-picker-drop" id="dv-cp-drop" style="min-width:300px">
             <div class="cp-title">📦 Informations produit</div>
             <div class="cp-grid" id="dv-cp-prod"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--orange)">🚢 Infos transitaire</div>
+            <div class="cp-title" style="margin-top:10px;color:var(--orange-t)">🚢 Infos transitaire</div>
             <div class="cp-grid" id="dv-cp-trans"></div>
             <div class="cp-title" style="margin-top:10px;color:var(--violet)">💱 Devise source</div>
             <div class="cp-grid" id="dv-cp-dev"></div>
-            <div class="cp-title" style="margin-top:10px;color:#059669">🧮 Calcul client</div>
+            <div class="cp-title" style="margin-top:10px;color:var(--ok)">🧮 Calcul client</div>
             <div class="cp-grid" id="dv-cp-calc"></div>
           </div>
         </div>
@@ -1012,7 +1012,7 @@ function prodGroupCard(g){
   const escapedKey=key.replace(/'/g,"\\'");
   const priceRows=[
     cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
     cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
     cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
   ].join('');
@@ -1084,11 +1084,11 @@ function prodGroupTable(groups){
       ${C.achat ?`<td>${N(c.pa)}</td>`:''}
       ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
       ${C.fret  ?`<td>${N(c.fret)} ${w.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
+      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
       ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
@@ -1112,10 +1112,10 @@ function prodGroupTable(groups){
         ${C.achat ?`<td>${N(cp.pa)}</td>`:''}
         ${C.prach ?`<td>${cp.prach?N(cp.prach):'—'}</td>`:''}
         ${C.fret  ?`<td>${N(cp.fret)}</td>`:''}
-        ${C.marge ?`<td style="color:var(--vert)">${N(cp.marge_xof)}</td>`:''}
+        ${C.marge ?`<td style="color:var(--vert-t)">${N(cp.marge_xof)}</td>`:''}
         ${C.vente ?`<td>${N(cp.pnh)}</td>`:''}
         ${C.total ?`<td>${N(cp.prix_ht)}</td>`:''}
-        ${C.ttc   ?`<td style="color:var(--bleu)">${N(cp.ttc)}</td>`:''}
+        ${C.ttc   ?`<td style="color:var(--bleu-t)">${N(cp.ttc)}</td>`:''}
         ${C.marche?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
         <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?'✓':'📋'}</button></div></td>
       </tr>`;
@@ -1161,11 +1161,11 @@ function prodCard(p){
     cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
     cols.prach&&c.prach?`<div class="pr"><span class="pr-lbl">Préacheminement</span><span class="pr-val">${N(c.prach)}</span></div>`:'',
     cols.fret  ?`<div class="pr"><span class="pr-lbl">Fret/Douane</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
     cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
     cols.total ?`<div class="pr"><span class="pr-lbl">Prix total HT</span><span class="pr-val">${N(c.prix_ht)}</span></div>`:'',
     cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
-    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
+    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert-t);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
   ].join('');
   return`<div class="card">
   <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
@@ -1216,11 +1216,11 @@ function prodTable(list){
       ${C.achat ?`<td>${N(c.pa)}</td>`:''}
       ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
       ${C.fret  ?`<td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
+      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
       ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
@@ -1308,10 +1308,10 @@ function calcPrev(){
     <div>EXW (XOF): <b>${N(c.pa)}</b></div>
     ${c.prach?`<div>Préacheminement: <b>${N(c.prach)}</b></div>`:''}
     <div>Fret/Douane: <b>${N(c.fret)}</b></div>
-    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert)">${N(c.marge_xof)}</b></div>
+    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.marge_xof)}</b></div>
     <div>Vente HT: <b>${N(c.pnh)}</b></div>
     <div>Prix total HT: <b>${N(c.prix_ht)}</b></div>
-    <div>TTC: <b style="color:var(--bleu)">${N(c.ttc)}</b></div>`;
+    <div>TTC: <b style="color:var(--bleu-t)">${N(c.ttc)}</b></div>`;
 }
 
 function saveProd(){
@@ -1415,7 +1415,7 @@ function renderFour(){
         ${f.wc?`<div class="info-row">💬 WeChat : ${f.wc}</div>`:''}
         ${f.dom?`<div class="info-row" style="margin-top:4px">🏭 ${f.dom}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
+          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'#fef3c7'};color:${f.ali==='Vérifié'?'var(--ok)':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
           ${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
           ${f.devis?`<a href="${f.devis}" target="_blank" class="devis-btn">📄 Devis PDF</a>`:''}
         </div>
@@ -1794,7 +1794,7 @@ async function onDevisDevChange(){
   inp.value=t.toFixed(4);devisFX.taux=t;
   if(rates){
     const hm=new Date(fxCache.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    msg.innerHTML=`<span style="color:var(--vert)">✓ Taux marché (${hm}) — modifiable librement</span>`;
+    msg.innerHTML=`<span style="color:var(--vert-t)">✓ Taux marché (${hm}) — modifiable librement</span>`;
   }else{
     msg.innerHTML=`<span style="color:#b45309">⚠️ API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
   }
@@ -1803,7 +1803,7 @@ async function onDevisDevChange(){
 
 function onDevisTauxChange(){
   const v=parseFloat(document.getElementById('dv-taux').value);
-  if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu)">✏️ Taux saisi manuellement</span>`;renderDevisCart();}
+  if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu-t)">✏️ Taux saisi manuellement</span>`;renderDevisCart();}
 }
 
 /* ---- CALCUL DEVIS (logique CLIENT — séparée de calc() interne) ---- */
@@ -2026,7 +2026,7 @@ function buildDevisTable(){
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.prixClientHT)}</td>`:''}
       ${SH.douane?`<td style="font-size:11px;color:#b45309">${N(c.douane)}</td>`:''}
       ${SH.tva?`<td style="font-size:11px;color:#6b7280">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
       <td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
