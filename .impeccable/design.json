@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-03T00:00:00Z",
+  "title": "Design System: Go.Flow",
+  "extensions": {
+    "colorMeta": {
+      "bleu-canal": { "role": "primary", "displayName": "Bleu Canal", "canonical": "#006ACC", "tonalRamp": ["oklch(0.20 0.09 245)", "oklch(0.30 0.12 245)", "oklch(0.40 0.14 245)", "oklch(0.51 0.15 245)", "oklch(0.62 0.15 245)", "oklch(0.74 0.11 245)", "oklch(0.86 0.06 245)", "oklch(0.95 0.02 245)"] },
+      "bleu": { "role": "primary", "displayName": "Bleu de marque (décoratif)", "canonical": "#0099FF", "tonalRamp": ["oklch(0.20 0.09 245)", "oklch(0.31 0.13 245)", "oklch(0.43 0.16 245)", "oklch(0.55 0.18 245)", "oklch(0.66 0.19 245)", "oklch(0.77 0.13 245)", "oklch(0.88 0.07 245)", "oklch(0.96 0.02 245)"] },
+      "vert-marge": { "role": "secondary", "displayName": "Vert Marge", "canonical": "#007A47", "tonalRamp": ["oklch(0.18 0.06 158)", "oklch(0.28 0.09 158)", "oklch(0.38 0.11 158)", "oklch(0.49 0.12 158)", "oklch(0.60 0.13 158)", "oklch(0.72 0.13 158)", "oklch(0.85 0.08 158)", "oklch(0.95 0.03 158)"] },
+      "jaune": { "role": "secondary", "displayName": "Or Total (fonds nuit uniquement)", "canonical": "#FFD700", "tonalRamp": ["oklch(0.25 0.06 95)", "oklch(0.37 0.09 95)", "oklch(0.49 0.12 95)", "oklch(0.62 0.15 95)", "oklch(0.75 0.17 95)", "oklch(0.87 0.18 95)", "oklch(0.93 0.12 95)", "oklch(0.97 0.05 95)"] },
+      "rouge-alerte": { "role": "tertiary", "displayName": "Rouge Alerte", "canonical": "#D6103A", "tonalRamp": ["oklch(0.20 0.10 18)", "oklch(0.31 0.15 18)", "oklch(0.42 0.19 18)", "oklch(0.53 0.21 18)", "oklch(0.64 0.20 18)", "oklch(0.76 0.13 18)", "oklch(0.88 0.07 18)", "oklch(0.96 0.02 18)"] },
+      "orange-terre": { "role": "tertiary", "displayName": "Orange Terre", "canonical": "#C2500A", "tonalRamp": ["oklch(0.20 0.07 48)", "oklch(0.31 0.11 48)", "oklch(0.42 0.14 48)", "oklch(0.53 0.16 48)", "oklch(0.64 0.17 48)", "oklch(0.76 0.13 48)", "oklch(0.88 0.07 48)", "oklch(0.96 0.02 48)"] },
+      "violet": { "role": "tertiary", "displayName": "Violet Oman", "canonical": "#7733FF", "tonalRamp": ["oklch(0.18 0.12 290)", "oklch(0.28 0.18 290)", "oklch(0.38 0.23 290)", "oklch(0.48 0.26 290)", "oklch(0.58 0.24 290)", "oklch(0.70 0.17 290)", "oklch(0.84 0.09 290)", "oklch(0.95 0.03 290)"] },
+      "nuit-lome": { "role": "neutral", "displayName": "Nuit Lomé", "canonical": "#1A1A2E", "tonalRamp": ["oklch(0.16 0.03 285)", "oklch(0.24 0.03 285)", "oklch(0.33 0.03 285)", "oklch(0.44 0.02 285)", "oklch(0.56 0.02 285)", "oklch(0.70 0.01 285)", "oklch(0.85 0.008 285)", "oklch(0.96 0.004 285)"] },
+      "gris-atelier": { "role": "neutral", "displayName": "Gris Atelier", "canonical": "#f5f5f7", "tonalRamp": ["oklch(0.24 0.01 285)", "oklch(0.36 0.008 285)", "oklch(0.48 0.006 285)", "oklch(0.60 0.005 285)", "oklch(0.72 0.004 285)", "oklch(0.84 0.003 285)", "oklch(0.92 0.002 285)", "oklch(0.97 0.002 285)"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Logo Go.Flow et en-tête d'impression uniquement." },
+      "headline": { "displayName": "Headline", "purpose": "Titres de sections et de panneaux (h2 / sec-hdr)." },
+      "title": { "displayName": "Title", "purpose": "Titres de cartes produit, modales, valeurs de stats." },
+      "body": { "displayName": "Body", "purpose": "Formulaires, boutons, tableaux (12px en cellules denses)." },
+      "label": { "displayName": "Label", "purpose": "Libellés de champs en majuscules espacées — seul emploi d'uppercase du système." }
+    },
+    "shadows": [
+      { "name": "repos", "value": "0 1px 3px rgba(0,0,0,0.07)", "purpose": "Cartes et surfaces posées au repos." },
+      { "name": "survol", "value": "0 4px 16px rgba(0,0,0,0.11)", "purpose": "Cartes interactives au survol, avec translateY(-2px)." },
+      { "name": "flottant", "value": "0 8px 24px rgba(0,0,0,0.12)", "purpose": "Dropdowns et sélecteurs de colonnes." },
+      { "name": "modal", "value": "0 20px 60px rgba(0,0,0,0.3)", "purpose": "Boîtes de dialogue sur voile rgba(0,0,0,.5)." }
+    ],
+    "motion": [
+      { "name": "transition-standard", "value": "0.2s", "purpose": "Transition par défaut des contrôles (boutons, onglets, cartes)." },
+      { "name": "reveal-accordeon", "value": "grid-template-rows 0.3s cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Dépliage du panneau alternatives fournisseurs, sans animer de propriété de layout brute." },
+      { "name": "toast", "value": "0.3s (translateY + opacity)", "purpose": "Entrée/sortie du toast de statut." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "520px" },
+      { "name": "compact", "value": "640px" },
+      { "name": "tablet", "value": "860px" },
+      { "name": "wide", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Bouton primaire",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Action principale d'un écran ou d'une modale (Enregistrer, + Produit).",
+      "html": "<button class=\"ds-btn-primary\">💾 Enregistrer</button>",
+      "css": ".ds-btn-primary { background: #006ACC; color: #fff; padding: 9px 16px; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s; } .ds-btn-primary:hover { background: #005CB3; } .ds-btn-primary:focus-visible { outline: 2px solid #0099FF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Bouton secondaire",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Actions de second rang (Annuler, Fermer, exports).",
+      "html": "<button class=\"ds-btn-sec\">Annuler</button>",
+      "css": ".ds-btn-sec { background: #fff; color: #1a1a2e; padding: 9px 16px; border: 1px solid #e0e0e8; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; } .ds-btn-sec:hover { background: #f5f5f7; } .ds-btn-sec:focus-visible { outline: 2px solid #0099FF; outline-offset: 2px; }"
+    },
+    {
+      "name": "CTA signature (spectre)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA de livraison (Générer le PDF) : surface nuit encadrée du spectre Go complet.",
+      "html": "<button class=\"ds-btn-grad\">📄 Générer le PDF</button>",
+      "css": ".ds-btn-grad { background: linear-gradient(#1A1A2E, #1A1A2E) padding-box, linear-gradient(135deg, #FF2244, #FF6600, #FFD700, #00CC77, #0099FF, #7733FF) border-box; border: 2px solid transparent; color: #fff; padding: 12px 28px; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; } .ds-btn-grad:hover { transform: translateY(-1px); } .ds-btn-grad:focus-visible { outline: 2px solid #0099FF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Champ de formulaire",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Champ standard avec son libellé majuscule associé.",
+      "html": "<div class=\"ds-fgrp\"><label class=\"ds-flbl\" for=\"ds-in\">Prix EXW *</label><input class=\"ds-fc\" id=\"ds-in\" type=\"number\" placeholder=\"2999\"></div>",
+      "css": ".ds-fgrp { display: flex; flex-direction: column; gap: 5px; font-family: 'Poppins', sans-serif; } .ds-flbl { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; } .ds-fc { padding: 9px 12px; border: 1px solid #e0e0e8; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; } .ds-fc:focus { border-color: #0099FF; } .ds-fc:focus-visible { outline: 2px solid #0099FF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Onglet de navigation",
+      "kind": "nav",
+      "refersTo": "button-secondary",
+      "description": "Onglet principal : sourdine au repos, encre + soulignement bleu à l'actif.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">📦 Catalogue</button><button class=\"ds-tab\">🏭 Fournisseurs</button><button class=\"ds-tab\">🧮 Simulation</button></nav>",
+      "css": ".ds-tabs { display: flex; background: #fff; border-bottom: 1px solid #e0e0e8; font-family: 'Poppins', sans-serif; } .ds-tab { padding: 14px 22px; font-size: 13px; font-weight: 500; color: #6b7280; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; transition: 0.2s; font-family: 'Poppins', sans-serif; } .ds-tab:hover { color: #006ACC; } .ds-tab-active { color: #1a1a2e; border-bottom-color: #0099FF; } .ds-tab:focus-visible { outline: 2px solid #0099FF; outline-offset: -2px; }"
+    },
+    {
+      "name": "Badge fournisseur",
+      "kind": "chip",
+      "refersTo": "badge-fournisseur",
+      "description": "Pastille d'origine fournisseur posée sur la photo produit.",
+      "html": "<span class=\"ds-badge ds-badge-yateli\">Yateli</span> <span class=\"ds-badge ds-badge-oman\">Oman</span> <span class=\"ds-badge ds-badge-autre\">Autre</span>",
+      "css": ".ds-badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; color: #fff; font-family: 'Poppins', sans-serif; backdrop-filter: blur(4px); } .ds-badge-yateli { background: rgba(0,106,204,0.92); } .ds-badge-oman { background: rgba(99,32,230,0.92); } .ds-badge-autre { background: rgba(194,80,10,0.92); }"
+    },
+    {
+      "name": "Carte produit (bloc prix)",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Le bloc de prix d'une carte catalogue : la hiérarchie chiffres-d'abord.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-ref\">HYD-001-001</div><div class=\"ds-card-title\">Hydrafacial 14-en-1</div><div class=\"ds-prices\"><div class=\"ds-pr\"><span class=\"ds-pr-lbl\">Achat EXW</span><span class=\"ds-pr-val\">284 905 XOF</span></div><div class=\"ds-pr\"><span class=\"ds-pr-lbl\">Marge</span><span class=\"ds-pr-val ds-pr-marge\">99 717 XOF (35%)</span></div><div class=\"ds-pr\"><span class=\"ds-pr-ttc\">Prix TTC</span><span class=\"ds-pr-val ds-pr-ttc\">519 921 XOF</span></div></div></div>",
+      "css": ".ds-card { background: #fff; border: 1px solid #e0e0e8; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); transition: 0.2s; font-family: 'Poppins', sans-serif; max-width: 280px; } .ds-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.11); transform: translateY(-2px); } .ds-card-ref { font-size: 10px; color: #6b7280; font-family: monospace; margin-bottom: 3px; } .ds-card-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 10px; line-height: 1.3; color: #1a1a2e; } .ds-prices { border-top: 1px solid #e0e0e8; padding-top: 10px; display: flex; flex-direction: column; gap: 3px; } .ds-pr { display: flex; justify-content: space-between; align-items: center; font-size: 11px; } .ds-pr-lbl { color: #6b7280; } .ds-pr-val { font-weight: 600; color: #1a1a2e; } .ds-pr-marge { color: #007A47; } .ds-pr-ttc { font-size: 13px; color: #006ACC; font-weight: 700; }"
+    },
+    {
+      "name": "Toast de statut",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Notification bas-droite : pastille d'état, surface nuit, live region.",
+      "html": "<div class=\"ds-toast\" role=\"status\">Paramètres enregistrés ✓</div>",
+      "css": ".ds-toast { display: inline-flex; align-items: center; gap: 9px; background: #1A1A2E; color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-family: 'Poppins', sans-serif; border: 1px solid rgba(255,255,255,0.18); } .ds-toast::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #00CC77; flex-shrink: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le Comptoir Lomé–Shenzhen",
+    "overview": "Go.Flow est un comptoir de négoce moderne : un outil de travail dense et sûr de lui, où l'on compare, calcule et tranche. La personnalité vient d'en haut — la bande spectrale six couleurs, le logo Montserrat 900, l'en-tête nuit — puis l'interface se tait et laisse parler les chiffres sur des surfaces blanches posées sur un gris d'atelier. Le système rejette le gabarit d'admin générique et le SaaS délavé : aucun texte porteur d'information sous 4,5:1, aucune décoration devant une donnée. Le spectre Go est une signature, pas un papier peint.",
+    "keyCharacteristics": [
+      "Console produit dense, claire, à onglets — light theme sur gris d'atelier",
+      "Identité portée par le spectre six couleurs et Montserrat 900, dosée par touches",
+      "Chaque teinte de marque a une jumelle « text-safe » pour le texte sur fond clair",
+      "Le vert signifie marge/gagnant, le bleu signifie action/prix — jamais l'inverse",
+      "L'impression (devis PDF) est une surface de premier rang avec ses propres styles"
+    ],
+    "rules": [
+      { "name": "La Règle du Spectre", "body": "Le dégradé six couleurs apparaît uniquement en intégralité et dans l'ordre rouge → violet (bande de marque, bordure du CTA, logo). Jamais tronqué, jamais inversé, jamais en fond de section.", "section": "colors" },
+      { "name": "La Règle de la Jumelle", "body": "Toute teinte de marque posée en texte sur fond clair passe par sa jumelle « -t » (#006ACC, #007A47, #C2500A, #D6103A). La version vive est décorative ou réservée aux fonds nuit. Test : si un chiffre est sous 4,5:1, c'est la mauvaise jumelle.", "section": "colors" },
+      { "name": "La Règle du Vert", "body": "Le vert veut dire marge, profit, gagnant — rien d'autre. Un vert décoratif est interdit.", "section": "colors" },
+      { "name": "La Règle du Montant", "body": "Un montant important est toujours en Montserrat 700+ et jamais plus petit que le texte qui le décrit. Prix TTC en Bleu Canal, marge en Vert Marge.", "section": "typography" },
+      { "name": "La Règle de l'Échelle Z", "body": "Les z-index suivent l'échelle sémantique 10 < 99 < 100 < 150 < 200 < 300 < 400. Toute valeur hors échelle est interdite.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do passer tout texte coloré sur fond clair par les jumelles text-safe (#006ACC, #007A47, #C2500A, #D6103A) — 4,5:1 minimum, sans exception.",
+      "Do réserver le spectre complet aux trois emplois signés : bande 4px, bordure du CTA, logo.",
+      "Do garder les montants en Montserrat lourd, Prix TTC en Bleu Canal, marge en Vert Marge, totaux en Or sur nuit.",
+      "Do donner à chaque contrôle ses états (hover, focus visible, actif, désactivé) et ≥ 43px au tactile.",
+      "Do soigner l'impression : tout nouvel élément d'interface déclare son comportement @media print."
+    ],
+    "donts": [
+      "Don't ressembler au « gabarit d'admin générique Bootstrap/AdminLTE » ni au « SaaS délavé » nommés dans PRODUCT.md — pas de gris clair « élégant » sur les chiffres.",
+      "Don't poser de bande latérale colorée (border-left > 1px) sur cartes, alertes ou toasts — filet complet, fond teinté ou pastille à la place.",
+      "Don't utiliser de jaune ou de vert vif (#FFD700, #00CC77) en texte sur fond clair.",
+      "Don't écrire un hexadécimal d'état inline — les paires --ok/--err/--warn + fonds existent pour ça.",
+      "Don't animer une propriété de layout (max-height, width) ni oublier l'alternative prefers-reduced-motion.",
+      "Don't sortir de l'échelle z sémantique ou inventer un 999."
+    ]
+  }
+}
