@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Go.Flow — Console Import Go Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -187,6 +187,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge-t);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
 .strat-btn{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;text-align:center;transition:.2s;line-height:1.5}
 .strat-btn:hover{border-color:var(--bleu)}
+.strat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
 .strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 .strat-btn small{display:block;font-weight:400;font-size:10px;color:var(--muted);margin-top:2px}
 .strat-btn.active small{color:var(--bleu-t)}
@@ -217,6 +218,35 @@ textarea.fc{resize:vertical;min-height:70px}
 .dv-table tbody tr:nth-child(even) td{background:#f9f9f9}
 .dv-table tfoot td{border-top:2px solid #1A1A2E}
 .dv-cgs{font-size:9px;color:#999;border-top:1px solid #eee;padding-top:10px;margin-top:16px;line-height:1.6}
+/* ===== ADAPTATION MOBILE / TACTILE ===== */
+@media(max-width:640px){
+  .hdr{padding:0 14px}
+  .hdr-lbl{display:none}
+  .wrap{padding:16px 14px}
+  .tabs{padding:0 10px}
+  .tab{padding:14px 14px}
+  .stats{gap:10px}
+  .stat{min-width:calc(50% - 5px)}
+  .devis-total-bar{justify-content:flex-start}
+}
+/* Cibles tactiles ≥44px sans alourdir la densité souris */
+@media(pointer:coarse){
+  .btn{padding:14px 16px}
+  .btn-sm{padding:13px 15px;font-size:13px}
+  .view-btn{padding:13px 14px}
+  .modal-x{width:44px;height:44px}
+  .cart-qty-ctrl button{width:42px;height:42px}
+  .cart-qty-ctrl input{height:42px;width:52px}
+  .thumb button{width:28px;height:28px;font-size:13px}
+  .alt-promote-btn{padding:12px 14px}
+  .grp-count-badge{padding:9px 13px}
+  select.filt,.search input,.col-picker-btn,.grp-btn{padding:13px 14px}
+  .trans-btn,.strat-btn{padding:13px 12px}
+  .hdr-cart-btn{padding:12px 14px}
+  .cp-item{padding:11px 8px}
+  .cp-item input[type=checkbox]{width:20px;height:20px}
+}
+.toast{bottom:max(20px,env(safe-area-inset-bottom))}
 /* ===== ACCESSIBILITÉ ===== */
 :focus-visible{outline:2px solid var(--bleu);outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -252,11 +282,11 @@ textarea.fc{resize:vertical;min-height:70px}
     <div class="logo-sub">Go Group — Console Import</div>
   </div>
   <div class="hdr-right">
-    <button class="btn btn-sec btn-sm" onclick="toggleSettings()">⚙️ Paramètres</button>
-    <button class="btn btn-sec btn-sm" onclick="exportCSV()">📥 CSV</button>
-    <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ PDF</button>
+    <button class="btn btn-sec btn-sm" onclick="toggleSettings()" aria-label="Paramètres">⚙️ <span class="hdr-lbl">Paramètres</span></button>
+    <button class="btn btn-sec btn-sm" onclick="exportCSV()" aria-label="Exporter en CSV">📥 <span class="hdr-lbl">CSV</span></button>
+    <button class="btn btn-sec btn-sm" onclick="window.print()" aria-label="Imprimer en PDF">🖨️ <span class="hdr-lbl">PDF</span></button>
     <div class="hdr-cart">
-      <button class="hdr-cart-btn" onclick="tab('devis')">📋 Devis</button>
+      <button class="hdr-cart-btn" onclick="tab('devis')" aria-label="Devis">📋 <span class="hdr-lbl">Devis</span></button>
       <span class="hdr-cart-count" id="cart-count" style="display:none">0</span>
     </div>
   </div>
@@ -435,7 +465,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <!-- Stratégie de prix -->
   <div class="devis-section">
     <div class="devis-section-title">💰 Stratégie de prix pour ce devis</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+    <div class="strat-grid">
       <button class="strat-btn active" id="strat-marge" onclick="setStrategy('marge_fixe')">
         📊 Marge standard<small>Marge cible (par défaut)</small>
       </button>
