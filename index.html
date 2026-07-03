@@ -2,13 +2,13 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Go.Flow — Console Import Go Group</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
-:root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
+:root{--rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;--blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;--gris:#f5f5f7;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;--bleu-t:#006ACC;--vert-t:#007A47;--orange-t:#C2500A;--rouge-t:#D6103A;--ok:#065F46;--ok-bg:#d1fae5;--ok-brd:#a7f3d0;--err:#B91C1C;--err-bg:#fee2e2;--err-bg2:#fecaca;--err-solid:#dc2626;--warn:#856404;--warn-bg:#fff3cd;--warn-brd:#ffc107;--grad:linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);min-height:100vh}
 .grad-bar{height:4px;background:var(--grad)}
@@ -17,16 +17,16 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .logo-sub{color:rgba(255,255,255,.45);font-size:10px;letter-spacing:2px;text-transform:uppercase;-webkit-text-fill-color:rgba(255,255,255,.45)}
 .hdr-right{display:flex;gap:8px;align-items:center}
 .tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto;position:sticky;top:64px;z-index:99;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
-.tab:hover{color:var(--bleu)}
+.tab{padding:14px 22px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;font-family:'Poppins',sans-serif;white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--bleu-t)}
 .tab.active{color:var(--nuit);border-bottom-color:var(--bleu)}
 .wrap{padding:20px 24px;max-width:1400px;margin:0 auto}
 .btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:.2s;text-decoration:none}
-.btn-primary{background:var(--bleu);color:#fff}.btn-primary:hover{background:#007acc}
+.btn-primary{background:var(--bleu-t);color:#fff}.btn-primary:hover{background:#005CB3}
 .btn-sec{background:#fff;color:var(--text);border:1px solid var(--border)}.btn-sec:hover{background:var(--gris)}
-.btn-danger{background:#fee2e2;color:#dc2626}.btn-danger:hover{background:#fecaca}
-.btn-success{background:#d1fae5;color:#059669}
-.btn-grad{background:var(--grad);color:#fff;font-weight:600}
+.btn-danger{background:var(--err-bg);color:var(--err)}.btn-danger:hover{background:var(--err-bg2)}
+.btn-success{background:var(--ok-bg);color:var(--ok)}
+.btn-grad{background:linear-gradient(var(--nuit),var(--nuit)) padding-box,var(--grad) border-box;border:2px solid transparent;color:#fff;font-weight:600}
 .btn-sm{padding:6px 10px;font-size:12px;border-radius:6px}
 .toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
 .search{flex:1;min-width:180px;position:relative}
@@ -51,7 +51,7 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .card-img img:hover{transform:scale(1.04)}
 .card-img-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
 .badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;backdrop-filter:blur(4px)}
-.b-yateli{background:rgba(0,153,255,.85)}.b-oman{background:rgba(119,51,255,.85)}.b-other{background:rgba(255,102,0,.85)}
+.b-yateli{background:rgba(0,106,204,.92)}.b-oman{background:rgba(99,32,230,.92)}.b-other{background:rgba(194,80,10,.92)}
 .card-body{padding:14px}
 .card-ref{font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:3px}
 .card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;line-height:1.3}
@@ -59,7 +59,7 @@ select.filt{padding:9px 14px;border:1px solid var(--border);border-radius:8px;fo
 .card-prices{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:3px}
 .pr{display:flex;justify-content:space-between;align-items:center;font-size:11px}
 .pr-lbl{color:var(--muted)}.pr-val{font-weight:600}
-.pr-ttc{font-size:13px;color:var(--bleu);font-weight:700}
+.pr-ttc{font-size:13px;color:var(--bleu-t);font-weight:700}
 .card-acts{display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .tbl-wrap{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:12px}
@@ -91,9 +91,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumb{position:relative;width:68px;height:68px}
 .thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
-.thumb button{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.thumb button{position:absolute;top:-5px;right:-5px;background:var(--err-solid);color:#fff;border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
 .sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.cnt-badge{background:var(--bleu);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
+.cnt-badge{background:var(--bleu-t);color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
 .sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
 .sim-form{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border)}
@@ -107,8 +107,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .prev-icon img{width:100%;height:100%;object-fit:cover}
 .trans-sel{display:flex;gap:8px}
 .trans-btn{flex:1;padding:9px;border:2px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;text-align:center;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
-.trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(100px);opacity:0;transition:.3s;border-left:4px solid var(--vert)}
+.trans-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--nuit);color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:300;transform:translateY(100px);opacity:0;transition:.3s;border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;gap:9px}
+.toast::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--toast-dot,var(--vert));flex-shrink:0}
 .toast.show{transform:translateY(0);opacity:1}
 .empty{text-align:center;padding:60px 20px;color:var(--muted)}
 .empty .ico{font-size:44px;margin-bottom:10px}
@@ -120,9 +121,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .four-card-hdr{display:flex;gap:12px;align-items:center;margin-bottom:10px}
 .four-info{flex:1;min-width:0}
 .info-row{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-bottom:3px}
-.info-row a{color:var(--bleu);text-decoration:none}
-.devis-btn{display:inline-flex;align-items:center;gap:4px;background:#fff3cd;color:#856404;border:1px solid #ffc107;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.2s}
-.devis-btn:hover{background:#ffc107;color:#fff}
+.info-row a{color:var(--bleu-t);text-decoration:none}
+.devis-btn{display:inline-flex;align-items:center;gap:4px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;transition:.2s}
+.devis-btn:hover{background:var(--warn-brd);color:var(--nuit)}
 /* Import Alibaba box */
 .ali-import-box{background:#f0f8ff;border:1px solid #bdd7f0;border-radius:10px;padding:14px;margin-bottom:16px}
 /* PRINT */
@@ -147,7 +148,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .comp-row input{flex:1}
 /* Grouped view */
 .grp-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;backdrop-filter:blur(4px);cursor:pointer;transition:.2s}
-.grp-count-badge:hover{background:var(--bleu)}
+.grp-count-badge:hover{background:var(--bleu-t)}
 .alt-panel{overflow:hidden;max-height:0;transition:max-height .35s ease}
 .alt-panel.open{max-height:800px}
 .alt-panel-inner{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
@@ -157,16 +158,16 @@ textarea.fc{resize:vertical;min-height:70px}
 .alt-card-info{flex:1;min-width:0}
 .alt-card-nom{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .alt-card-prix{font-size:11px;color:var(--muted)}
-.alt-promote-btn{padding:4px 10px;border:1px solid var(--bleu);border-radius:6px;background:#fff;color:var(--bleu);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:.2s}
-.alt-promote-btn:hover{background:var(--bleu);color:#fff}
-.winner-tag{font-size:9px;font-weight:700;color:var(--vert);text-transform:uppercase;letter-spacing:.5px}
+.alt-promote-btn{padding:4px 10px;border:1px solid var(--bleu-t);border-radius:6px;background:#fff;color:var(--bleu-t);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:.2s}
+.alt-promote-btn:hover{background:var(--bleu-t);color:#fff}
+.winner-tag{font-size:9px;font-weight:700;color:var(--vert-t);text-transform:uppercase;letter-spacing:.5px}
 /* Table accordion rows */
 .tbl-alt-row{background:#f8f8fc}
 .tbl-alt-row td{font-size:11px;padding:6px 12px!important}
 .expand-cell{cursor:pointer;user-select:none}
 /* Grouped toolbar */
 .grp-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;transition:.2s}
-.grp-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.grp-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 /* Column picker */
 .col-picker-wrap{position:relative}
 .col-picker-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap}
@@ -183,12 +184,13 @@ textarea.fc{resize:vertical;min-height:70px}
 .hdr-cart{position:relative;display:inline-flex}
 .hdr-cart-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px;transition:.2s}
 .hdr-cart-btn:hover{background:rgba(255,255,255,.2)}
-.hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
+.hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge-t);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none}
 .strat-btn{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;text-align:center;transition:.2s;line-height:1.5}
 .strat-btn:hover{border-color:var(--bleu)}
-.strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu)}
+.strat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.strat-btn.active{border-color:var(--bleu);background:#eff8ff;color:var(--bleu-t)}
 .strat-btn small{display:block;font-weight:400;font-size:10px;color:var(--muted);margin-top:2px}
-.strat-btn.active small{color:#5ab4e8}
+.strat-btn.active small{color:var(--bleu-t)}
 .devis-section{background:#fff;border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:16px}
 .devis-section-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px;color:var(--nuit)}
 .cart-item-grid{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);border:1px solid var(--border);transition:.2s}
@@ -197,8 +199,8 @@ textarea.fc{resize:vertical;min-height:70px}
 .cart-qty-ctrl button{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;transition:.15s}
 .cart-qty-ctrl button:hover{background:var(--bleu);color:#fff;border-color:var(--bleu)}
 .cart-qty-ctrl input{width:44px;text-align:center;padding:3px 4px;border:1px solid var(--border);border-radius:6px;font-family:'Poppins',sans-serif;font-size:12px;outline:none}
-.cart-price-tag{font-size:14px;font-weight:700;color:var(--bleu)}
-.btn-in-cart{background:#d1fae5!important;color:#059669!important;border:1px solid #a7f3d0!important}
+.cart-price-tag{font-size:14px;font-weight:700;color:var(--bleu-t)}
+.btn-in-cart{background:var(--ok-bg)!important;color:var(--ok)!important;border:1px solid var(--ok-brd)!important}
 .devis-total-bar{background:var(--nuit);color:#fff;border-radius:12px;padding:16px 20px;display:flex;justify-content:space-around;align-items:center;margin-top:16px;flex-wrap:wrap;gap:12px}
 .devis-total-item{text-align:center;min-width:100px}
 .devis-total-item .val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px}
@@ -216,6 +218,44 @@ textarea.fc{resize:vertical;min-height:70px}
 .dv-table tbody tr:nth-child(even) td{background:#f9f9f9}
 .dv-table tfoot td{border-top:2px solid #1A1A2E}
 .dv-cgs{font-size:9px;color:#999;border-top:1px solid #eee;padding-top:10px;margin-top:16px;line-height:1.6}
+/* ===== ADAPTATION MOBILE / TACTILE ===== */
+@media(max-width:640px){
+  .hdr{padding:0 14px}
+  .hdr-lbl{display:none}
+  .wrap{padding:16px 14px}
+  .tabs{padding:0 10px}
+  .tab{padding:14px 14px}
+  .stats{gap:10px}
+  .stat{min-width:calc(50% - 5px)}
+  .devis-total-bar{justify-content:flex-start}
+}
+/* Cibles tactiles ≥44px sans alourdir la densité souris */
+@media(pointer:coarse){
+  .btn{padding:14px 16px}
+  .btn-sm{padding:13px 15px;font-size:13px}
+  .view-btn{padding:13px 14px}
+  .modal-x{width:44px;height:44px}
+  .cart-qty-ctrl button{width:42px;height:42px}
+  .cart-qty-ctrl input{height:42px;width:52px}
+  .thumb button{width:28px;height:28px;font-size:13px}
+  .alt-promote-btn{padding:12px 14px}
+  .grp-count-badge{padding:9px 13px}
+  select.filt,.search input,.col-picker-btn,.grp-btn{padding:13px 14px}
+  .trans-btn,.strat-btn{padding:13px 12px}
+  .hdr-cart-btn{padding:12px 14px}
+  .cp-item{padding:11px 8px}
+  .cp-item input[type=checkbox]{width:20px;height:20px}
+}
+.toast{bottom:max(20px,env(safe-area-inset-bottom))}
+/* ===== ACCESSIBILITÉ ===== */
+:focus-visible{outline:2px solid var(--bleu);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--nuit);color:#fff;padding:10px 18px;border-radius:0 0 8px 0;font-size:13px;font-weight:600;z-index:400;text-decoration:none}
+.skip-link:focus{left:0}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .card:hover,.cart-item-grid:hover{transform:none}
+}
 @keyframes spin{to{transform:rotate(360deg)}}
 .fx-spin{display:inline-block;animation:spin .7s linear infinite;font-style:normal;line-height:1}
 .fx-status{font-size:11px;margin-top:5px;min-height:16px}
@@ -234,6 +274,7 @@ textarea.fc{resize:vertical;min-height:70px}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Aller au contenu</a>
 <div class="grad-bar"></div>
 <header class="hdr">
   <div>
@@ -241,11 +282,11 @@ textarea.fc{resize:vertical;min-height:70px}
     <div class="logo-sub">Go Group — Console Import</div>
   </div>
   <div class="hdr-right">
-    <button class="btn btn-sec btn-sm" onclick="toggleSettings()">⚙️ Paramètres</button>
-    <button class="btn btn-sec btn-sm" onclick="exportCSV()">📥 CSV</button>
-    <button class="btn btn-sec btn-sm" onclick="window.print()">🖨️ PDF</button>
+    <button class="btn btn-sec btn-sm" onclick="toggleSettings()" aria-label="Paramètres">⚙️ <span class="hdr-lbl">Paramètres</span></button>
+    <button class="btn btn-sec btn-sm" onclick="exportCSV()" aria-label="Exporter en CSV">📥 <span class="hdr-lbl">CSV</span></button>
+    <button class="btn btn-sec btn-sm" onclick="window.print()" aria-label="Imprimer en PDF">🖨️ <span class="hdr-lbl">PDF</span></button>
     <div class="hdr-cart">
-      <button class="hdr-cart-btn" onclick="tab('devis')">📋 Devis</button>
+      <button class="hdr-cart-btn" onclick="tab('devis')" aria-label="Devis">📋 <span class="hdr-lbl">Devis</span></button>
       <span class="hdr-cart-count" id="cart-count" style="display:none">0</span>
     </div>
   </div>
@@ -257,25 +298,25 @@ textarea.fc{resize:vertical;min-height:70px}
   <div class="ph-sub" id="ph-date" style="margin-top:4px"></div>
 </div>
 
-<nav class="tabs">
-  <div class="tab active" onclick="tab('catalogue')">📦 Catalogue</div>
-  <div class="tab" onclick="tab('fournisseurs')">🏭 Fournisseurs</div>
-  <div class="tab" onclick="tab('transitaires')">🚢 Transitaires</div>
-  <div class="tab" onclick="tab('simulation')">🧮 Simulation</div>
-  <div class="tab" onclick="tab('devis')">📋 Devis</div>
+<nav class="tabs" role="tablist" aria-label="Sections">
+  <button class="tab active" id="tab-catalogue" role="tab" aria-selected="true" aria-controls="t-catalogue" onclick="tab('catalogue')">📦 Catalogue</button>
+  <button class="tab" id="tab-fournisseurs" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-fournisseurs" onclick="tab('fournisseurs')">🏭 Fournisseurs</button>
+  <button class="tab" id="tab-transitaires" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-transitaires" onclick="tab('transitaires')">🚢 Transitaires</button>
+  <button class="tab" id="tab-simulation" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-simulation" onclick="tab('simulation')">🧮 Simulation</button>
+  <button class="tab" id="tab-devis" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-devis" onclick="tab('devis')">📋 Devis</button>
 </nav>
 
-<div class="wrap">
+<div class="wrap" id="main">
 
 <!-- SETTINGS -->
 <div class="settings-panel" id="spanel">
   <div class="sec-hdr">⚙️ Paramètres globaux</div>
   <div class="s-grid">
-    <div class="fgrp"><label class="flbl">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
-    <div class="fgrp"><label class="flbl">Fret aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
-    <div class="fgrp"><label class="flbl">Fret maritime (XOF/CBM)</label><input type="number" class="fc" id="s_fm"></div>
-    <div class="fgrp"><label class="flbl">Taux marge cible (%)</label><input type="number" class="fc" id="s_mg" step="0.5"></div>
-    <div class="fgrp"><label class="flbl">TVA (%)</label><input type="number" class="fc" id="s_tv" step="0.5"></div>
+    <div class="fgrp"><label class="flbl" for="s_tc">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
+    <div class="fgrp"><label class="flbl" for="s_fa">Fret aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
+    <div class="fgrp"><label class="flbl" for="s_fm">Fret maritime (XOF/CBM)</label><input type="number" class="fc" id="s_fm"></div>
+    <div class="fgrp"><label class="flbl" for="s_mg">Taux marge cible (%)</label><input type="number" class="fc" id="s_mg" step="0.5"></div>
+    <div class="fgrp"><label class="flbl" for="s_tv">TVA (%)</label><input type="number" class="fc" id="s_tv" step="0.5"></div>
   </div>
   <div style="margin-top:14px;display:flex;gap:8px">
     <button class="btn btn-primary" onclick="saveSettings()">💾 Enregistrer</button>
@@ -284,10 +325,10 @@ textarea.fc{resize:vertical;min-height:70px}
 </div>
 
 <!-- CATALOGUE -->
-<div id="t-catalogue">
+<div id="t-catalogue" role="tabpanel" aria-labelledby="tab-catalogue">
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
-    <div class="search"><input type="text" placeholder="Rechercher..." id="cat-search" oninput="renderCat()"></div>
+    <div class="search"><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCat()"></div>
     <select class="filt" id="f-cat" onchange="renderCat()">
       <option value="">Toutes catégories</option>
       <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
@@ -295,8 +336,8 @@ textarea.fc{resize:vertical;min-height:70px}
     </select>
     <select class="filt" id="f-four" onchange="renderCat()"><option value="">Tous fournisseurs</option></select>
     <div class="view-tog">
-      <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille">▦</button>
-      <button class="view-btn" id="vl" onclick="setView('list')" title="Liste">☰</button>
+      <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille" aria-label="Vue grille">▦</button>
+      <button class="view-btn" id="vl" onclick="setView('list')" title="Liste" aria-label="Vue liste">☰</button>
     </div>
     <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques">⊞ Grouper</button>
     <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" style="display:none">
@@ -328,25 +369,25 @@ textarea.fc{resize:vertical;min-height:70px}
 </div>
 
 <!-- FOURNISSEURS -->
-<div id="t-fournisseurs" style="display:none">
+<div id="t-fournisseurs" role="tabpanel" aria-labelledby="tab-fournisseurs" style="display:none">
   <div class="toolbar">
-    <div class="search"><input type="text" placeholder="Rechercher..." id="four-search" oninput="renderFour()"></div>
+    <div class="search"><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFour()"></div>
     <button class="btn btn-primary" onclick="openFourModal()">+ Fournisseur</button>
   </div>
   <div id="four-cont"></div>
 </div>
 
 <!-- TRANSITAIRES -->
-<div id="t-transitaires" style="display:none">
+<div id="t-transitaires" role="tabpanel" aria-labelledby="tab-transitaires" style="display:none">
   <div class="toolbar">
-    <div class="search"><input type="text" placeholder="Rechercher..." id="tr-search" oninput="renderTrans()"></div>
+    <div class="search"><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTrans()"></div>
     <button class="btn btn-primary" onclick="openTransModal()">+ Transitaire</button>
   </div>
   <div id="trans-cont"></div>
 </div>
 
 <!-- SIMULATION -->
-<div id="t-simulation" style="display:none">
+<div id="t-simulation" role="tabpanel" aria-labelledby="tab-simulation" style="display:none">
   <div class="sim-wrap">
     <div class="sim-form">
       <div class="sec-hdr">🧮 Paramètres commande</div>
@@ -359,19 +400,19 @@ textarea.fc{resize:vertical;min-height:70px}
         </div>
       </div>
       <div class="fg" style="gap:11px">
-        <div class="fgrp full"><label class="flbl">Produit</label>
+        <div class="fgrp full"><label class="flbl" for="sim-prod">Produit</label>
           <select class="fc" id="sim-prod" onchange="simSelProd()"><option value="">— Sélectionner —</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Fournisseur</label>
+        <div class="fgrp"><label class="flbl" for="sim-four">Fournisseur</label>
           <select class="fc" id="sim-four" onchange="simCalc()"><option value="">— Auto —</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Transitaire</label>
+        <div class="fgrp"><label class="flbl" for="sim-trans">Transitaire</label>
           <select class="fc" id="sim-trans" onchange="simCalc()"><option value="">— Défaut —</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Quantité</label>
+        <div class="fgrp"><label class="flbl" for="sim-qty">Quantité</label>
           <input type="number" class="fc" id="sim-qty" value="1" min="1" oninput="simCalc()">
         </div>
-        <div class="fgrp"><label class="flbl">Prix vente HT unitaire (XOF)</label>
+        <div class="fgrp"><label class="flbl" for="sim-pv">Prix vente HT unitaire (XOF)</label>
           <input type="number" class="fc" id="sim-pv" placeholder="Auto" oninput="simCalc()">
         </div>
         <div class="fgrp full"><label class="flbl">Mode livraison</label>
@@ -380,17 +421,17 @@ textarea.fc{resize:vertical;min-height:70px}
             <button class="trans-btn" id="tb-aer" onclick="setSimTrans('Aérien')">✈️ Aérien</button>
           </div>
         </div>
-        <div class="fgrp"><label class="flbl">Assurance</label>
+        <div class="fgrp"><label class="flbl" for="sim-ass">Assurance</label>
           <select class="fc" id="sim-ass" onchange="simCalc()">
             <option value="0">Non</option><option value="1">Oui (1%)</option><option value="2">Oui (2%)</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl">TVA</label>
+        <div class="fgrp"><label class="flbl" for="sim-tva">TVA</label>
           <select class="fc" id="sim-tva" onchange="simCalc()">
             <option value="1">Oui (18%)</option><option value="0">Non</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl">Remise (%)</label>
+        <div class="fgrp"><label class="flbl" for="sim-rem">Remise (%)</label>
           <input type="number" class="fc" id="sim-rem" value="0" min="0" max="100" oninput="simCalc()">
         </div>
       </div>
@@ -406,25 +447,25 @@ textarea.fc{resize:vertical;min-height:70px}
 </div>
 
 <!-- DEVIS -->
-<div id="t-devis" style="display:none">
+<div id="t-devis" role="tabpanel" aria-labelledby="tab-devis" style="display:none">
 
   <!-- Infos client -->
   <div class="devis-section">
     <div class="devis-section-title">👤 Informations client</div>
     <div class="fg">
-      <div class="fgrp"><label class="flbl">Nom complet</label><input class="fc" id="dv-nom" placeholder="Jean Dupont" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Entreprise</label><input class="fc" id="dv-ent" placeholder="Beauté Pro SARL" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Email</label><input type="email" class="fc" id="dv-email" placeholder="client@exemple.com" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Téléphone / WhatsApp</label><input class="fc" id="dv-tel" placeholder="+228 ..." oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Adresse</label><input class="fc" id="dv-adr" oninput="saveDevisClient()"></div>
-      <div class="fgrp"><label class="flbl">Ville / Pays</label><input class="fc" id="dv-ville" placeholder="Lomé, Togo" oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-nom">Nom complet</label><input class="fc" id="dv-nom" placeholder="Jean Dupont" oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-ent">Entreprise</label><input class="fc" id="dv-ent" placeholder="Beauté Pro SARL" oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-email">Email</label><input type="email" class="fc" id="dv-email" placeholder="client@exemple.com" oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-tel">Téléphone / WhatsApp</label><input class="fc" id="dv-tel" placeholder="+228 ..." oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-adr">Adresse</label><input class="fc" id="dv-adr" oninput="saveDevisClient()"></div>
+      <div class="fgrp"><label class="flbl" for="dv-ville">Ville / Pays</label><input class="fc" id="dv-ville" placeholder="Lomé, Togo" oninput="saveDevisClient()"></div>
     </div>
   </div>
 
   <!-- Stratégie de prix -->
   <div class="devis-section">
     <div class="devis-section-title">💰 Stratégie de prix pour ce devis</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+    <div class="strat-grid">
       <button class="strat-btn active" id="strat-marge" onclick="setStrategy('marge_fixe')">
         📊 Marge standard<small>Marge cible (par défaut)</small>
       </button>
@@ -451,7 +492,7 @@ textarea.fc{resize:vertical;min-height:70px}
     <div class="devis-section-title">💱 Devise du devis client</div>
     <div class="fx-box">
       <div class="fgrp">
-        <label class="flbl">Devise de présentation</label>
+        <label class="flbl" for="dv-dev">Devise de présentation</label>
         <select class="fc" id="dv-dev" onchange="onDevisDevChange()">
           <option value="XOF">XOF — Franc CFA (F)</option>
           <option value="USD">USD — Dollar américain ($)</option>
@@ -476,19 +517,19 @@ textarea.fc{resize:vertical;min-height:70px}
       <div class="devis-section-title" style="margin-bottom:0">🛒 Produits sélectionnés &nbsp;<span id="dv-count" style="background:var(--bleu);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;font-family:'Poppins',sans-serif">0</span></div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="view-tog">
-          <button class="view-btn active" id="dvg" onclick="setDevisView('grid')" title="Grille">▦</button>
-          <button class="view-btn" id="dvl" onclick="setDevisView('list')" title="Liste">☰</button>
+          <button class="view-btn active" id="dvg" onclick="setDevisView('grid')" title="Grille" aria-label="Vue grille">▦</button>
+          <button class="view-btn" id="dvl" onclick="setDevisView('list')" title="Liste" aria-label="Vue liste">☰</button>
         </div>
         <div class="col-picker-wrap" id="dv-cp-wrap">
           <button class="col-picker-btn" onclick="toggleDevisColPicker()">👁 Colonnes devis</button>
           <div class="col-picker-drop" id="dv-cp-drop" style="min-width:300px">
             <div class="cp-title">📦 Informations produit</div>
             <div class="cp-grid" id="dv-cp-prod"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--orange)">🚢 Infos transitaire</div>
+            <div class="cp-title" style="margin-top:10px;color:var(--orange-t)">🚢 Infos transitaire</div>
             <div class="cp-grid" id="dv-cp-trans"></div>
             <div class="cp-title" style="margin-top:10px;color:var(--violet)">💱 Devise source</div>
             <div class="cp-grid" id="dv-cp-dev"></div>
-            <div class="cp-title" style="margin-top:10px;color:#059669">🧮 Calcul client</div>
+            <div class="cp-title" style="margin-top:10px;color:var(--ok)">🧮 Calcul client</div>
             <div class="cp-grid" id="dv-cp-calc"></div>
           </div>
         </div>
@@ -513,49 +554,49 @@ textarea.fc{resize:vertical;min-height:70px}
 
 <!-- PRODUCT MODAL -->
 <div class="overlay" id="prod-modal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
     <div class="modal-hdr">
       <div class="modal-title" id="pm-title">Nouveau produit</div>
-      <button class="modal-x" onclick="closeMod('prod-modal')">✕</button>
+      <button class="modal-x" onclick="closeMod('prod-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
       <div class="fg">
-        <div class="fgrp"><label class="flbl">Référence (auto)</label><input type="text" class="fc" id="p-ref" readonly></div>
-        <div class="fgrp"><label class="flbl">Nom / Désignation *</label><input type="text" class="fc" id="p-nom" oninput="updateSLink()"></div>
-        <div class="fgrp"><label class="flbl">Catégorie *</label>
-          <select class="fc" id="p-cat" onchange="genRef();updateSLink()">
+        <div class="fgrp"><label class="flbl" for="p-ref">Référence (auto)</label><input type="text" class="fc" id="p-ref" readonly></div>
+        <div class="fgrp"><label class="flbl" for="p-nom">Nom / Désignation *</label><input type="text" class="fc" id="p-nom" required aria-required="true" oninput="updateSLink()"></div>
+        <div class="fgrp"><label class="flbl" for="p-cat">Catégorie *</label>
+          <select class="fc" id="p-cat" required aria-required="true" onchange="genRef();updateSLink()">
             <option value="">Sélectionner...</option>
             <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
             <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl">Fournisseur</label><select class="fc" id="p-four"></select></div>
-        <div class="fgrp"><label class="flbl">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Préacheminement (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — si fourni par le fournisseur" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Devise</label>
+        <div class="fgrp"><label class="flbl" for="p-four">Fournisseur</label><select class="fc" id="p-four"></select></div>
+        <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-prach">Préacheminement (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — si fourni par le fournisseur" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-dev">Devise</label>
           <select class="fc" id="p-dev" onchange="calcPrev()">
             <option value="RMB">RMB (¥)</option><option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option><option value="XOF">XOF (F)</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl">Longueur (cm)</label><input type="number" class="fc" id="p-l" step="0.1" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Largeur (cm)</label><input type="number" class="fc" id="p-la" step="0.1" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Hauteur (cm)</label><input type="number" class="fc" id="p-h" step="0.1" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Poids (kg)</label><input type="number" class="fc" id="p-poids" step="0.01" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl">Transport défaut</label>
+        <div class="fgrp"><label class="flbl" for="p-l">Longueur (cm)</label><input type="number" class="fc" id="p-l" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-la">Largeur (cm)</label><input type="number" class="fc" id="p-la" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-h">Hauteur (cm)</label><input type="number" class="fc" id="p-h" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-poids">Poids (kg)</label><input type="number" class="fc" id="p-poids" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-trans">Transport défaut</label>
           <select class="fc" id="p-trans"><option value="Maritime">Maritime</option><option value="Aérien">Aérien</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Taux marge % (vide=global)</label><input type="number" class="fc" id="p-marge" step="0.5" placeholder="Défaut"></div>
-        <div class="fgrp"><label class="flbl">Remise %</label><input type="number" class="fc" id="p-rem" value="0" step="0.5"></div>
-        <div class="fgrp"><label class="flbl">MOQ</label><input type="number" class="fc" id="p-moq" value="1" min="1"></div>
-        <div class="fgrp full"><label class="flbl">Prix marché concurrent (XOF)</label>
+        <div class="fgrp"><label class="flbl" for="p-marge">Taux marge % (vide=global)</label><input type="number" class="fc" id="p-marge" step="0.5" placeholder="Défaut"></div>
+        <div class="fgrp"><label class="flbl" for="p-rem">Remise %</label><input type="number" class="fc" id="p-rem" value="0" step="0.5"></div>
+        <div class="fgrp"><label class="flbl" for="p-moq">MOQ</label><input type="number" class="fc" id="p-moq" value="1" min="1"></div>
+        <div class="fgrp full"><label class="flbl" for="p-conc">Prix marché concurrent (XOF)</label>
           <div class="comp-row">
             <input type="number" class="fc" id="p-conc" placeholder="Saisir manuellement">
             <a id="p-glink" href="#" target="_blank" class="btn btn-sec btn-sm" title="Rechercher sur Google">🔍 Rechercher</a>
           </div>
         </div>
-        <div class="fgrp full"><label class="flbl">Description</label><textarea class="fc" id="p-desc" rows="2"></textarea></div>
-        <div class="fgrp full"><label class="flbl">Spécificités techniques</label><textarea class="fc" id="p-specs" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl" for="p-desc">Description</label><textarea class="fc" id="p-desc" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl" for="p-specs">Spécificités techniques</label><textarea class="fc" id="p-specs" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl">Photos (max 3)</label>
           <div class="upload-area" onclick="document.getElementById('p-photos-in').click()">📸 Cliquer pour ajouter des photos (PNG, JPG, WebP)</div>
           <input type="file" id="p-photos-in" accept="image/*" multiple style="display:none" onchange="addPics(this)">
@@ -576,10 +617,10 @@ textarea.fc{resize:vertical;min-height:70px}
 
 <!-- FOURNISSEUR MODAL -->
 <div class="overlay" id="four-modal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fm-title">
     <div class="modal-hdr">
       <div class="modal-title" id="fm-title">Nouveau fournisseur</div>
-      <button class="modal-x" onclick="closeMod('four-modal')">✕</button>
+      <button class="modal-x" onclick="closeMod('four-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
       <div class="ali-import-box">
@@ -591,27 +632,27 @@ textarea.fc{resize:vertical;min-height:70px}
         <div style="font-size:11px;color:var(--muted);margin-top:6px">Collez l'URL du store Alibaba pour pré-remplir automatiquement.</div>
       </div>
       <div class="fg">
-        <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="f-nom"></div>
-        <div class="fgrp"><label class="flbl">Contact (nom)</label><input type="text" class="fc" id="f-contact"></div>
-        <div class="fgrp"><label class="flbl">Pays</label><input type="text" class="fc" id="f-pays" placeholder="Chine"></div>
-        <div class="fgrp"><label class="flbl">Email</label><input type="email" class="fc" id="f-email"></div>
-        <div class="fgrp"><label class="flbl">WhatsApp</label><input type="text" class="fc" id="f-wa"></div>
-        <div class="fgrp"><label class="flbl">WeChat</label><input type="text" class="fc" id="f-wc"></div>
-        <div class="fgrp"><label class="flbl">Domaine d'activité</label><input type="text" class="fc" id="f-dom"></div>
-        <div class="fgrp"><label class="flbl">Année fondation</label><input type="number" class="fc" id="f-an"></div>
-        <div class="fgrp"><label class="flbl">Évaluation /5</label>
+        <div class="fgrp"><label class="flbl" for="f-nom">Nom entreprise *</label><input type="text" class="fc" id="f-nom" required aria-required="true"></div>
+        <div class="fgrp"><label class="flbl" for="f-contact">Contact (nom)</label><input type="text" class="fc" id="f-contact"></div>
+        <div class="fgrp"><label class="flbl" for="f-pays">Pays</label><input type="text" class="fc" id="f-pays" placeholder="Chine"></div>
+        <div class="fgrp"><label class="flbl" for="f-email">Email</label><input type="email" class="fc" id="f-email"></div>
+        <div class="fgrp"><label class="flbl" for="f-wa">WhatsApp</label><input type="text" class="fc" id="f-wa"></div>
+        <div class="fgrp"><label class="flbl" for="f-wc">WeChat</label><input type="text" class="fc" id="f-wc"></div>
+        <div class="fgrp"><label class="flbl" for="f-dom">Domaine d'activité</label><input type="text" class="fc" id="f-dom"></div>
+        <div class="fgrp"><label class="flbl" for="f-an">Année fondation</label><input type="number" class="fc" id="f-an"></div>
+        <div class="fgrp"><label class="flbl" for="f-eval">Évaluation /5</label>
           <select class="fc" id="f-eval"><option>5</option><option>4</option><option selected>3</option><option>2</option><option>1</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Statut Alibaba</label>
+        <div class="fgrp"><label class="flbl" for="f-ali">Statut Alibaba</label>
           <select class="fc" id="f-ali"><option>Non disponible</option><option>Vérifié</option><option>Non vérifié</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Lien Alibaba</label><input type="url" class="fc" id="f-ali-url"></div>
-        <div class="fgrp"><label class="flbl">Lien Devis (PDF URL)</label><input type="url" class="fc" id="f-devis" placeholder="https://..."></div>
-        <div class="fgrp"><label class="flbl">Langues</label><input type="text" class="fc" id="f-lang" placeholder="Chinois, Anglais..."></div>
-        <div class="fgrp"><label class="flbl">Marchés principaux</label><input type="text" class="fc" id="f-mkt"></div>
-        <div class="fgrp full"><label class="flbl">Description activités</label><textarea class="fc" id="f-desc" rows="2"></textarea></div>
-        <div class="fgrp full"><label class="flbl">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
-        <div class="fgrp full"><label class="flbl">Logo (URL ou upload)</label>
+        <div class="fgrp"><label class="flbl" for="f-ali-url">Lien Alibaba</label><input type="url" class="fc" id="f-ali-url"></div>
+        <div class="fgrp"><label class="flbl" for="f-devis">Lien Devis (PDF URL)</label><input type="url" class="fc" id="f-devis" placeholder="https://..."></div>
+        <div class="fgrp"><label class="flbl" for="f-lang">Langues</label><input type="text" class="fc" id="f-lang" placeholder="Chinois, Anglais..."></div>
+        <div class="fgrp"><label class="flbl" for="f-mkt">Marchés principaux</label><input type="text" class="fc" id="f-mkt"></div>
+        <div class="fgrp full"><label class="flbl" for="f-desc">Description activités</label><textarea class="fc" id="f-desc" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl" for="f-com">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
+        <div class="fgrp full"><label class="flbl" for="f-logo-url">Logo (URL ou upload)</label>
           <input type="url" class="fc" id="f-logo-url" placeholder="https://... (URL directe du logo)" style="margin-bottom:6px" oninput="previewLogoUrl()">
           <div class="upload-area" onclick="document.getElementById('f-logo-in').click()">🏭 Ou uploader un logo depuis votre appareil</div>
           <input type="file" id="f-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'f-logo-prev','f-logo-dat')">
@@ -629,28 +670,28 @@ textarea.fc{resize:vertical;min-height:70px}
 
 <!-- TRANSITAIRE MODAL -->
 <div class="overlay" id="trans-modal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tm-title">
     <div class="modal-hdr">
       <div class="modal-title" id="tm-title">Nouveau transitaire</div>
-      <button class="modal-x" onclick="closeMod('trans-modal')">✕</button>
+      <button class="modal-x" onclick="closeMod('trans-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
       <div class="fg">
-        <div class="fgrp"><label class="flbl">Nom entreprise *</label><input type="text" class="fc" id="t-nom"></div>
-        <div class="fgrp"><label class="flbl">Pays départ</label><input type="text" class="fc" id="t-dep" placeholder="Chine"></div>
-        <div class="fgrp"><label class="flbl">Pays arrivée</label><input type="text" class="fc" id="t-arr" placeholder="Togo"></div>
-        <div class="fgrp"><label class="flbl">Contact</label><input type="text" class="fc" id="t-contact"></div>
-        <div class="fgrp"><label class="flbl">WhatsApp</label><input type="text" class="fc" id="t-wa"></div>
-        <div class="fgrp"><label class="flbl">Téléphone</label><input type="text" class="fc" id="t-tel"></div>
-        <div class="fgrp"><label class="flbl">Type logistique</label>
+        <div class="fgrp"><label class="flbl" for="t-nom">Nom entreprise *</label><input type="text" class="fc" id="t-nom" required aria-required="true"></div>
+        <div class="fgrp"><label class="flbl" for="t-dep">Pays départ</label><input type="text" class="fc" id="t-dep" placeholder="Chine"></div>
+        <div class="fgrp"><label class="flbl" for="t-arr">Pays arrivée</label><input type="text" class="fc" id="t-arr" placeholder="Togo"></div>
+        <div class="fgrp"><label class="flbl" for="t-contact">Contact</label><input type="text" class="fc" id="t-contact"></div>
+        <div class="fgrp"><label class="flbl" for="t-wa">WhatsApp</label><input type="text" class="fc" id="t-wa"></div>
+        <div class="fgrp"><label class="flbl" for="t-tel">Téléphone</label><input type="text" class="fc" id="t-tel"></div>
+        <div class="fgrp"><label class="flbl" for="t-type">Type logistique</label>
           <select class="fc" id="t-type"><option>Maritime</option><option>Aérien</option><option>Routier</option><option>Multimodale</option></select>
         </div>
-        <div class="fgrp"><label class="flbl">Entreposage (jours)</label><input type="number" class="fc" id="t-ent" value="0"></div>
-        <div class="fgrp"><label class="flbl">Tarif maritime (XOF/CBM)</label><input type="number" class="fc" id="t-mar" placeholder="230000"></div>
-        <div class="fgrp"><label class="flbl">Délai maritime (jours)</label><input type="number" class="fc" id="t-mard"></div>
-        <div class="fgrp"><label class="flbl">Tarif aérien (XOF/kg)</label><input type="number" class="fc" id="t-aer" placeholder="11000"></div>
-        <div class="fgrp"><label class="flbl">Délai aérien (jours)</label><input type="number" class="fc" id="t-aerd"></div>
-        <div class="fgrp"><label class="flbl">Assurance incluse</label>
+        <div class="fgrp"><label class="flbl" for="t-ent">Entreposage (jours)</label><input type="number" class="fc" id="t-ent" value="0"></div>
+        <div class="fgrp"><label class="flbl" for="t-mar">Tarif maritime (XOF/CBM)</label><input type="number" class="fc" id="t-mar" placeholder="230000"></div>
+        <div class="fgrp"><label class="flbl" for="t-mard">Délai maritime (jours)</label><input type="number" class="fc" id="t-mard"></div>
+        <div class="fgrp"><label class="flbl" for="t-aer">Tarif aérien (XOF/kg)</label><input type="number" class="fc" id="t-aer" placeholder="11000"></div>
+        <div class="fgrp"><label class="flbl" for="t-aerd">Délai aérien (jours)</label><input type="number" class="fc" id="t-aerd"></div>
+        <div class="fgrp"><label class="flbl" for="t-ass">Assurance incluse</label>
           <select class="fc" id="t-ass"><option value="0">Non</option><option value="1">Oui — 1%</option><option value="1.5">Oui — 1.5%</option><option value="2">Oui — 2%</option></select>
         </div>
         <div class="fgrp full"><label class="flbl">Logo</label>
@@ -668,10 +709,13 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
+// Stockage résilient : données corrompues → valeur de repli ; quota plein → toast au lieu d'un crash silencieux
+function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
+function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Stockage local plein — réduisez le nombre ou la taille des photos',true);}}
 const DATA_VER=3;
 const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tva:18};
 const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
@@ -767,13 +811,13 @@ let grouped=false,stratPrix='prix_bas',winOverrides={};
 const WK='gf_win';
 
 function initCols(){
-  const saved=JSON.parse(localStorage.getItem('gf_c')||'null');
+  const saved=LS_GET('gf_c',null);
   COL_DEFS.forEach(c=>{cols[c.k]=saved??(c.def);if(saved)cols[c.k]=saved[c.k]!==undefined?saved[c.k]:c.def;});
   const wrap=document.getElementById('cp-opts');
   wrap.innerHTML=COL_DEFS.map(c=>`<label class="cp-item"><input type="checkbox" ${cols[c.k]?'checked':''} onchange="toggleCol('${c.k}',this.checked)">${c.lbl}</label>`).join('');
 }
-function toggleCol(k,v){cols[k]=v;localStorage.setItem('gf_c',JSON.stringify(cols));renderCat();}
-function setAllCols(v){COL_DEFS.forEach(c=>{cols[c.k]=v;});localStorage.setItem('gf_c',JSON.stringify(cols));document.querySelectorAll('#cp-opts input').forEach(i=>i.checked=v);renderCat();}
+function toggleCol(k,v){cols[k]=v;LS_SET('gf_c',cols);renderCat();}
+function setAllCols(v){COL_DEFS.forEach(c=>{cols[c.k]=v;});LS_SET('gf_c',cols);document.querySelectorAll('#cp-opts input').forEach(i=>i.checked=v);renderCat();}
 function toggleColPicker(){
   const d=document.getElementById('cp-drop');d.classList.toggle('open');
   if(d.classList.contains('open')){
@@ -783,7 +827,7 @@ function toggleColPicker(){
 }
 
 function init(){
-  S=JSON.parse(localStorage.getItem(SK)||'null')||{...DS};
+  S=LS_GET(SK,null)||{...DS};
   initCols();
   // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
   const storedVer=parseInt(localStorage.getItem(VK)||'0');
@@ -792,9 +836,9 @@ function init(){
     localStorage.removeItem(FK);
     localStorage.setItem(VK,DATA_VER);
   }
-  fours=JSON.parse(localStorage.getItem(FK)||'null');
+  fours=LS_GET(FK,null);
   if(!fours||!fours.length)fours=DF.map(f=>({...f}));
-  prods=JSON.parse(localStorage.getItem(PK)||'null');
+  prods=LS_GET(PK,null);
   if(!prods||!prods.length){prods=buildProds();save('p');}
   // Mise à jour silencieuse des fournisseurs par défaut si données manquantes
   fours.forEach((f,i)=>{
@@ -807,8 +851,8 @@ function init(){
     }
   });
   save('f');
-  trans=JSON.parse(localStorage.getItem(TK)||'[]');
-  winOverrides=JSON.parse(localStorage.getItem(WK)||'{}');
+  trans=LS_GET(TK,[]);
+  winOverrides=LS_GET(WK,{});
   // Silent migration: add grp field to products that lack it
   let migrated=false;
   prods.forEach(p=>{
@@ -831,10 +875,10 @@ function buildProds(){
 }
 
 function save(t){
-  if(t==='p')localStorage.setItem(PK,JSON.stringify(prods));
-  if(t==='f')localStorage.setItem(FK,JSON.stringify(fours));
-  if(t==='t')localStorage.setItem(TK,JSON.stringify(trans));
-  if(t==='s')localStorage.setItem(SK,JSON.stringify(S));
+  if(t==='p')LS_SET(PK,prods);
+  if(t==='f')LS_SET(FK,fours);
+  if(t==='t')LS_SET(TK,trans);
+  if(t==='s')LS_SET(SK,S);
 }
 
 function loadS(){
@@ -899,9 +943,8 @@ function Nd(n,d=2){return isNaN(n)?'—':n.toLocaleString('fr-FR',{minimumFracti
 function tab(name){
   ['catalogue','fournisseurs','transitaires','simulation','devis'].forEach(t=>{
     document.getElementById('t-'+t).style.display=t===name?'block':'none';
-  });
-  document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active',['catalogue','fournisseurs','transitaires','simulation','devis'][i]===name);
+    const b=document.getElementById('tab-'+t);
+    if(b){const on=t===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;}
   });
   if(name==='devis')renderDevis();
 }
@@ -975,7 +1018,7 @@ function selectWinner(key,prods){
 function setWinner(key,prodId,event){
   if(event)event.stopPropagation();
   winOverrides[key]=prodId;
-  localStorage.setItem(WK,JSON.stringify(winOverrides));
+  LS_SET(WK,winOverrides);
   renderCat();toast('Fournisseur sélectionné comme gagnant ✓');
 }
 
@@ -992,21 +1035,21 @@ function prodGroupCard(g){
   const em=EMOJIS[w.cat]||'📦';
   const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${w.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
+    ?`<img src="${imgSrc}" alt="${String(w.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
     :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(w);
   const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
   const escapedKey=key.replace(/'/g,"\\'");
   const priceRows=[
     cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
     cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
     cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
   ].join('');
   const altCards=others.map(p=>{
     const fp=fours.find(x=>x.id===p.fid);
     const cp=calc(p);
-    const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" class="alt-card-img" loading="lazy" onerror="this.style.display='none'">`:'<span style="font-size:20px;width:38px;text-align:center">'+EMOJIS[p.cat]+'</span>';
+    const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" class="alt-card-img" alt="" loading="lazy" onerror="this.style.display='none'">`:'<span style="font-size:20px;width:38px;text-align:center">'+EMOJIS[p.cat]+'</span>';
     return`<div class="alt-card">
       ${pimg}
       <div class="alt-card-info">
@@ -1061,7 +1104,7 @@ function prodGroupTable(groups){
     const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives">▶</button>`:'';
     const winRow=`<tr>
       <td class="no-print">${expandBtn}</td>
-      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[w.cat]+'</span>'}</td>
+      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[w.cat]+'</span>'}</td>
       <td><code style="font-size:10px">${w.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span style="font-size:9px;background:var(--bleu);color:#fff;padding:1px 5px;border-radius:8px;margin-left:4px">+${others.length}</span>`:''}</td>
       ${C.cat   ?`<td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${w.cat}</span></td>`:''}
@@ -1071,11 +1114,11 @@ function prodGroupTable(groups){
       ${C.achat ?`<td>${N(c.pa)}</td>`:''}
       ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
       ${C.fret  ?`<td>${N(c.fret)} ${w.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
+      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
       ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">🗑️</button>
@@ -1086,7 +1129,7 @@ function prodGroupTable(groups){
     const colCount=4+(Object.values(C).filter(Boolean).length)+1;
     const altRows=others.map(p=>{
       const fp=fours.find(x=>x.id===p.fid);const cp=calc(p);
-      const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" loading="lazy">`:'<span style="font-size:16px">'+EMOJIS[p.cat]+'</span>';
+      const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" alt="" loading="lazy">`:'<span style="font-size:16px">'+EMOJIS[p.cat]+'</span>';
       return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
         <td></td>
         <td>${pimg}</td>
@@ -1099,10 +1142,10 @@ function prodGroupTable(groups){
         ${C.achat ?`<td>${N(cp.pa)}</td>`:''}
         ${C.prach ?`<td>${cp.prach?N(cp.prach):'—'}</td>`:''}
         ${C.fret  ?`<td>${N(cp.fret)}</td>`:''}
-        ${C.marge ?`<td style="color:var(--vert)">${N(cp.marge_xof)}</td>`:''}
+        ${C.marge ?`<td style="color:var(--vert-t)">${N(cp.marge_xof)}</td>`:''}
         ${C.vente ?`<td>${N(cp.pnh)}</td>`:''}
         ${C.total ?`<td>${N(cp.prix_ht)}</td>`:''}
-        ${C.ttc   ?`<td style="color:var(--bleu)">${N(cp.ttc)}</td>`:''}
+        ${C.ttc   ?`<td style="color:var(--bleu-t)">${N(cp.ttc)}</td>`:''}
         ${C.marche?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
         <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?'✓':'📋'}</button></div></td>
       </tr>`;
@@ -1140,7 +1183,7 @@ function prodCard(p){
   const em=EMOJIS[p.cat]||'📦';
   const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${p.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
+    ?`<img src="${imgSrc}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none;font-size:44px">'+em+'</div>'
     :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
   const c=calc(p);
   const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
@@ -1148,11 +1191,11 @@ function prodCard(p){
     cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
     cols.prach&&c.prach?`<div class="pr"><span class="pr-lbl">Préacheminement</span><span class="pr-val">${N(c.prach)}</span></div>`:'',
     cols.fret  ?`<div class="pr"><span class="pr-lbl">Fret/Douane</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
+    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
     cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
     cols.total ?`<div class="pr"><span class="pr-lbl">Prix total HT</span><span class="pr-val">${N(c.prix_ht)}</span></div>`:'',
     cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
-    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
+    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert-t);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
   ].join('');
   return`<div class="card">
   <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
@@ -1193,7 +1236,7 @@ function prodTable(list){
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
     return`<tr>
-      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[p.cat]+'</span>'}</td>
+      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:'<span style="font-size:20px">'+EMOJIS[p.cat]+'</span>'}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${p.nom}</td>
       ${C.cat   ?`<td><span style="background:#f0f0ff;color:#444;padding:2px 6px;border-radius:10px;font-size:10px">${p.cat}</span></td>`:''}
@@ -1203,11 +1246,11 @@ function prodTable(list){
       ${C.achat ?`<td>${N(c.pa)}</td>`:''}
       ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
       ${C.fret  ?`<td>${N(c.fret)} ${p.tr==='Aérien'?'✈️':'🚢'}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
+      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
       ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
       ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
+      ${C.marche?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
@@ -1259,7 +1302,7 @@ function openProdModal(id=null){
     document.getElementById('p-dev').value='RMB';
   }
   updateSLink();
-  document.getElementById('prod-modal').classList.add('open');
+  openMod('prod-modal');
 }
 
 function genRef(){
@@ -1295,10 +1338,10 @@ function calcPrev(){
     <div>EXW (XOF): <b>${N(c.pa)}</b></div>
     ${c.prach?`<div>Préacheminement: <b>${N(c.prach)}</b></div>`:''}
     <div>Fret/Douane: <b>${N(c.fret)}</b></div>
-    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert)">${N(c.marge_xof)}</b></div>
+    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.marge_xof)}</b></div>
     <div>Vente HT: <b>${N(c.pnh)}</b></div>
     <div>Prix total HT: <b>${N(c.prix_ht)}</b></div>
-    <div>TTC: <b style="color:var(--bleu)">${N(c.ttc)}</b></div>`;
+    <div>TTC: <b style="color:var(--bleu-t)">${N(c.ttc)}</b></div>`;
 }
 
 function saveProd(){
@@ -1332,20 +1375,20 @@ function addPics(inp){
   });inp.value='';
 }
 function renderThumbs(){
-  document.getElementById('p-thumbs').innerHTML=pics.map((s,i)=>`<div class="thumb"><img src="${s}"><button onclick="pics.splice(${i},1);renderThumbs()">✕</button></div>`).join('');
+  document.getElementById('p-thumbs').innerHTML=pics.map((s,i)=>`<div class="thumb"><img src="${s}" alt="Photo produit ${i+1}"><button onclick="pics.splice(${i},1);renderThumbs()" aria-label="Supprimer">✕</button></div>`).join('');
 }
 function addLogo(inp,pid,did){
   const f=inp.files[0];if(!f)return;
   const r=new FileReader();r.onload=e=>{
     document.getElementById(did).value=e.target.result;
-    document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()">✕</button></div>`;
+    document.getElementById(pid).innerHTML=`<div class="thumb"><img src="${e.target.result}" alt="Aperçu de la photo"><button onclick="document.getElementById('${did}').value='';this.closest('.thumb').remove()" aria-label="Supprimer">✕</button></div>`;
   };r.readAsDataURL(f);inp.value='';
 }
 function previewLogoUrl(){
   const url=document.getElementById('f-logo-url').value.trim();
   const prev=document.getElementById('f-logo-prev');
   const dat=document.getElementById('f-logo-dat');
-  if(url){dat.value=url;prev.innerHTML=`<div class="thumb"><img src="${url}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><text y=%221em%22 font-size=%2230%22>🏭</text></svg>'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;}
+  if(url){dat.value=url;prev.innerHTML=`<div class="thumb"><img src="${url}" alt="Aperçu du logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><text y=%221em%22 font-size=%2230%22>🏭</text></svg>'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''" aria-label="Supprimer">✕</button></div>`;}
   else{dat.value='';prev.innerHTML='';}
 }
 
@@ -1385,7 +1428,7 @@ function renderFour(){
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const stars='⭐'.repeat(parseInt(f.eval)||0);
-    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${f.nom}" onerror="this.style.display='none'">`:`<div style="width:56px;height:56px;border-radius:10px;background:var(--gris);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏭</div>`;
+    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${String(f.nom||'').replace(/"/g,'&quot;')}" onerror="this.style.display='none'">`:`<div style="width:56px;height:56px;border-radius:10px;background:var(--gris);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏭</div>`;
     return`<div class="card">
       <div class="card-body">
         <div class="four-card-hdr">
@@ -1402,7 +1445,7 @@ function renderFour(){
         ${f.wc?`<div class="info-row">💬 WeChat : ${f.wc}</div>`:''}
         ${f.dom?`<div class="info-row" style="margin-top:4px">🏭 ${f.dom}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'#d1fae5':'#fef3c7'};color:${f.ali==='Vérifié'?'#059669':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
+          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'#fef3c7'};color:${f.ali==='Vérifié'?'var(--ok)':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
           ${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
           ${f.devis?`<a href="${f.devis}" target="_blank" class="devis-btn">📄 Devis PDF</a>`:''}
         </div>
@@ -1443,9 +1486,9 @@ function openFourModal(id=null){
       document.getElementById('f-logo-dat').value=f.logo;
       if(f.logo.startsWith('http')){
         document.getElementById('f-logo-url').value=f.logo;
-        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}" onerror="this.style.display='none'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;
+        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}" alt="Logo" onerror="this.style.display='none'"><button onclick="document.getElementById('f-logo-url').value='';document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''" aria-label="Supprimer">✕</button></div>`;
       }else{
-        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}"><button onclick="document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''">✕</button></div>`;
+        document.getElementById('f-logo-prev').innerHTML=`<div class="thumb"><img src="${f.logo}" alt="Logo"><button onclick="document.getElementById('f-logo-dat').value='';document.getElementById('f-logo-prev').innerHTML=''" aria-label="Supprimer">✕</button></div>`;
       }
     }
   }else{
@@ -1453,7 +1496,7 @@ function openFourModal(id=null){
     ['f-nom','f-contact','f-pays','f-email','f-wa','f-wc','f-dom','f-an','f-ali-url','f-devis','f-lang','f-mkt','f-desc','f-com'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('f-eval').value=3;document.getElementById('f-ali').value='Non disponible';
   }
-  document.getElementById('four-modal').classList.add('open');
+  openMod('four-modal');
 }
 
 function saveFour(){
@@ -1515,13 +1558,13 @@ function openTransModal(id=null){
     document.getElementById('t-mar').value=t.mar||'';document.getElementById('t-mard').value=t.mard||'';
     document.getElementById('t-aer').value=t.aer||'';document.getElementById('t-aerd').value=t.aerd||'';
     document.getElementById('t-ass').value=t.ass||'0';
-    if(t.logo){document.getElementById('t-logo-dat').value=t.logo;document.getElementById('t-logo-prev').innerHTML=`<div class="thumb"><img src="${t.logo}"></div>`;}
+    if(t.logo){document.getElementById('t-logo-dat').value=t.logo;document.getElementById('t-logo-prev').innerHTML=`<div class="thumb"><img src="${t.logo}" alt="Logo"></div>`;}
   }else{
     document.getElementById('tm-title').textContent='Nouveau transitaire';
     ['t-nom','t-dep','t-arr','t-contact','t-wa','t-tel','t-mar','t-mard','t-aer','t-aerd'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('t-type').value='Maritime';document.getElementById('t-ent').value=0;document.getElementById('t-ass').value='0';
   }
-  document.getElementById('trans-modal').classList.add('open');
+  openMod('trans-modal');
 }
 
 function saveTrans(){
@@ -1693,14 +1736,14 @@ const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35,show:{.
 
 /* ---- CHARGEMENT / PERSISTANCE ---- */
 function loadDevis(){
-  devisCart=JSON.parse(localStorage.getItem(DK)||'[]');
-  devisClient=JSON.parse(localStorage.getItem(DCK)||'null')||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
-  const saved=JSON.parse(localStorage.getItem(DPK)||'null');
+  devisCart=LS_GET(DK,[]);
+  devisClient=LS_GET(DCK,null)||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
+  const saved=LS_GET(DPK,null);
   devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved,show:{...DV_SHOW_DEFAULT,...(saved.show||{})}}:{...DV_PREFS_DEFAULT,show:{...DV_SHOW_DEFAULT}};
   if(saved&&saved.fx){devisFX={dev:saved.fx.dev||'XOF',taux:saved.fx.taux||1};}
   updateCartBadge();
 }
-function saveDevisCartLS(){localStorage.setItem(DK,JSON.stringify(devisCart));updateCartBadge();}
+function saveDevisCartLS(){LS_SET(DK,devisCart);updateCartBadge();}
 function saveDevisClient(){
   devisClient={
     nom:document.getElementById('dv-nom').value,
@@ -1710,7 +1753,7 @@ function saveDevisClient(){
     adr:document.getElementById('dv-adr').value,
     ville:document.getElementById('dv-ville').value,
   };
-  localStorage.setItem(DCK,JSON.stringify(devisClient));
+  LS_SET(DCK,devisClient);
 }
 function saveDevisPrefs(){
   if(devisPrefs.strategy==='personnalise'){
@@ -1718,7 +1761,7 @@ function saveDevisPrefs(){
     if(el)devisPrefs.margePerso=parseFloat(el.value)||35;
   }
   devisPrefs.fx={dev:devisFX.dev,taux:devisFX.taux};
-  localStorage.setItem(DPK,JSON.stringify(devisPrefs));
+  LS_SET(DPK,devisPrefs);
 }
 
 function updateCartBadge(){
@@ -1781,7 +1824,7 @@ async function onDevisDevChange(){
   inp.value=t.toFixed(4);devisFX.taux=t;
   if(rates){
     const hm=new Date(fxCache.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    msg.innerHTML=`<span style="color:var(--vert)">✓ Taux marché (${hm}) — modifiable librement</span>`;
+    msg.innerHTML=`<span style="color:var(--vert-t)">✓ Taux marché (${hm}) — modifiable librement</span>`;
   }else{
     msg.innerHTML=`<span style="color:#b45309">⚠️ API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
   }
@@ -1790,7 +1833,7 @@ async function onDevisDevChange(){
 
 function onDevisTauxChange(){
   const v=parseFloat(document.getElementById('dv-taux').value);
-  if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu)">✏️ Taux saisi manuellement</span>`;renderDevisCart();}
+  if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu-t)">✏️ Taux saisi manuellement</span>`;renderDevisCart();}
 }
 
 /* ---- CALCUL DEVIS (logique CLIENT — séparée de calc() interne) ---- */
@@ -1944,7 +1987,7 @@ function buildDevisGrid(){
     const c=calcDevis(item),p=item.snap;
     const em=EMOJIS[p.cat]||'📦';
     const imgHtml=p.photos&&p.photos[0]
-      ?`<img src="${p.photos[0]}" alt="${p.nom}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none;font-size:44px">${em}</div>`
+      ?`<img src="${p.photos[0]}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none;font-size:44px">${em}</div>`
       :`<div class="card-img-placeholder" style="font-size:44px">${em}</div>`;
     return`<div class="cart-item-grid">
       <div class="card-img" style="height:130px">${imgHtml}</div>
@@ -2013,7 +2056,7 @@ function buildDevisTable(){
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.prixClientHT)}</td>`:''}
       ${SH.douane?`<td style="font-size:11px;color:#b45309">${N(c.douane)}</td>`:''}
       ${SH.tva?`<td style="font-size:11px;color:#6b7280">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
       <td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
@@ -2187,11 +2230,49 @@ function generateDevisPDF(){
 /* ---- FIN MODULE DEVIS ---- */
 
 /* ---- UTILS ---- */
-function closeMod(id){document.getElementById(id).classList.remove('open');}
+let modReturnFocus=null;
+function openMod(id){
+  modReturnFocus=document.activeElement;
+  const ov=document.getElementById(id);
+  ov.classList.add('open');
+  const first=ov.querySelector('.fg input.fc:not([readonly]),.fg select.fc,.fg textarea.fc')||ov.querySelector('button');
+  if(first)first.focus();
+}
+function closeMod(id){
+  document.getElementById(id).classList.remove('open');
+  if(modReturnFocus&&document.contains(modReturnFocus)){modReturnFocus.focus();modReturnFocus=null;}
+}
+// Clavier : Échap ferme modales et menus ; Tab reste piégé dans la modale ouverte ; flèches sur les onglets
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const ov=document.querySelector('.overlay.open');
+    if(ov){closeMod(ov.id);return;}
+    document.querySelectorAll('.col-picker-drop.open').forEach(d=>d.classList.remove('open'));
+    return;
+  }
+  if(e.key==='Tab'){
+    const ov=document.querySelector('.overlay.open');
+    if(!ov)return;
+    const foc=[...ov.querySelectorAll('button,input:not([type=hidden]):not([readonly]),select,textarea,a[href]')].filter(el=>el.offsetParent!==null);
+    if(!foc.length)return;
+    const first=foc[0],last=foc[foc.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    return;
+  }
+  if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&e.target.closest&&e.target.closest('[role=tablist]')){
+    const names=['catalogue','fournisseurs','transitaires','simulation','devis'];
+    const cur=names.findIndex(n=>document.getElementById('tab-'+n)===e.target);
+    if(cur<0)return;
+    e.preventDefault();
+    const next=names[(cur+(e.key==='ArrowRight'?1:names.length-1))%names.length];
+    tab(next);document.getElementById('tab-'+next).focus();
+  }
+});
 document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
 function toast(msg,err=false){
   const t=document.getElementById('toast');t.textContent=msg;
-  t.style.borderLeftColor=err?'var(--rouge)':'var(--vert)';
+  t.style.setProperty('--toast-dot',err?'var(--rouge)':'var(--vert)');
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
 
