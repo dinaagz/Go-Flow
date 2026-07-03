@@ -149,9 +149,10 @@ textarea.fc{resize:vertical;min-height:70px}
 /* Grouped view */
 .grp-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;backdrop-filter:blur(4px);cursor:pointer;transition:.2s}
 .grp-count-badge:hover{background:var(--bleu-t)}
-.alt-panel{overflow:hidden;max-height:0;transition:max-height .35s ease}
-.alt-panel.open{max-height:800px}
-.alt-panel-inner{padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.alt-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.22,1,.36,1)}
+.alt-panel.open{grid-template-rows:1fr}
+.alt-panel-inner{min-height:0;overflow:hidden;padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+@media(prefers-reduced-motion:reduce){.alt-panel{transition:none}}
 .alt-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--gris);font-size:12px}
 .alt-card.is-winner{border-color:var(--vert);background:#f0fff8}
 .alt-card-img{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0}
@@ -278,7 +279,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div class="grad-bar"></div>
 <header class="hdr">
   <div>
-    <div class="logo">Go.Flow</div>
+    <h1 class="logo">Go.Flow</h1>
     <div class="logo-sub">Go Group — Console Import</div>
   </div>
   <div class="hdr-right">
@@ -310,7 +311,7 @@ textarea.fc{resize:vertical;min-height:70px}
 
 <!-- SETTINGS -->
 <div class="settings-panel" id="spanel">
-  <div class="sec-hdr">⚙️ Paramètres globaux</div>
+  <h2 class="sec-hdr">⚙️ Paramètres globaux</h2>
   <div class="s-grid">
     <div class="fgrp"><label class="flbl" for="s_tc">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
     <div class="fgrp"><label class="flbl" for="s_fa">Fret aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
@@ -390,7 +391,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div id="t-simulation" role="tabpanel" aria-labelledby="tab-simulation" style="display:none">
   <div class="sim-wrap">
     <div class="sim-form">
-      <div class="sec-hdr">🧮 Paramètres commande</div>
+      <h2 class="sec-hdr">🧮 Paramètres commande</h2>
       <div id="sim-prev" style="display:none" class="prod-prev">
         <div class="prev-icon" id="sim-ico">📦</div>
         <div>
@@ -437,7 +438,7 @@ textarea.fc{resize:vertical;min-height:70px}
       </div>
     </div>
     <div class="sim-result" id="sim-result">
-      <div class="sec-hdr" style="color:#fff">📊 Récapitulatif</div>
+      <h2 class="sec-hdr" style="color:#fff">📊 Récapitulatif</h2>
       <div id="sim-rows"><div style="text-align:center;opacity:.4;padding:40px 0;font-size:13px">Sélectionnez un produit</div></div>
       <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-grad" onclick="window.print()">🖨️ Export PDF</button>
@@ -451,7 +452,7 @@ textarea.fc{resize:vertical;min-height:70px}
 
   <!-- Infos client -->
   <div class="devis-section">
-    <div class="devis-section-title">👤 Informations client</div>
+    <h2 class="devis-section-title">👤 Informations client</h2>
     <div class="fg">
       <div class="fgrp"><label class="flbl" for="dv-nom">Nom complet</label><input class="fc" id="dv-nom" placeholder="Jean Dupont" oninput="saveDevisClient()"></div>
       <div class="fgrp"><label class="flbl" for="dv-ent">Entreprise</label><input class="fc" id="dv-ent" placeholder="Beauté Pro SARL" oninput="saveDevisClient()"></div>
@@ -464,7 +465,7 @@ textarea.fc{resize:vertical;min-height:70px}
 
   <!-- Stratégie de prix -->
   <div class="devis-section">
-    <div class="devis-section-title">💰 Stratégie de prix pour ce devis</div>
+    <h2 class="devis-section-title">💰 Stratégie de prix pour ce devis</h2>
     <div class="strat-grid">
       <button class="strat-btn active" id="strat-marge" onclick="setStrategy('marge_fixe')">
         📊 Marge standard<small>Marge cible (par défaut)</small>
@@ -489,7 +490,7 @@ textarea.fc{resize:vertical;min-height:70px}
 
   <!-- Devise du devis -->
   <div class="devis-section">
-    <div class="devis-section-title">💱 Devise du devis client</div>
+    <h2 class="devis-section-title">💱 Devise du devis client</h2>
     <div class="fx-box">
       <div class="fgrp">
         <label class="flbl" for="dv-dev">Devise de présentation</label>
@@ -514,7 +515,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <!-- Panier -->
   <div class="devis-section">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-      <div class="devis-section-title" style="margin-bottom:0">🛒 Produits sélectionnés &nbsp;<span id="dv-count" style="background:var(--bleu);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;font-family:'Poppins',sans-serif">0</span></div>
+      <h2 class="devis-section-title" style="margin-bottom:0">🛒 Produits sélectionnés &nbsp;<span id="dv-count" style="background:var(--bleu);color:#fff;border-radius:10px;padding:2px 8px;font-size:12px;font-family:'Poppins',sans-serif">0</span></h2>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div class="view-tog">
           <button class="view-btn active" id="dvg" onclick="setDevisView('grid')" title="Grille" aria-label="Vue grille">▦</button>
@@ -556,7 +557,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div class="overlay" id="prod-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
     <div class="modal-hdr">
-      <div class="modal-title" id="pm-title">Nouveau produit</div>
+      <h2 class="modal-title" id="pm-title">Nouveau produit</h2>
       <button class="modal-x" onclick="closeMod('prod-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
@@ -619,7 +620,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div class="overlay" id="four-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fm-title">
     <div class="modal-hdr">
-      <div class="modal-title" id="fm-title">Nouveau fournisseur</div>
+      <h2 class="modal-title" id="fm-title">Nouveau fournisseur</h2>
       <button class="modal-x" onclick="closeMod('four-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
@@ -672,7 +673,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div class="overlay" id="trans-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tm-title">
     <div class="modal-hdr">
-      <div class="modal-title" id="tm-title">Nouveau transitaire</div>
+      <h2 class="modal-title" id="tm-title">Nouveau transitaire</h2>
       <button class="modal-x" onclick="closeMod('trans-modal')" aria-label="Fermer">✕</button>
     </div>
     <div class="modal-body">
@@ -1707,6 +1708,7 @@ const DK='gf_d',DCK='gf_dc',DPK='gf_dp';
 let devisCart=[],devisClient={},devisPrefs={},devisView='grid';
 let devisFX={dev:'XOF',taux:1};
 let fxCache={rates:null,ts:0};
+let fxReqSeq=0;
 
 const DEVIS_SHOW_DEFS=[
   // Infos produit
@@ -1818,7 +1820,9 @@ async function onDevisDevChange(){
   }
   spin.style.display='inline';inp.value='';
   msg.innerHTML='<span style="color:var(--muted)">Récupération du taux en cours…</span>';
+  const reqId=++fxReqSeq;
   const rates=await fetchFXRates();
+  if(reqId!==fxReqSeq)return; // une devise plus récente a été sélectionnée entre-temps
   spin.style.display='none';
   const t=xofPer(dev,rates);
   inp.value=t.toFixed(4);devisFX.taux=t;
