@@ -31,7 +31,16 @@ sed -n '/<script>/,/<\/script>/p' index.html | grep -v '<script>' | grep -v '</s
 
 ## Architecture
 
-Everything lives in `index.html` — CSS, HTML, and JS in one file (~1400 lines). No framework.
+Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines). No framework.
+
+### App shell (premium SaaS layout)
+
+- Desktop (≥1024px): fixed left **sidebar** (`.sidebar` > `.tabs` nav) + glass **topbar** (`.hdr`) + sticky 4px `.grad-bar` brand line on top
+- Mobile (<1024px): sidebar collapses into a horizontal scrollable nav strip under the topbar
+- Icons: inline **SVG sprite** (`<symbol id="i-*">`, Lucide-style outline, stroke 2) at the top of `<body>`. Never use emojis as structural icons. In JS templates use the helpers:
+  - `ICO(name)` → `<svg class="ic"><use href="#i-name"/></svg>`
+  - `TRI(tr)` → ship/plane icon for transport mode
+  - `PH_LG` / `PH_SM` — image placeholder icons (large card / small table)
 
 ### Data layer (localStorage)
 
