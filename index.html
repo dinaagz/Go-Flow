@@ -138,6 +138,17 @@ select.filt:hover{border-color:#C3CADC}
 .pr{display:flex;justify-content:space-between;align-items:center;font-size:11.5px}
 .pr-lbl{color:var(--muted)}.pr-val{font-weight:600;font-variant-numeric:tabular-nums}
 .pr-ttc{font-size:13px;color:var(--bleu-t);font-weight:700}
+.pr-strong .pr-lbl{color:var(--text);font-weight:700}.pr-strong .pr-val{font-weight:800}
+.pr-click{cursor:pointer;border-radius:6px}
+.pr-click:hover .pr-lbl{color:var(--bleu-t)}
+.pr-click .ic{width:12px;height:12px;transition:transform .18s var(--ease)}
+.pr-click.open .ic{transform:rotate(90deg)}
+.cost-det{display:none;background:var(--gris);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin:2px 0 4px;font-size:10.5px}
+.cost-det.open{display:block}
+.cd-row{display:flex;justify-content:space-between;gap:10px;padding:2px 0;color:var(--muted);font-variant-numeric:tabular-nums}
+.cd-tot{font-weight:700;color:var(--text);border-top:1px dashed var(--border2);margin-top:3px;padding-top:4px}
+.cd-note{font-size:9.5px;color:var(--muted);margin-top:3px;font-style:italic}
+.sim-sec{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin:10px 0 2px}
 .card-acts{display:flex;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)}
 .card-acts .btn-sm{padding:7px 9px}
 .pill-cat{background:#EEF1FA;color:#4A5065;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:500;white-space:nowrap}
@@ -478,13 +489,28 @@ textarea.fc{resize:vertical;min-height:70px}
   <h2 class="sec-hdr"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres globaux</h2>
   <div class="s-grid">
     <div class="fgrp"><label class="flbl" for="s_tc">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
-    <div class="fgrp"><label class="flbl" for="s_fa">Fret aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
-    <div class="fgrp"><label class="flbl" for="s_fm">Fret maritime (XOF/CBM)</label><input type="number" class="fc" id="s_fm"></div>
+    <div class="fgrp"><label class="flbl" for="s_fa">Frais logistiques aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
+    <div class="fgrp"><label class="flbl" for="s_fm">Frais logistiques maritime (XOF/CBM)</label><input type="number" class="fc" id="s_fm"></div>
     <div class="fgrp"><label class="flbl" for="s_mg">Taux marge cible (%)</label><input type="number" class="fc" id="s_mg" step="0.5"></div>
-    <div class="fgrp"><label class="flbl" for="s_tv">TVA (%)</label><input type="number" class="fc" id="s_tv" step="0.5"></div>
+    <div class="fgrp"><label class="flbl" for="s_trf_mode">Frais transfert de fonds</label>
+      <div style="display:flex;gap:6px">
+        <select class="fc" id="s_trf_mode" style="flex:1.2"><option value="pct">Taux (%)</option><option value="fixe">Montant fixe (devise)</option></select>
+        <input type="number" class="fc" id="s_trf_val" step="0.01" min="0" style="flex:1">
+      </div>
+    </div>
+    <div class="fgrp"><label class="flbl" for="s_ass_on">Trade Assurance (optionnelle)</label>
+      <div style="display:flex;gap:6px">
+        <select class="fc" id="s_ass_on" style="flex:1"><option value="0">Désactivée</option><option value="1">Activée</option></select>
+        <select class="fc" id="s_ass_mode" style="flex:1"><option value="pct">Taux (%)</option><option value="fixe">Fixe</option></select>
+        <input type="number" class="fc" id="s_ass_val" step="0.01" min="0" style="flex:.8">
+      </div>
+    </div>
+    <div class="fgrp"><label class="flbl" for="s_tvi">TVA interne (%) — clients assujettis uniquement</label><input type="number" class="fc" id="s_tvi" step="0.5"></div>
   </div>
-  <div style="margin-top:14px;display:flex;gap:8px">
+  <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Les tarifs transitaire sont <b>tout-compris</b> (fret + douane + taxes) : la TVA n'est jamais ajoutée en plus des frais logistiques. La TVA interne n'apparaît séparément que pour les clients professionnels assujettis.</div>
+  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+    <button class="btn btn-sec" onclick="exportAudit()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Historique audit</button>
     <button class="btn btn-sec" onclick="toggleSettings()">Fermer</button>
   </div>
 </div>
@@ -577,7 +603,7 @@ textarea.fc{resize:vertical;min-height:70px}
         <div class="fgrp"><label class="flbl" for="sim-qty">Quantité</label>
           <input type="number" class="fc" id="sim-qty" value="1" min="1" oninput="simCalc()">
         </div>
-        <div class="fgrp"><label class="flbl" for="sim-pv">Prix vente HT unitaire (XOF)</label>
+        <div class="fgrp"><label class="flbl" for="sim-pv">Prix de Vente HT unitaire (XOF)</label>
           <input type="number" class="fc" id="sim-pv" placeholder="Auto" oninput="simCalc()">
         </div>
         <div class="fgrp full"><label class="flbl">Mode livraison</label>
@@ -586,14 +612,14 @@ textarea.fc{resize:vertical;min-height:70px}
             <button class="trans-btn" id="tb-aer" onclick="setSimTrans('Aérien')"><svg class="ic" aria-hidden="true"><use href="#i-plane"/></svg> Aérien</button>
           </div>
         </div>
-        <div class="fgrp"><label class="flbl" for="sim-ass">Assurance</label>
+        <div class="fgrp"><label class="flbl" for="sim-ass">Trade Assurance</label>
           <select class="fc" id="sim-ass" onchange="simCalc()">
-            <option value="0">Non</option><option value="1">Oui (1%)</option><option value="2">Oui (2%)</option>
+            <option value="def">— Selon paramètres —</option><option value="1">Activée</option><option value="0">Désactivée</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl" for="sim-tva">TVA</label>
+        <div class="fgrp"><label class="flbl" for="sim-tva">Client assujetti TVA ?</label>
           <select class="fc" id="sim-tva" onchange="simCalc()">
-            <option value="1">Oui (18%)</option><option value="0">Non</option>
+            <option value="0">Non — TTC tout-compris</option><option value="1">Oui — TVA séparée</option>
           </select>
         </div>
         <div class="fgrp"><label class="flbl" for="sim-rem">Remise (%)</label>
@@ -624,6 +650,12 @@ textarea.fc{resize:vertical;min-height:70px}
       <div class="fgrp"><label class="flbl" for="dv-tel">Téléphone / WhatsApp</label><input class="fc" id="dv-tel" placeholder="+228 ..." oninput="saveDevisClient()"></div>
       <div class="fgrp"><label class="flbl" for="dv-adr">Adresse</label><input class="fc" id="dv-adr" oninput="saveDevisClient()"></div>
       <div class="fgrp"><label class="flbl" for="dv-ville">Ville / Pays</label><input class="fc" id="dv-ville" placeholder="Lomé, Togo" oninput="saveDevisClient()"></div>
+      <div class="fgrp full"><label class="flbl">Client assujetti à la TVA ?</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;padding:6px 0">
+          <input type="checkbox" id="dv-assuj" onchange="saveDevisClient();renderDevisCart()">
+          Oui — afficher la TVA interne séparément sur le devis <span style="color:var(--muted)">(sinon : Prix TTC tout-compris uniquement)</span>
+        </label>
+      </div>
     </div>
   </div>
 
@@ -739,16 +771,19 @@ textarea.fc{resize:vertical;min-height:70px}
         </div>
         <div class="fgrp"><label class="flbl" for="p-four">Fournisseur</label><select class="fc" id="p-four"></select></div>
         <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl" for="p-prach">Préacheminement (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — si fourni par le fournisseur" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-prach">Fret local (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — transport fournisseur → transitaire" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-dev">Devise</label>
           <select class="fc" id="p-dev" onchange="calcPrev()">
             <option value="RMB">RMB (¥)</option><option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option><option value="XOF">XOF (F)</option>
           </select>
         </div>
-        <div class="fgrp"><label class="flbl" for="p-l">Longueur (cm)</label><input type="number" class="fc" id="p-l" step="0.1" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl" for="p-la">Largeur (cm)</label><input type="number" class="fc" id="p-la" step="0.1" oninput="calcPrev()"></div>
-        <div class="fgrp"><label class="flbl" for="p-h">Hauteur (cm)</label><input type="number" class="fc" id="p-h" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-l">Longueur</label><input type="number" class="fc" id="p-l" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-la">Largeur</label><input type="number" class="fc" id="p-la" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-h">Hauteur</label><input type="number" class="fc" id="p-h" step="0.1" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-dimu">Unité dimensions</label>
+          <select class="fc" id="p-dimu" onchange="calcPrev()"><option value="cm">cm</option><option value="m">m</option></select>
+        </div>
         <div class="fgrp"><label class="flbl" for="p-poids">Poids (kg)</label><input type="number" class="fc" id="p-poids" step="0.01" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-trans">Transport défaut</label>
           <select class="fc" id="p-trans"><option value="Maritime">Maritime</option><option value="Aérien">Aérien</option></select>
@@ -854,9 +889,9 @@ textarea.fc{resize:vertical;min-height:70px}
           <select class="fc" id="t-type"><option>Maritime</option><option>Aérien</option><option>Routier</option><option>Multimodale</option></select>
         </div>
         <div class="fgrp"><label class="flbl" for="t-ent">Entreposage (jours)</label><input type="number" class="fc" id="t-ent" value="0"></div>
-        <div class="fgrp"><label class="flbl" for="t-mar">Tarif maritime (XOF/CBM)</label><input type="number" class="fc" id="t-mar" placeholder="230000"></div>
+        <div class="fgrp"><label class="flbl" for="t-mar">Tarif maritime tout-compris (XOF/CBM)</label><input type="number" class="fc" id="t-mar" placeholder="230000"></div>
         <div class="fgrp"><label class="flbl" for="t-mard">Délai maritime (jours)</label><input type="number" class="fc" id="t-mard"></div>
-        <div class="fgrp"><label class="flbl" for="t-aer">Tarif aérien (XOF/kg)</label><input type="number" class="fc" id="t-aer" placeholder="11000"></div>
+        <div class="fgrp"><label class="flbl" for="t-aer">Tarif aérien tout-compris (XOF/kg)</label><input type="number" class="fc" id="t-aer" placeholder="11000"></div>
         <div class="fgrp"><label class="flbl" for="t-aerd">Délai aérien (jours)</label><input type="number" class="fc" id="t-aerd"></div>
         <div class="fgrp"><label class="flbl" for="t-ass">Assurance incluse</label>
           <select class="fc" id="t-ass"><option value="0">Non</option><option value="1">Oui — 1%</option><option value="1.5">Oui — 1.5%</option><option value="2">Oui — 2%</option></select>
@@ -884,7 +919,11 @@ const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
 function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
 function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Stockage local plein — réduisez le nombre ou la taille des photos',true);}}
 const DATA_VER=3;
-const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tva:18};
+// Tarifs transitaire TOUT-COMPRIS (fret + douane + taxes) — la TVA n'est jamais ajoutée par-dessus.
+// trf  : frais de transfert de fonds {mode:'pct'|'fixe', val} appliqués sur le coût d'achat HT
+// assu : Trade Assurance optionnelle (désactivée par défaut), même structure + interrupteur `on`
+// tvaInterne : TVA affichée séparément UNIQUEMENT pour les clients professionnels assujettis
+const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tvaInterne:18,trf:{mode:'pct',val:0},assu:{on:false,mode:'pct',val:1.5}};
 const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
 const ICO=(n,c='')=>`<svg class="ic${c?' '+c:''}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const TRI=t=>t==='Aérien'?ICO('plane'):ICO('ship');
@@ -964,18 +1003,18 @@ const DP=[
 ];
 
 const COL_DEFS=[
-  {k:'cat',   lbl:'Catégorie',         def:true},
-  {k:'four',  lbl:'Fournisseur',       def:true},
-  {k:'cbm',   lbl:'CBM',               def:false},
-  {k:'poids', lbl:'Poids',             def:false},
-  {k:'achat', lbl:'Achat EXW',         def:true},
-  {k:'prach', lbl:'Préacheminement',   def:false},
-  {k:'fret',  lbl:'Fret/Douane',       def:false},
-  {k:'marge', lbl:'Marge',             def:true},
-  {k:'vente', lbl:'Vente HT (EXW+mg)', def:true},
-  {k:'total', lbl:'Prix total HT',     def:false},
-  {k:'ttc',   lbl:'Prix TTC',          def:true},
-  {k:'marche',lbl:'Prix marché',       def:false},
+  {k:'cat',    lbl:'Catégorie',                       def:true},
+  {k:'four',   lbl:'Fournisseur',                     def:true},
+  {k:'cbm',    lbl:'CBM',                             def:false},
+  {k:'poids',  lbl:'Poids',                           def:false},
+  {k:'achat',  lbl:'Achat EXW',                       def:false},
+  {k:'prach',  lbl:'Fret local',                      def:false},
+  {k:'revient',lbl:'Coût de Revient HT',              def:true},
+  {k:'fret',   lbl:'Frais logistiques (Transitaire)', def:true},
+  {k:'marge',  lbl:'Marge',                           def:true},
+  {k:'vente',  lbl:'Prix de Vente HT',                def:true},
+  {k:'ttc',    lbl:'Prix de Vente TTC',               def:true},
+  {k:'marche', lbl:'Prix marché',                     def:false},
 ];
 let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
 let grouped=false,stratPrix='prix_bas',winOverrides={};
@@ -998,7 +1037,11 @@ function toggleColPicker(){
 }
 
 function init(){
-  S=LS_GET(SK,null)||{...DS};
+  // Fusion avec les défauts + migration : l'ancien champ `tva` devient `tvaInterne`
+  const s0=LS_GET(SK,null)||{};
+  S={...DS,...s0,trf:{...DS.trf,...(s0.trf||{})},assu:{...DS.assu,...(s0.assu||{})}};
+  if(s0.tva!=null&&s0.tvaInterne==null)S.tvaInterne=s0.tva;
+  delete S.tva;
   initCols();
   // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
   const storedVer=parseInt(localStorage.getItem(VK)||'0');
@@ -1057,7 +1100,12 @@ function loadS(){
   document.getElementById('s_fa').value=S.tarifAerien;
   document.getElementById('s_fm').value=S.tarifMaritime;
   document.getElementById('s_mg').value=S.tauxMarge;
-  document.getElementById('s_tv').value=S.tva;
+  document.getElementById('s_trf_mode').value=S.trf.mode;
+  document.getElementById('s_trf_val').value=S.trf.val;
+  document.getElementById('s_ass_on').value=S.assu.on?'1':'0';
+  document.getElementById('s_ass_mode').value=S.assu.mode;
+  document.getElementById('s_ass_val').value=S.assu.val;
+  document.getElementById('s_tvi').value=S.tvaInterne;
 }
 
 function saveSettings(){
@@ -1065,47 +1113,92 @@ function saveSettings(){
   S.tarifAerien=parseFloat(document.getElementById('s_fa').value)||11000;
   S.tarifMaritime=parseFloat(document.getElementById('s_fm').value)||230000;
   S.tauxMarge=parseFloat(document.getElementById('s_mg').value)||35;
-  S.tva=parseFloat(document.getElementById('s_tv').value)||18;
-  save('s');renderCat();toast('Paramètres enregistrés ✓');
+  S.trf={mode:document.getElementById('s_trf_mode').value,val:parseFloat(document.getElementById('s_trf_val').value)||0};
+  S.assu={on:document.getElementById('s_ass_on').value==='1',mode:document.getElementById('s_ass_mode').value,val:parseFloat(document.getElementById('s_ass_val').value)||0};
+  S.tvaInterne=parseFloat(document.getElementById('s_tvi').value)||18;
+  save('s');auditLog('parametres',{...S});
+  renderCat();simCalc();toast('Paramètres enregistrés ✓');
 }
 
 function toggleSettings(){document.getElementById('spanel').classList.toggle('open');}
 
-function toXOF(v,dev){
-  if(!v)return 0;
-  const tc=S.tauxChange;
-  if(dev==='RMB')return v*tc;
-  if(dev==='USD')return v*600;
-  if(dev==='EUR')return v*655;
-  return v;
+function xofRate(dev){
+  if(dev==='RMB')return S.tauxChange;
+  if(dev==='USD')return 600;
+  if(dev==='EUR')return 655;
+  return 1;
 }
+function toXOF(v,dev){return v?v*xofRate(dev):0;}
+
+/* ===== MOTEUR DE CALCUL (source unique de vérité) =====
+   Étape 1 — Coût de revient HT en devise source :
+     Coût d'achat HT = EXW × qté + fret local ; + frais transfert + Trade Assurance
+   Étape 2 — Conversion en devise cible (XOF) PUIS marge sur le coût de revient unitaire converti
+   Étape 3 — Frais logistiques transitaire tout-compris (fret + douane + taxes) → Prix de Vente TTC
+   La TVA interne (clients assujettis) est affichée séparément, jamais ajoutée aux frais logistiques. */
+const r2=v=>Math.round((v+Number.EPSILON)*100)/100;
+function cbmOf(l,la,h,unit){const v=(l||0)*(la||0)*(h||0);return unit==='m'?v:v/1e6;}
+function fraisCfg(cfg,base){if(!cfg)return 0;return cfg.mode==='fixe'?(parseFloat(cfg.val)||0):r2(base*(parseFloat(cfg.val)||0)/100);}
+function calcEngine(i){
+  const qty=Math.max(1,i.qty||1);
+  // Étape 1 — coût de revient (devise source) ; le fret local vaut pour la commande entière
+  const coutAchat=r2((i.exw||0)*qty+(i.fretLocal||0));
+  const coutAchatU=r2(coutAchat/qty);
+  const fTrf=fraisCfg(i.transfert,coutAchat);
+  const fAss=(i.assurance&&i.assurance.on)?fraisCfg(i.assurance,coutAchat):0;
+  const coutRevient=r2(coutAchat+fTrf+fAss);
+  const coutRevientU=r2(coutRevient/qty);
+  // Étape 2 — conversion avant marge
+  const tc=i.tauxChange||1;
+  const coutRevientUX=r2(coutRevientU*tc);
+  const coutRevientX=r2(coutRevientUX*qty);
+  const margeU=r2(coutRevientUX*(i.margePct||0)/100);
+  const margeTot=r2(margeU*qty);
+  const pvuBrut=r2(coutRevientUX+margeU);
+  const remU=r2(pvuBrut*(i.remisePct||0)/100);
+  const pvuHT=r2(pvuBrut-remU);
+  const pvtHT=r2(pvuHT*qty);
+  // Étape 3 — frais logistiques tout-compris puis TTC
+  const cbm=cbmOf(i.l,i.la,i.h,i.dimU);
+  const fraisLog=r2(i.mode==='Aérien'?(i.kg||0)*qty*(i.tarifAerien||0):cbm*qty*(i.tarifMaritime||0));
+  const fraisLogU=r2(fraisLog/qty);
+  const pvuTTC=r2(pvuHT+fraisLogU);
+  const pvtTTC=r2(pvtHT+fraisLog);
+  // TVA interne — assujettis uniquement, assise sur le montant HT (jamais sur les frais logistiques)
+  const tvaM=(i.assujetti&&i.tvaInterne)?r2(pvtHT*i.tvaInterne/100):0;
+  return{qty,dev:i.dev||'XOF',tauxChange:tc,mode:i.mode||'Maritime',
+    exwUX:r2((i.exw||0)*tc),fretLocalX:r2((i.fretLocal||0)*tc),
+    coutAchat,coutAchatU,fTrf,fAss,coutRevient,coutRevientU,coutRevientUX,coutRevientX,
+    margeU,margeTot,margePct:i.margePct||0,remU,pvuHT,pvtHT,
+    cbm,cbmTot:r2(cbm*qty*1e6)/1e6,fraisLog,fraisLogU,pvuTTC,pvtTTC,
+    tvaM,tvaPct:i.assujetti?(i.tvaInterne||0):0,totalAvecTVA:r2(pvtTTC+tvaM)};
+}
+/* ===== FIN MOTEUR ===== */
+
+// Adaptateur produit → moteur (o : surcharges {marge,rem,qty,tr,fa,fm,assu,assujetti})
 function calc(p,o={}){
-  const mg=((o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge))/100);
-  const tr=o.tr||p.tr||'Maritime';
-  const fa=o.fa||S.tarifAerien,fm=o.fm||S.tarifMaritime;
-  const dev=p.dev||'RMB';
-  // Prix EXW en XOF
-  const pa=toXOF(p.prix,dev);
-  // Préacheminement (inland freight, donné par le fournisseur, même devise que EXW)
-  const prach=toXOF(parseFloat(p.prach)||0,dev);
-  // Fret/Douane : calculé au CBM (maritime) ou au poids (aérien) — à charge du client
-  const cbm=(p.l*p.la*p.h)/1e6;
-  const fret=tr==='Aérien'?p.kg*fa:cbm*fm;
-  // Marge calculée UNIQUEMENT sur le prix EXW
-  const marge_xof=pa*mg;
-  // Prix de vente HT (EXW + marge)
-  const pvh=pa+marge_xof;
-  const rem=parseFloat(p.rem)||0;
-  const remM=pvh*rem/100;
-  const pnh=pvh-remM;  // prix net de vente HT (après remise sur EXW+marge)
-  // Prix total HT client = vente nette + préacheminement + fret/douane
-  const prix_ht=pnh+prach+fret;
-  // Coût total de revient
-  const cout=pa+prach+fret;
-  // Marge nette = ce qu'on gagne réellement
-  const mn=pnh-pa;
-  const tva=S.tva/100;
-  return{pa,prach,cbm,fret,marge_xof,pvh,remM,pnh,prix_ht,cout,mn,ttc:prix_ht*(1+tva)};
+  const margePct=o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge);
+  return calcEngine({
+    exw:parseFloat(p.prix)||0,fretLocal:parseFloat(p.prach)||0,dev:p.dev||'RMB',
+    qty:o.qty||1,tauxChange:xofRate(p.dev||'RMB'),
+    margePct,remisePct:o.rem!==undefined?o.rem:(parseFloat(p.rem)||0),
+    l:p.l,la:p.la,h:p.h,dimU:p.dimU||'cm',kg:p.kg,
+    mode:o.tr||p.tr||'Maritime',
+    tarifAerien:o.fa||S.tarifAerien,tarifMaritime:o.fm||S.tarifMaritime,
+    transfert:S.trf,assurance:o.assu!==undefined?{...S.assu,on:o.assu}:S.assu,
+    tvaInterne:S.tvaInterne,assujetti:!!o.assujetti});
+}
+
+/* ---- HISTORIQUE AUDIT ---- */
+const AK='gf_audit';
+function auditLog(type,data){const h=LS_GET(AK,[]);h.unshift({ts:new Date().toISOString(),type,data});LS_SET(AK,h.slice(0,100));}
+function exportAudit(){
+  const h=LS_GET(AK,[]);
+  if(!h.length){toast('Aucun calcul dans l\'historique audit',true);return;}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(h,null,2)],{type:'application/json'}));
+  a.download=`GoFlow_Audit_${new Date().toISOString().slice(0,10)}.json`;a.click();
+  toast('Historique audit exporté ✓');
 }
 
 function N(n){if(isNaN(n)||n==null)return'—';return Math.round(n).toLocaleString('fr-FR')+' XOF';}
@@ -1137,12 +1230,12 @@ function renderCat(){
   fours.forEach(f=>{const o=document.createElement('option');o.value=f.id;o.textContent=f.nom;if(f.id===curff)o.selected=true;ff.appendChild(o);});
   const fv=ff.value;
   let list=prods.filter(p=>(!q||(p.nom.toLowerCase().includes(q)||p.ref.toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q)))&&(!fc||p.cat===fc)&&(!fv||p.fid===fv));
-  const totalV=prods.reduce((s,p)=>s+calc(p).cout,0);
+  const totalV=prods.reduce((s,p)=>s+calc(p).coutRevientUX,0);
   document.getElementById('cat-stats').innerHTML=`
     <div class="stat"><div class="stat-ico">${ICO('box')}</div><div class="stat-txt"><div class="stat-val">${prods.length}</div><div class="stat-lbl">Produits</div></div></div>
     <div class="stat"><div class="stat-ico">${ICO('eye')}</div><div class="stat-txt"><div class="stat-val">${list.length}</div><div class="stat-lbl">Affichés</div></div></div>
     <div class="stat"><div class="stat-ico">${ICO('tag')}</div><div class="stat-txt"><div class="stat-val">${[...new Set(prods.map(p=>p.cat))].length}</div><div class="stat-lbl">Catégories</div></div></div>
-    <div class="stat"><div class="stat-ico">${ICO('cash')}</div><div class="stat-txt"><div class="stat-val" style="font-size:15px">${N(totalV)}</div><div class="stat-lbl">Valeur catalogue</div></div></div>`;
+    <div class="stat"><div class="stat-ico">${ICO('cash')}</div><div class="stat-txt"><div class="stat-val" style="font-size:15px">${N(totalV)}</div><div class="stat-lbl">Coût de revient catalogue</div></div></div>`;
   const c=document.getElementById('cat-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">'+ICO('inbox')+'</div><h3>Aucun produit trouvé</h3><p>Ajustez vos filtres ou ajoutez un produit.</p></div>';return;}
   if(grouped){
@@ -1177,13 +1270,13 @@ function groupList(list){
 function selectWinner(key,prods){
   if(prods.length===1)return prods[0];
   if(winOverrides[key]){const ov=prods.find(p=>p.id===winOverrides[key]);if(ov)return ov;}
-  if(stratPrix==='prix_bas')return prods.reduce((b,p)=>calc(p).pa<calc(b).pa?p:b);
+  if(stratPrix==='prix_bas')return prods.reduce((b,p)=>calc(p).coutRevientUX<calc(b).coutRevientUX?p:b);
   if(stratPrix==='meilleure_qualite')return prods.reduce((b,p)=>{
     const fp=fours.find(x=>x.id===p.fid),fb=fours.find(x=>x.id===b.fid);
     return(parseInt(fp&&fp.eval||0)||0)>(parseInt(fb&&fb.eval||0)||0)?p:b;
   });
   // meilleur_rapport: highest margin %
-  return prods.reduce((b,p)=>{const cp=calc(p),cb=calc(b);return(cp.pa>0?cp.marge_xof/cp.pa:0)>(cb.pa>0?cb.marge_xof/cb.pa:0)?p:b;});
+  return prods.reduce((b,p)=>{const cp=calc(p),cb=calc(b);return(cp.coutRevientUX>0?cp.margeU/cp.coutRevientUX:0)>(cb.coutRevientUX>0?cb.margeU/cb.coutRevientUX:0)?p:b;});
 }
 
 function setWinner(key,prodId,event){
@@ -1198,6 +1291,35 @@ function toggleAccordion(key){
   if(panel)panel.classList.toggle('open');
 }
 
+/* Bloc prix commun aux cartes produit — structure en 5 lignes :
+   Coût de Revient HT (cliquable → détail) / Frais logistiques / Marge / Prix de Vente HT / Prix de Vente TTC */
+function cardPriceRows(p,c){
+  const sym={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
+  const detail=`<div class="cost-det" id="cd-${p.id}">
+      <div class="cd-row"><span>Coût d'achat HT (EXW${c.fretLocalX?' + fret local':''})</span><span>${N(c.exwUX+c.fretLocalX)}</span></div>
+      ${c.fTrf?`<div class="cd-row"><span>Frais transfert de fonds${S.trf.mode==='pct'?' ('+S.trf.val+'%)':''}</span><span>${N(c.fTrf*c.tauxChange)}</span></div>`:''}
+      ${c.fAss?`<div class="cd-row"><span>Trade Assurance${S.assu.mode==='pct'?' ('+S.assu.val+'%)':''}</span><span>${N(c.fAss*c.tauxChange)}</span></div>`:''}
+      <div class="cd-row cd-tot"><span>Coût de revient HT</span><span>${N(c.coutRevientUX)}</span></div>
+      <div class="cd-note">${Nd(c.coutRevientU)} ${sym} × ${Nd(c.tauxChange,2)} XOF/${c.dev}</div>
+    </div>`;
+  return[
+    cols.achat  ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.exwUX)}</span></div>`:'',
+    cols.prach&&c.fretLocalX?`<div class="pr"><span class="pr-lbl">Fret local</span><span class="pr-val">${N(c.fretLocalX)}</span></div>`:'',
+    cols.revient?`<div class="pr pr-click" id="cdt-${p.id}" onclick="toggleCostDetail('${p.id}',event)" title="Voir le détail du coût de revient"><span class="pr-lbl">Coût de Revient HT ${ICO('chev')}</span><span class="pr-val">${N(c.coutRevientUX)}</span></div>${detail}`:'',
+    cols.fret   ?`<div class="pr"><span class="pr-lbl">Frais logistiques <small>(${c.mode})</small></span><span class="pr-val">${N(c.fraisLogU)}</span></div>`:'',
+    cols.marge  ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.margeU)} <small>(${Nd(c.margePct,1)}%)</small></span></div>`:'',
+    cols.vente  ?`<div class="pr pr-strong"><span class="pr-lbl">Prix de Vente HT</span><span class="pr-val">${N(c.pvuHT)}</span></div>`:'',
+    cols.ttc    ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix de Vente TTC</span><span class="pr-val pr-ttc">${N(c.pvuTTC)}</span></div>`:'',
+    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert-t);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
+  ].join('');
+}
+function toggleCostDetail(id,ev){
+  if(ev)ev.stopPropagation();
+  const el=document.getElementById('cd-'+id),btn=document.getElementById('cdt-'+id);
+  if(el)el.classList.toggle('open');
+  if(btn)btn.classList.toggle('open');
+}
+
 function prodGroupCard(g){
   const{key,prods:gps,winner:w}=g;
   const others=gps.filter(p=>p.id!==w.id);
@@ -1208,14 +1330,8 @@ function prodGroupCard(g){
     ?`<img src="${imgSrc}" alt="${String(w.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
   const c=calc(w);
-  const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
   const escapedKey=key.replace(/'/g,"\\'");
-  const priceRows=[
-    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
-    cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
-    cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
-  ].join('');
+  const priceRows=cardPriceRows(w,c);
   const altCards=others.map(p=>{
     const fp=fours.find(x=>x.id===p.fid);
     const cp=calc(p);
@@ -1224,7 +1340,7 @@ function prodGroupCard(g){
       ${pimg}
       <div class="alt-card-info">
         <div class="alt-card-nom">${p.nom}</div>
-        <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.ttc)} TTC</div>
+        <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.pvuTTC)} TTC</div>
       </div>
       <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
@@ -1250,18 +1366,18 @@ function prodGroupCard(g){
 function prodGroupTable(groups){
   const C=cols;
   const ths=['<th></th>','<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
-    C.cat   ?'<th>Catégorie</th>'       :'',
-    C.four  ?'<th>Fournisseur</th>'     :'',
-    C.cbm   ?'<th>CBM</th>'             :'',
-    C.poids ?'<th>Poids</th>'           :'',
-    C.achat ?'<th>Achat EXW</th>'       :'',
-    C.prach ?'<th>Préacheminement</th>' :'',
-    C.fret  ?'<th>Fret/Douane</th>'     :'',
-    C.marge ?'<th>Marge</th>'           :'',
-    C.vente ?'<th>Vente HT</th>'        :'',
-    C.total ?'<th>Prix total HT</th>'   :'',
-    C.ttc   ?'<th>TTC</th>'             :'',
-    C.marche?'<th>Marché</th>'          :'',
+    C.cat    ?'<th>Catégorie</th>'         :'',
+    C.four   ?'<th>Fournisseur</th>'       :'',
+    C.cbm    ?'<th>CBM</th>'               :'',
+    C.poids  ?'<th>Poids</th>'             :'',
+    C.achat  ?'<th>Achat EXW</th>'         :'',
+    C.prach  ?'<th>Fret local</th>'        :'',
+    C.revient?'<th>Coût de Revient HT</th>':'',
+    C.fret   ?'<th>Frais logistiques (Transitaire)</th>':'',
+    C.marge  ?'<th>Marge</th>'             :'',
+    C.vente  ?'<th>Prix de Vente HT</th>'  :'',
+    C.ttc    ?'<th>Prix de Vente TTC</th>' :'',
+    C.marche ?'<th>Marché</th>'            :'',
     '<th class="no-print">Actions</th>',
   ].join('');
   const rows=groups.map(g=>{
@@ -1269,7 +1385,6 @@ function prodGroupTable(groups){
     const others=gps.filter(p=>p.id!==w.id);
     const f=fours.find(x=>x.id===w.fid);const c=calc(w);
     const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
-    const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
     const escapedKey=key.replace(/'/g,"\\'");
     const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives" aria-label="Voir alternatives">${ICO('chev')}</button>`:'';
     const winRow=`<tr>
@@ -1277,18 +1392,18 @@ function prodGroupTable(groups){
       <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
       <td><code style="font-size:10px">${w.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>
-      ${C.cat   ?`<td><span class="pill-cat">${w.cat}</span></td>`:''}
-      ${C.four  ?`<td>${fourLabel(f)}</td>`:''}
-      ${C.cbm   ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
-      ${C.poids ?`<td>${w.kg} kg</td>`:''}
-      ${C.achat ?`<td>${N(c.pa)}</td>`:''}
-      ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
-      ${C.fret  ?`<td>${N(c.fret)}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
-      ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
-      ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${w.cat}</span></td>`:''}
+      ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
+      ${C.poids  ?`<td>${w.kg} kg</td>`:''}
+      ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
+      ${C.prach  ?`<td>${c.fretLocalX?N(c.fretLocalX):'—'}</td>`:''}
+      ${C.revient?`<td style="font-weight:600">${N(c.coutRevientUX)}</td>`:''}
+      ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
+      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
+      ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
+      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
@@ -1305,18 +1420,18 @@ function prodGroupTable(groups){
         <td>${pimg}</td>
         <td><code style="font-size:9px">${p.ref}</code></td>
         <td style="color:var(--muted)">${p.nom}</td>
-        ${C.cat   ?`<td></td>`:''}
-        ${C.four  ?`<td>${fourLabel(fp)}</td>`:''}
-        ${C.cbm   ?`<td>${Nd(cp.cbm,4)}</td>`:''}
-        ${C.poids ?`<td>${p.kg} kg</td>`:''}
-        ${C.achat ?`<td>${N(cp.pa)}</td>`:''}
-        ${C.prach ?`<td>${cp.prach?N(cp.prach):'—'}</td>`:''}
-        ${C.fret  ?`<td>${N(cp.fret)}</td>`:''}
-        ${C.marge ?`<td style="color:var(--vert-t)">${N(cp.marge_xof)}</td>`:''}
-        ${C.vente ?`<td>${N(cp.pnh)}</td>`:''}
-        ${C.total ?`<td>${N(cp.prix_ht)}</td>`:''}
-        ${C.ttc   ?`<td style="color:var(--bleu-t)">${N(cp.ttc)}</td>`:''}
-        ${C.marche?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+        ${C.cat    ?`<td></td>`:''}
+        ${C.four   ?`<td>${fourLabel(fp)}</td>`:''}
+        ${C.cbm    ?`<td>${Nd(cp.cbm,4)}</td>`:''}
+        ${C.poids  ?`<td>${p.kg} kg</td>`:''}
+        ${C.achat  ?`<td>${N(cp.exwUX)}</td>`:''}
+        ${C.prach  ?`<td>${cp.fretLocalX?N(cp.fretLocalX):'—'}</td>`:''}
+        ${C.revient?`<td>${N(cp.coutRevientUX)}</td>`:''}
+        ${C.fret   ?`<td>${N(cp.fraisLogU)}</td>`:''}
+        ${C.marge  ?`<td style="color:var(--vert-t)">${N(cp.margeU)}</td>`:''}
+        ${C.vente  ?`<td>${N(cp.pvuHT)}</td>`:''}
+        ${C.ttc    ?`<td style="color:var(--bleu-t)">${N(cp.pvuTTC)}</td>`:''}
+        ${C.marche ?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
         <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?ICO('check'):ICO('quote')}</button></div></td>
       </tr>`;
     }).join('');
@@ -1355,17 +1470,7 @@ function prodCard(p){
     ?`<img src="${imgSrc}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
   const c=calc(p);
-  const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
-  const priceRows=[
-    cols.achat ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.pa)}</span></div>`:'',
-    cols.prach&&c.prach?`<div class="pr"><span class="pr-lbl">Préacheminement</span><span class="pr-val">${N(c.prach)}</span></div>`:'',
-    cols.fret  ?`<div class="pr"><span class="pr-lbl">Fret/Douane</span><span class="pr-val">${N(c.fret)}</span></div>`:'',
-    cols.marge ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.marge_xof)} <small>(${mgPct}%)</small></span></div>`:'',
-    cols.vente ?`<div class="pr"><span class="pr-lbl">Vente HT</span><span class="pr-val">${N(c.pnh)}</span></div>`:'',
-    cols.total ?`<div class="pr"><span class="pr-lbl">Prix total HT</span><span class="pr-val">${N(c.prix_ht)}</span></div>`:'',
-    cols.ttc   ?`<div class="pr"><span class="pr-lbl pr-ttc">Prix TTC</span><span class="pr-val pr-ttc">${N(c.ttc)}</span></div>`:'',
-    cols.marche&&p.conc?`<div class="pr" style="font-size:10px"><span class="pr-lbl">Marché</span><span style="color:var(--vert-t);font-weight:600">${parseInt(p.conc).toLocaleString('fr-FR')} XOF</span></div>`:'',
-  ].join('');
+  const priceRows=cardPriceRows(p,c);
   return`<div class="card">
   <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
   <div class="card-body">
@@ -1385,41 +1490,40 @@ function prodCard(p){
 function prodTable(list){
   const C=cols;
   const ths=['<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
-    C.cat   ?'<th>Catégorie</th>'       :'',
-    C.four  ?'<th>Fournisseur</th>'     :'',
-    C.cbm   ?'<th>CBM</th>'             :'',
-    C.poids ?'<th>Poids</th>'           :'',
-    C.achat ?'<th>Achat EXW</th>'       :'',
-    C.prach ?'<th>Préacheminement</th>' :'',
-    C.fret  ?'<th>Fret/Douane</th>'     :'',
-    C.marge ?'<th>Marge</th>'           :'',
-    C.vente ?'<th>Vente HT</th>'        :'',
-    C.total ?'<th>Prix total HT</th>'   :'',
-    C.ttc   ?'<th>TTC</th>'             :'',
-    C.marche?'<th>Marché</th>'          :'',
+    C.cat    ?'<th>Catégorie</th>'         :'',
+    C.four   ?'<th>Fournisseur</th>'       :'',
+    C.cbm    ?'<th>CBM</th>'               :'',
+    C.poids  ?'<th>Poids</th>'             :'',
+    C.achat  ?'<th>Achat EXW</th>'         :'',
+    C.prach  ?'<th>Fret local</th>'        :'',
+    C.revient?'<th>Coût de Revient HT</th>':'',
+    C.fret   ?'<th>Frais logistiques (Transitaire)</th>':'',
+    C.marge  ?'<th>Marge</th>'             :'',
+    C.vente  ?'<th>Prix de Vente HT</th>'  :'',
+    C.ttc    ?'<th>Prix de Vente TTC</th>' :'',
+    C.marche ?'<th>Marché</th>'            :'',
     '<th class="no-print">Actions</th>',
     '<th class="no-print">Devis</th>',
   ].join('');
   const rows=list.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
-    const mgPct=Nd(c.pa>0?c.marge_xof/c.pa*100:0,1);
     return`<tr>
       <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${p.nom}</td>
-      ${C.cat   ?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
-      ${C.four  ?`<td>${fourLabel(f)}</td>`:''}
-      ${C.cbm   ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
-      ${C.poids ?`<td>${p.kg} kg</td>`:''}
-      ${C.achat ?`<td>${N(c.pa)}</td>`:''}
-      ${C.prach ?`<td>${c.prach?N(c.prach):'—'}</td>`:''}
-      ${C.fret  ?`<td>${N(c.fret)}</td>`:''}
-      ${C.marge ?`<td style="color:var(--vert-t);font-weight:600">${N(c.marge_xof)} <small style="opacity:.7">(${mgPct}%)</small></td>`:''}
-      ${C.vente ?`<td>${N(c.pnh)}</td>`:''}
-      ${C.total ?`<td style="font-weight:600">${N(c.prix_ht)}</td>`:''}
-      ${C.ttc   ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.ttc)}</td>`:''}
-      ${C.marche?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
+      ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
+      ${C.poids  ?`<td>${p.kg} kg</td>`:''}
+      ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
+      ${C.prach  ?`<td>${c.fretLocalX?N(c.fretLocalX):'—'}</td>`:''}
+      ${C.revient?`<td style="font-weight:600">${N(c.coutRevientUX)}</td>`:''}
+      ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
+      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
+      ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
+      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
@@ -1452,6 +1556,7 @@ function openProdModal(id=null){
     document.getElementById('p-l').value=p.l;
     document.getElementById('p-la').value=p.la;
     document.getElementById('p-h').value=p.h;
+    document.getElementById('p-dimu').value=p.dimU||'cm';
     document.getElementById('p-poids').value=p.kg;
     document.getElementById('p-trans').value=p.tr;
     document.getElementById('p-marge').value=p.marge;
@@ -1469,6 +1574,7 @@ function openProdModal(id=null){
     document.getElementById('p-rem').value='0';
     document.getElementById('p-moq').value='1';
     document.getElementById('p-dev').value='RMB';
+    document.getElementById('p-dimu').value='cm';
   }
   updateSLink();
   openMod('prod-modal');
@@ -1499,18 +1605,19 @@ function calcPrev(){
   const kg=parseFloat(document.getElementById('p-poids').value);
   updateSLink();
   if(!prix||!l||!la||!h||!kg){document.getElementById('calc-prev').style.display='none';return;}
-  const p={prix,prach:parseFloat(document.getElementById('p-prach').value)||0,dev:document.getElementById('p-dev').value,l,la,h,kg,tr:'Maritime',marge:document.getElementById('p-marge').value,rem:0};
+  const p={prix,prach:parseFloat(document.getElementById('p-prach').value)||0,dev:document.getElementById('p-dev').value,l,la,h,dimU:document.getElementById('p-dimu').value,kg,tr:'Maritime',marge:document.getElementById('p-marge').value,rem:0};
   const c=calc(p);
   document.getElementById('calc-prev').style.display='block';
   document.getElementById('calc-prev-rows').innerHTML=`
     <div>CBM: <b>${Nd(c.cbm,4)} m³</b></div>
-    <div>EXW (XOF): <b>${N(c.pa)}</b></div>
-    ${c.prach?`<div>Préacheminement: <b>${N(c.prach)}</b></div>`:''}
-    <div>Fret/Douane: <b>${N(c.fret)}</b></div>
-    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.marge_xof)}</b></div>
-    <div>Vente HT: <b>${N(c.pnh)}</b></div>
-    <div>Prix total HT: <b>${N(c.prix_ht)}</b></div>
-    <div>TTC: <b style="color:var(--bleu-t)">${N(c.ttc)}</b></div>`;
+    <div>Coût d'achat HT: <b>${N(c.exwUX+c.fretLocalX)}</b></div>
+    ${c.fTrf?`<div>Frais transfert: <b>${N(c.fTrf*c.tauxChange)}</b></div>`:''}
+    ${c.fAss?`<div>Trade Assurance: <b>${N(c.fAss*c.tauxChange)}</b></div>`:''}
+    <div>Coût de revient HT: <b>${N(c.coutRevientUX)}</b></div>
+    <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.margeU)}</b></div>
+    <div>Prix de Vente HT: <b>${N(c.pvuHT)}</b></div>
+    <div>Frais logistiques: <b>${N(c.fraisLogU)}</b></div>
+    <div>Prix de Vente TTC: <b style="color:var(--bleu-t)">${N(c.pvuTTC)}</b></div>`;
 }
 
 function saveProd(){
@@ -1523,6 +1630,7 @@ function saveProd(){
     prach:parseFloat(document.getElementById('p-prach').value)||0,
     dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
     la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
+    dimU:document.getElementById('p-dimu').value,
     kg:parseFloat(document.getElementById('p-poids').value)||0,tr:document.getElementById('p-trans').value,
     marge:document.getElementById('p-marge').value,rem:parseFloat(document.getElementById('p-rem').value)||0,
     conc:document.getElementById('p-conc').value,moq:parseInt(document.getElementById('p-moq').value)||1,
@@ -1784,7 +1892,7 @@ function simSelProd(){
   prev.style.display='flex';
   document.getElementById('sim-name').textContent=p.nom;
   document.getElementById('sim-ref').textContent=p.ref;
-  document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} cm · ${p.kg} kg · ${p.cat}`;
+  document.getElementById('sim-specs').textContent=`${p.l}×${p.la}×${p.h} ${p.dimU||'cm'} · ${p.kg} kg · ${p.cat}`;
   const ico=document.getElementById('sim-ico');
   if(p.photos&&p.photos[0]){
     ico.innerHTML=`<img src="${p.photos[0]}" style="width:70px;height:70px;object-fit:cover" alt="" onerror="phFallback(this)">`;
@@ -1793,7 +1901,7 @@ function simSelProd(){
   }
   setSimTrans(p.tr||'Maritime');
   const c=calc(p);
-  document.getElementById('sim-pv').value=Math.round(c.pnh);
+  document.getElementById('sim-pv').value=Math.round(c.pvuHT);
   simCalc();
 }
 
@@ -1803,63 +1911,67 @@ function simCalc(){
   const p=prods.find(x=>x.id===id);
   const qty=parseInt(document.getElementById('sim-qty').value)||1;
   const rem=parseFloat(document.getElementById('sim-rem').value)||0;
-  const useTVA=document.getElementById('sim-tva').value==='1';
-  const ass=parseFloat(document.getElementById('sim-ass').value)||0;
+  const assujetti=document.getElementById('sim-tva').value==='1';
+  const assSel=document.getElementById('sim-ass').value;
   const tid=document.getElementById('sim-trans').value;
   const tr=trans.find(x=>x.id===tid);
   const fa=tr&&tr.aer?parseFloat(tr.aer):S.tarifAerien;
   const fm=tr&&tr.mar?parseFloat(tr.mar):S.tarifMaritime;
-  const c=calc(p,{tr:simTr,fa,fm});
-  // En simulation, le prix de vente saisi remplace le pvh EXW (la marge est déjà incluse)
+  const o={tr:simTr,fa,fm,qty,rem,assujetti};
+  if(assSel!=='def')o.assu=assSel==='1';
+  let c=calc(p,o);
+  // Un Prix de Vente HT saisi remplace le prix calculé ; la marge est alors recalculée
   const pvInput=parseFloat(document.getElementById('sim-pv').value);
-  const pvu=pvInput||c.pnh;  // prix vente EXW+marge, potentiellement override
-  const remM_sim=pvu*rem/100;
-  const pvn=pvu-remM_sim;  // vente nette après remise
-  const prix_total_ht=pvn+c.prach+c.fret;  // prix total client HT
-  const assM=prix_total_ht*ass/100;
-  const tva=useTVA?S.tva/100:0;
-  const ttcU=(prix_total_ht+assM)*(1+tva);
-  const marge_u=pvn-c.pa;  // marge sur EXW
-  const totAHT=c.cout*qty;
-  const totPrixHT=prix_total_ht*qty;
-  const totTTC=ttcU*qty;
-  const totMarge=marge_u*qty;
+  if(pvInput){
+    const pvuHT=r2(pvInput-pvInput*rem/100);
+    const margeU=r2(pvuHT-c.coutRevientUX);
+    const pvtHT=r2(pvuHT*qty);
+    const tvaM=(assujetti&&S.tvaInterne)?r2(pvtHT*S.tvaInterne/100):0;
+    c={...c,pvuHT,pvtHT,margeU,margeTot:r2(margeU*qty),
+      margePct:c.coutRevientUX>0?r2(margeU/c.coutRevientUX*100):0,
+      pvuTTC:r2(pvuHT+c.fraisLogU),pvtTTC:r2(pvtHT+c.fraisLog),
+      tvaM,totalAvecTVA:r2(pvtHT+c.fraisLog+tvaM)};
+  }
   const f=fours.find(x=>x.id===p.fid);
+  const sym={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
+  const D=v=>Nd(v,2)+' '+sym;
   document.getElementById('sim-rows').innerHTML=`
     <div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>
     <div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>
     <div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>
     <div class="sim-row"><span>Transport</span><span>${simTr==='Maritime'?ICO('ship'):ICO('plane')} ${simTr}</span></div>
-    <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbm*qty,4)} m³</span></div>
+    <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbmTot,4)} m³</span></div>
     <div class="sim-row"><span>Poids total</span><span>${Nd(p.kg*qty,2)} kg</span></div>
-    <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
-    <div class="sim-row"><span>Prix EXW unitaire</span><span>${N(c.pa)}</span></div>
-    ${c.prach?`<div class="sim-row"><span>Préacheminement unitaire</span><span>${N(c.prach)}</span></div>`:''}
-    <div class="sim-row"><span>Fret/Douane unitaire</span><span>${N(c.fret)}</span></div>
-    <div class="sim-row"><span>Coût de revient unitaire</span><span>${N(c.cout)}</span></div>
-    ${ass>0?`<div class="sim-row"><span>Assurance (${ass}%)</span><span>${N(assM)}</span></div>`:''}
-    <hr style="border-color:rgba(255,255,255,.08);margin:4px 0">
-    <div class="sim-row"><span>Marge (sur EXW)</span><span style="color:#4ade80">${N(marge_u)} (${Nd(c.pa>0?marge_u/c.pa*100:0,1)}%)</span></div>
-    <div class="sim-row"><span>Vente HT (EXW + marge)</span><span>${N(pvn)}</span></div>
-    <div class="sim-row"><span>Prix total HT client</span><span style="font-weight:600">${N(prix_total_ht)}</span></div>
-    ${tva>0?`<div class="sim-row"><span>TVA (${S.tva}%)</span><span>${N(prix_total_ht*tva)}</span></div>`:''}
-    <div class="sim-row"><span>TTC unitaire</span><span>${N(ttcU)}</span></div>
+    <div class="sim-sec">Étape 1 · Coût de revient HT (${c.dev})</div>
+    <div class="sim-row"><span>Coût d'achat HT (EXW × qté${parseFloat(p.prach)?' + fret local':''})</span><span>${D(c.coutAchat)}</span></div>
+    ${c.fTrf?`<div class="sim-row"><span>Frais transfert de fonds${S.trf.mode==='pct'?' ('+S.trf.val+'%)':''}</span><span>${D(c.fTrf)}</span></div>`:''}
+    ${c.fAss?`<div class="sim-row"><span>Trade Assurance${S.assu.mode==='pct'?' ('+S.assu.val+'%)':''}</span><span>${D(c.fAss)}</span></div>`:''}
+    <div class="sim-row"><span>Coût de revient HT</span><span style="font-weight:600">${D(c.coutRevient)}</span></div>
+    <div class="sim-row"><span>Coût de revient unitaire HT</span><span>${D(c.coutRevientU)}</span></div>
+    <div class="sim-sec">Étape 2 · Prix de Vente HT (XOF)</div>
+    <div class="sim-row"><span>Taux de change</span><span>1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</span></div>
+    <div class="sim-row"><span>Coût de revient unitaire (XOF)</span><span>${N(c.coutRevientUX)}</span></div>
+    <div class="sim-row"><span>Marge unitaire</span><span style="color:#4ade80">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
+    ${rem>0?`<div class="sim-row"><span>Remise (${rem}%)</span><span>incluse</span></div>`:''}
+    <div class="sim-row"><span>Prix de Vente unitaire HT</span><span style="font-weight:600">${N(c.pvuHT)}</span></div>
+    <div class="sim-row"><span>Prix de Vente total HT</span><span style="font-weight:600">${N(c.pvtHT)}</span></div>
+    <div class="sim-sec">Étape 3 · Prix de Vente TTC (estimation)</div>
+    <div class="sim-row"><span>Frais logistiques (Transitaire) — tout-compris</span><span>${N(c.fraisLog)}</span></div>
+    <div class="sim-row"><span>Prix de Vente unitaire TTC</span><span>${N(c.pvuTTC)}</span></div>
+    ${c.tvaM?`<div class="sim-row"><span>TVA interne (${S.tvaInterne}%) — client assujetti</span><span>${N(c.tvaM)}</span></div>`:''}
     <hr style="border-color:rgba(255,255,255,.08);margin:6px 0">
-    <div class="sim-row"><span>Total coût de revient</span><span>${N(totAHT)}</span></div>
-    <div class="sim-row"><span>Total prix HT client</span><span>${N(totPrixHT)}</span></div>
-    <div class="sim-row sim-total"><span>TOTAL TTC</span><span>${N(totTTC)}</span></div>
-    <div class="sim-row sim-marge"><span>Marge totale (sur EXW)</span><span>${N(totMarge)} (${c.pa>0?Nd(marge_u/c.pa*100,1):0}%)</span></div>`;
+    <div class="sim-row sim-total"><span>PRIX DE VENTE TOTAL TTC</span><span>${N(c.totalAvecTVA)}</span></div>
+    <div class="sim-row sim-marge"><span>Marge totale</span><span>${N(c.margeTot)} (${Nd(c.margePct,1)}%)</span></div>`;
 }
 
 function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
 
 /* ---- EXPORT CSV ---- */
 function exportCSV(){
-  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Prix EXW (devise)','Préacheminement (devise)','Devise','Prix EXW XOF','Préacheminement XOF','CBM m3','Poids kg','Transport','Fret/Douane XOF','Coût revient XOF','Marge %','Marge XOF','Vente HT XOF','Remise %','Prix net HT XOF','Prix total HT XOF','TVA %','Prix TTC XOF','Prix marché XOF'];
+  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Devise','Prix EXW (devise)','Fret local (devise)','Coût achat HT (devise)','Frais transfert (devise)','Trade Assurance (devise)','Coût de revient HT (devise)','Taux change','Coût de revient HT (XOF)','Marge %','Marge (XOF)','Remise %','Prix de Vente HT (XOF)','CBM m3','Poids kg','Transport','Frais logistiques Transitaire (XOF)','Prix de Vente TTC (XOF)','Prix marché XOF'];
   const rows=prods.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
-    const mgpct=p.marge||S.tauxMarge;
-    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.prix,p.prach||0,p.dev||'RMB',Math.round(c.pa),Math.round(c.prach),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fret),Math.round(c.cout),mgpct,Math.round(c.marge_xof),Math.round(c.pvh),p.rem||0,Math.round(c.pnh),Math.round(c.prix_ht),S.tva,Math.round(c.ttc),p.conc||''].join(';');
+    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.dev||'RMB',p.prix,p.prach||0,Nd(c.coutAchat),Nd(c.fTrf),Nd(c.fAss),Nd(c.coutRevient),c.tauxChange,Math.round(c.coutRevientUX),Nd(c.margePct,1),Math.round(c.margeU),p.rem||0,Math.round(c.pvuHT),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fraisLogU),Math.round(c.pvuTTC),p.conc||''].join(';');
   });
   const csv=[hdr.join(';'),...rows].join('\n');
   const a=document.createElement('a');
@@ -1893,12 +2005,13 @@ const DEVIS_SHOW_DEFS=[
   {k:'delai',      g:'trans', lbl:'Délai estimé',            def:false},
   // Devise source
   {k:'dev_source', g:'dev',   lbl:'Prix en devise (RMB/USD…)',def:false},
-  // Calcul client
-  {k:'prix_exw',   g:'calc',  lbl:'Prix EXW (XOF)',          def:false},
-  {k:'prix_ht',    g:'calc',  lbl:'Prix HT client',          def:true},
-  {k:'douane',     g:'calc',  lbl:'Douane estimée',          def:false},
-  {k:'tva',        g:'calc',  lbl:'TVA',                     def:false},
-  {k:'prix_ttc',   g:'calc',  lbl:'Prix TTC client',         def:false},
+  // Calcul (colonnes internes : coût de revient et marge n'apparaissent JAMAIS sur le PDF client)
+  {k:'prix_exw',    g:'calc', lbl:'Prix EXW (XOF)',           def:false},
+  {k:'cout_revient',g:'calc', lbl:'Coût de Revient Unit.',    def:true},
+  {k:'frais_log',   g:'calc', lbl:'Frais Log. Unit.',         def:true},
+  {k:'marge',       g:'calc', lbl:'Marge % (interne)',        def:true},
+  {k:'prix_ht',     g:'calc', lbl:'Prix Vente HT/u',          def:true},
+  {k:'prix_ttc',    g:'calc', lbl:'Prix Vente TTC/u',         def:true},
 ];
 
 const DV_SHOW_DEFAULT=Object.fromEntries(DEVIS_SHOW_DEFS.map(d=>[d.k,d.def]));
@@ -1922,6 +2035,7 @@ function saveDevisClient(){
     tel:document.getElementById('dv-tel').value,
     adr:document.getElementById('dv-adr').value,
     ville:document.getElementById('dv-ville').value,
+    assujetti:document.getElementById('dv-assuj').checked,
   };
   LS_SET(DCK,devisClient);
 }
@@ -2008,27 +2122,22 @@ function onDevisTauxChange(){
   if(v>0){devisFX.taux=v;document.getElementById('dv-fx-msg').innerHTML=`<span style="color:var(--bleu-t)">Taux saisi manuellement</span>`;renderDevisCart();}
 }
 
-/* ---- CALCUL DEVIS (logique CLIENT — séparée de calc() interne) ---- */
+/* ---- CALCUL DEVIS (mêmes règles que le moteur central, marge selon la stratégie du devis) ---- */
 function calcDevis(item){
   const p=item.snap;
   const strat=devisPrefs.strategy||'marge_fixe';
   const base=devisPrefs.margeFixe||35;
   const perso=devisPrefs.margePerso||base;
   const mgPct=strat==='competitif'?base*0.6:strat==='premium'?base*1.2:strat==='personnalise'?perso:base;
-  const mg=mgPct/100;
-  const pa=toXOF(p.prix,p.dev||'RMB');
-  const prach=toXOF(parseFloat(p.prach)||0,p.dev||'RMB');
-  const cbm=((p.l||0)*(p.la||0)*(p.h||0))/1e6;
-  const fret=p.tr==='Aérien'?(p.kg||0)*S.tarifAerien:cbm*S.tarifMaritime;
-  const marge_xof=pa*mg;
-  const pvh=pa+marge_xof;
-  const prixClientHT=pvh+prach+fret;
-  const douane=Math.round(pa*0.15); // estimation 15 % valeur EXW
-  const prixClientTTC=prixClientHT*(1+S.tva/100);
-  const qty=item.qty||1;
-  return{pa,prach,cbm,fret,marge_xof,pvh,prixClientHT,douane,prixClientTTC,
-    totalHT:prixClientHT*qty,totalTTC:prixClientTTC*qty,mgPct,
-    prix_src:p.prix,dev:p.dev||'RMB'};
+  const e=calcEngine({
+    exw:parseFloat(p.prix)||0,fretLocal:parseFloat(p.prach)||0,dev:p.dev||'RMB',
+    qty:item.qty||1,tauxChange:xofRate(p.dev||'RMB'),
+    margePct:mgPct,remisePct:0,
+    l:p.l,la:p.la,h:p.h,dimU:p.dimU||'cm',kg:p.kg,mode:p.tr||'Maritime',
+    tarifAerien:S.tarifAerien,tarifMaritime:S.tarifMaritime,
+    transfert:S.trf,assurance:S.assu,
+    tvaInterne:S.tvaInterne,assujetti:!!devisClient.assujetti});
+  return{...e,mgPct:r2(mgPct),prix_src:p.prix};
 }
 
 /* ---- ACTIONS PANIER ---- */
@@ -2105,8 +2214,7 @@ function initDevisColPicker(){
   Object.values(grpIds).forEach(id=>document.getElementById(id).innerHTML='');
   DEVIS_SHOW_DEFS.forEach(c=>{
     const el=document.createElement('label');el.className='cp-item';
-    const lbl=c.k==='tva'?`TVA (${S.tva||18}%)`:c.lbl;
-    el.innerHTML=`<input type="checkbox" ${devisPrefs.show[c.k]?'checked':''} onchange="toggleDevisCol('${c.k}',this.checked)">${lbl}`;
+    el.innerHTML=`<input type="checkbox" ${devisPrefs.show[c.k]?'checked':''} onchange="toggleDevisCol('${c.k}',this.checked)">${c.lbl}`;
     document.getElementById(grpIds[c.g]).appendChild(el);
   });
 }
@@ -2129,6 +2237,7 @@ function renderDevis(){
   document.getElementById('dv-tel').value=devisClient.tel||'';
   document.getElementById('dv-adr').value=devisClient.adr||'';
   document.getElementById('dv-ville').value=devisClient.ville||'';
+  document.getElementById('dv-assuj').checked=!!devisClient.assujetti;
   const persoEl=document.getElementById('strat-perso-val');
   if(persoEl)persoEl.value=devisPrefs.margePerso||35;
   // Restaurer l'UI devise
@@ -2169,14 +2278,14 @@ function buildDevisGrid(){
         ${devisPrefs.show.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${ICO('factory')} ${p.fn}</div>`:''}
         ${devisPrefs.show.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">${ICO('ship')} ${p.trans_nom}</div>`:''}
         <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
-          <div class="cart-price-tag">${Ndv(c.prixClientHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">HT/u</small></div>
-          <div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.prixClientTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
+          <div class="cart-price-tag">${Ndv(c.pvuHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">Prix de Vente HT/u</small></div>
+          <div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.pvuTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
         </div>
         <div class="cart-qty-ctrl">
           <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
           <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
           <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.totalHT)}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.pvtHT)}</span>
         </div>
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
       </div></div>`;
@@ -2199,10 +2308,11 @@ function buildDevisTable(){
     SH.delai?'<th>Délai</th>':'',
     SH.dev_source?'<th>Prix devise</th>':'',
     SH.prix_exw?'<th>EXW (XOF)</th>':'',
-    SH.prix_ht?`<th>Prix HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
-    SH.douane?'<th>Douane est.</th>':'',
-    SH.tva?`<th>TVA (${S.tva}%)</th>`:'',
-    SH.prix_ttc?`<th>Prix TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
+    SH.cout_revient?'<th>Coût de Revient Unit.</th>':'',
+    SH.frais_log?'<th>Frais Log. Unit.</th>':'',
+    SH.marge?'<th>Marge %</th>':'',
+    SH.prix_ht?`<th>Prix Vente HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
+    SH.prix_ttc?`<th>Prix Vente TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th>Qté</th>',`<th>Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
     '<th class="no-print">Actions</th>',
   ].join('');
@@ -2223,17 +2333,18 @@ function buildDevisTable(){
       ${SH.type_fret?`<td>${TRI(p.tr)} ${p.tr||'—'}</td>`:''}
       ${SH.delai?`<td style="font-size:12px">${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-size:11px;font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
-      ${SH.prix_exw?`<td style="font-size:11px">${N(c.pa)}</td>`:''}
-      ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.prixClientHT)}</td>`:''}
-      ${SH.douane?`<td style="font-size:11px;color:#b45309">${N(c.douane)}</td>`:''}
-      ${SH.tva?`<td style="font-size:11px;color:#6b7280">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.prixClientTTC)}</td>`:''}
+      ${SH.prix_exw?`<td style="font-size:11px">${N(c.exwUX)}</td>`:''}
+      ${SH.cout_revient?`<td style="font-size:11px">${Ndv(c.coutRevientUX)}</td>`:''}
+      ${SH.frais_log?`<td style="font-size:11px">${Ndv(c.fraisLogU)}</td>`:''}
+      ${SH.marge?`<td style="font-size:11px;color:var(--vert-t);font-weight:600">${Nd(c.mgPct,1)}%</td>`:''}
+      ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
+      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.pvuTTC)}</td>`:''}
       <td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
         <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
       </div></td>
-      <td style="font-weight:700">${Ndv(c.totalHT)}</td>
+      <td style="font-weight:700">${Ndv(c.pvtHT)}</td>
       <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button></td>
     </tr>`;
   }).join('');
@@ -2248,21 +2359,22 @@ function dvQty(cid,qty){
 
 function renderDevisTotal(){
   if(!devisCart.length){document.getElementById('dv-total-bar').innerHTML='';return;}
-  const SH=devisPrefs.show;
+  const cs=devisCart.map(calcDevis);
   const totQty=devisCart.reduce((s,i)=>s+i.qty,0);
-  const totMarge=devisCart.reduce((s,i)=>s+calcDevis(i).marge_xof*i.qty,0);
-  const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
-  const totTTC=devisCart.reduce((s,i)=>s+calcDevis(i).totalTTC,0);
+  const totMarge=cs.reduce((s,c)=>s+c.margeTot,0);
+  const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
+  const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
+  const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
+  const totTTC=cs.reduce((s,c)=>s+c.pvtTTC,0);
   const devLabel=devisFX.dev!=='XOF'?` (${devisFX.dev})`:'';
   document.getElementById('dv-total-bar').innerHTML=`
     <div class="devis-total-bar">
       <div class="devis-total-item"><div class="val">${totQty}</div><div class="lbl">Unités</div></div>
       <div class="devis-total-item"><div class="val" style="color:var(--vert)">${N(totMarge)}</div><div class="lbl">Marge (XOF)</div></div>
-      <div class="devis-total-item"><div class="val">${Ndv(totHT)}</div><div class="lbl">Sous-total HT${devLabel}</div></div>
-      ${SH.tva?`
-      <div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totTTC-totHT)}</div><div class="lbl">TVA (${S.tva}%)${devLabel}</div></div>
-      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${Ndv(totTTC)}</div><div class="lbl">TOTAL TTC CLIENT${devLabel}</div></div>
-      `:''}
+      <div class="devis-total-item"><div class="val">${Ndv(totHT)}</div><div class="lbl">Prix de Vente HT${devLabel}</div></div>
+      <div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totLog)}</div><div class="lbl">Frais logistiques${devLabel}</div></div>
+      ${devisClient.assujetti?`<div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totTVA)}</div><div class="lbl">TVA interne (${S.tvaInterne}%)${devLabel}</div></div>`:''}
+      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${Ndv(totTTC+totTVA)}</div><div class="lbl">TOTAL TTC CLIENT${devLabel}</div></div>
     </div>`;
 }
 
@@ -2273,13 +2385,6 @@ function generateDevisPDF(){
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
   const SH=devisPrefs.show;
-  const base=devisPrefs.margeFixe||35;
-  const stratNames={
-    marge_fixe:`Marge fixe (${base}%)`,
-    competitif:`Compétitif − 40 % (${(base*0.6).toFixed(1)}%)`,
-    premium:`Premium + 20 % (${(base*1.2).toFixed(1)}%)`,
-    personnalise:`Personnalisée (${devisPrefs.margePerso||base}%)`
-  };
   // Bloc client
   const cl=devisClient;
   const clientHtml=[
@@ -2287,9 +2392,12 @@ function generateDevisPDF(){
     cl.email?`Email : ${cl.email}`:'',
     cl.tel?`Tél : ${cl.tel}`:'',
     cl.adr?`Adresse : ${cl.adr}`:'',
-    cl.ville||''
+    cl.ville||'',
+    cl.assujetti?'<em>Client assujetti à la TVA</em>':''
   ].filter(Boolean).join('<br>')||'<span style="color:#999;font-style:italic">Aucune information client</span>';
-  // En-têtes colonnes
+  // En-têtes : colonnes descriptives configurables + colonnes de prix fixes.
+  // Les colonnes internes (coût de revient, marge, EXW) n'apparaissent JAMAIS sur le PDF client.
+  const devL=devisFX.dev!=='XOF'?' ('+devisFX.dev+')':'';
   const colH=[
     SH.photos?'<th>Photo</th>':'',
     '<th>Désignation</th>',
@@ -2303,12 +2411,11 @@ function generateDevisPDF(){
     SH.type_fret?'<th>Mode</th>':'',
     SH.delai?'<th>Délai</th>':'',
     SH.dev_source?'<th>Prix devise</th>':'',
-    SH.prix_exw?'<th>EXW (XOF)</th>':'',
-    SH.prix_ht?`<th>Prix HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
-    SH.douane?'<th>Douane est.*</th>':'',
-    SH.tva?`<th>TVA (${S.tva}%)</th>`:'',
-    SH.prix_ttc?`<th>Prix TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
-    '<th>Qté</th>',`<th style="white-space:nowrap">Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
+    `<th style="white-space:nowrap">Prix unitaire HT${devL}</th>`,
+    '<th>Qté</th>',
+    `<th style="white-space:nowrap">Prix total HT${devL}</th>`,
+    `<th style="white-space:nowrap">Frais logistiques*${devL}</th>`,
+    `<th style="white-space:nowrap">Prix total TTC${devL}</th>`,
   ].join('');
   const nbCols=colH.split('<th').length-1;
   // Lignes
@@ -2329,18 +2436,18 @@ function generateDevisPDF(){
       ${SH.type_fret?`<td>${p.tr==='Aérien'?'Aérien':'Maritime'}</td>`:''}
       ${SH.delai?`<td>${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
-      ${SH.prix_exw?`<td>${N(c.pa)}</td>`:''}
-      ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.prixClientHT)}</td>`:''}
-      ${SH.douane?`<td style="color:#b45309;white-space:nowrap">${N(c.douane)}</td>`:''}
-      ${SH.tva?`<td style="color:#6b7280;white-space:nowrap">${Ndv(c.prixClientHT*S.tva/100)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:600;white-space:nowrap;color:#0066cc">${Ndv(c.prixClientTTC)}</td>`:''}
+      <td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>
       <td style="text-align:center">${item.qty}</td>
-      <td style="font-weight:700;white-space:nowrap">${Ndv(c.totalHT)}</td>
+      <td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>
+      <td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>
+      <td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>
     </tr>`;
   }).join('');
-  const totHT=devisCart.reduce((s,i)=>s+calcDevis(i).totalHT,0);
-  const totTTC=devisCart.reduce((s,i)=>s+calcDevis(i).totalTTC,0);
-  const showDouaneNote=SH.douane;
+  const cs=devisCart.map(calcDevis);
+  const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
+  const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
+  const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
+  const totTTC=cs.reduce((s,c)=>s+c.pvtTTC,0);
   // Injecter dans la zone d'impression
   document.body.classList.add('printing-devis');
   document.getElementById('devis-print-area').innerHTML=`
@@ -2364,36 +2471,40 @@ function generateDevisPDF(){
       <thead><tr>${colH}</tr></thead>
       <tbody>${rowsHtml}</tbody>
       <tfoot>
-        ${SH.tva?`
         <tr style="background:#f5f5f7">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
+          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devL}</td>
           <td colspan="2" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
         <tr>
-          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">TVA (${S.tva}%)</td>
-          <td colspan="2" style="font-size:12px">${Ndv(totTTC-totHT)}</td>
+          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">Frais logistiques* — tout-compris${devL}</td>
+          <td colspan="2" style="font-size:12px;white-space:nowrap">${Ndv(totLog)}</td>
         </tr>
+        ${cl.assujetti?`
+        <tr>
+          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">TVA interne (${S.tvaInterne}%) — sur le montant HT</td>
+          <td colspan="2" style="font-size:12px;white-space:nowrap">${Ndv(totTVA)}</td>
+        </tr>
+        `:''}
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
-          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC)}</td>
+          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devL}</td>
+          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC+totTVA)}</td>
         </tr>
-        `:`
-        <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-1}" style="text-align:right;font-weight:700;font-size:13px">TOTAL HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</td>
-          <td style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totHT)}</td>
-        </tr>
-        `}
       </tfoot>
     </table>
     <div class="dv-cgs">
       <strong>Conditions générales :</strong><br>
       Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en ${devisFX.dev==='XOF'?'Francs CFA (XOF)':devisFX.dev+' — convertis depuis XOF'}. ${devisFX.dev!=='XOF'?`<strong>Taux de change appliqué : 1 ${devisFX.dev} = ${Nd(devisFX.taux,4)} XOF</strong> (taux indicatif) — `:'<strong>Taux de change du jour appliqué</strong> — '}de légères variations peuvent être constatées au moment de la commande.<br>
+      <strong>Frais logistiques (*) :</strong> Tarif transitaire <strong>tout-compris (fret + douane + taxes)</strong> — aucune TVA ni taxe supplémentaire ne s'ajoute aux frais logistiques. Les montants indiqués sont des estimations ; le montant définitif pourra différer légèrement.<br>
+      ${cl.assujetti?`<strong>TVA :</strong> Client assujetti — la TVA interne (${S.tvaInterne}%) est calculée sur le montant HT des marchandises et affichée séparément ci-dessus.<br>`:''}
       <strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant HT</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>
-      ${showDouaneNote?`<strong>Frais de douane (*) :</strong> Les frais de douane figurant sur ce devis sont des <em>estimations</em>. Le montant définitif pourra différer légèrement. Ces frais sont entièrement à la <strong>charge du client</strong> et devront être réglés au maximum <strong>2 jours</strong> après que le transitaire notifie la livraison effective des colis à son niveau.<br>`:''}
       <strong>Post-acheminement :</strong> Les frais de livraison locale (post-acheminement) sont également à la charge du client et ne sont pas inclus dans ce devis.<br>
       <strong>Délais :</strong> Les délais de livraison indiqués sont estimatifs et peuvent varier selon le mode de transport et les conditions douanières.<br><br>
       <strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em>
     </div>`;
+  auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,
+    strategie:devisPrefs.strategy,parametres:{...S},
+    lignes:devisCart.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,calc:cs[ix]})),
+    totaux:{totHT:r2(totHT),fraisLog:r2(totLog),tva:r2(totTVA),totTTC:r2(totTTC+totTVA)}});
   window.print();
   document.body.classList.remove('printing-devis');
 }
