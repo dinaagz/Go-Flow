@@ -50,7 +50,7 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines)
 | `gf_p` | Products array |
 | `gf_f` | Suppliers array |
 | `gf_t` | Freight forwarders array |
-| `gf_c` | Column picker state (object of `{colKey: boolean}`) |
+| `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis|pdf: {visible: [key…], touched: bool, known: [key…]}}`. Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
 | `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
 | `gf_audit` | Calculation audit trail (last 100 entries: settings changes + generated devis PDFs), exportable as JSON from the settings panel |
 
@@ -99,6 +99,18 @@ All prices flow through `calcEngine(inputs)` in `index.html` (between the `=====
 ```
 
 **TVA rule**: no VAT is ever added on top of frais logistiques (already tax-inclusive). `S.tvaInterne` only appears as a separate line for VAT-registered clients (`devisClient.assujetti` checkbox / simulation select), computed on the merchandise HT amount. Internal columns (coût de revient, marge, EXW) never appear on the client PDF.
+
+### Universal column manager (ColumnManager)
+
+Column visibility for **Catalogue / Simulation / Devis / PDF export** flows through one store + one reusable component (between the `===== GESTION UNIVERSELLE DES COLONNES` / `===== FIN GESTION DES COLONNES` markers):
+
+- `CM_DEFS` — column definitions per view: `{k, lbl, def (visible by default), mob:false (auto-hidden on mobile), g (dropdown group)}`. `CM_FIXED` lists always-on columns shown as disabled items.
+- `cmMount(view, hostId, {inline})` — renders the component into a host div (button + dropdown with count badge `visible/total`, "Tout afficher", "Réinitialiser"; `inline:true` renders a flat list, used in the PDF config modal).
+- `cmVisible(view)` — returns the effective `{key: bool}` set. On viewports <768px, non-essential columns (`mob:false`) are auto-hidden **until** the user customizes the view (`touched`).
+- `cmToggle/cmShowAll/cmReset` mutate + `cmSave()` to `gf_cols` + re-render via `CM_RENDER[view]`; changes are announced to screen readers through the `#cm-live` live region.
+- Stale-key safety: saved keys no longer in `CM_DEFS` are dropped; columns added to the code after a save (tracked via `known`) pick up their `def` value.
+- PDF columns are a **separate** preference (`pdf` view), configured in the `pdf-modal` opened by `openPdfConfig()` before `generateDevisPDF()`. The PDF price block (Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC) is always included; internal columns (coût de revient, marge, EXW) are never exportable to the client PDF.
+- Table rows get a "Voir détails" (eye) button → `showProdDetails` / `showDevisDetails` open `detail-modal` with every field, including hidden columns (mobile fallback).
 
 ### Grouped view
 

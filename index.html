@@ -274,6 +274,17 @@ textarea.fc{resize:vertical;min-height:70px}
 .cp-item:hover{background:var(--gris)}
 .cp-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--bleu-t);cursor:pointer}
 .cp-fixed{opacity:.45;pointer-events:none}
+.cm-count{margin-left:4px;background:var(--gris);border:1px solid var(--border);border-radius:8px;padding:1px 7px;font-size:10px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.cm-acts{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.cm-acts .btn{flex:1}
+.cm-inline{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--gris)}
+.cm-inline .cp-item:hover{background:#E9EDF5}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.sim-hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sim-hdr-row .sec-hdr{margin-bottom:0}
+.detail-row{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border)}
+.detail-row span:first-child{color:var(--muted)}
+.detail-row span:last-child{font-weight:600;text-align:right}
 /* ===== DEVIS ===== */
 .strat-btn{flex:1;padding:12px;border:1.5px solid var(--border2);border-radius:12px;background:var(--surface);cursor:pointer;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;text-align:center;transition:all .18s;line-height:1.5;color:var(--text)}
 .strat-btn .ic{width:15px;height:15px;vertical-align:-3px;color:var(--muted)}
@@ -536,24 +547,7 @@ textarea.fc{resize:vertical;min-height:70px}
       <option value="meilleure_qualite">Meilleure qualité</option>
       <option value="meilleur_rapport">Meilleur rapport</option>
     </select>
-    <div class="col-picker-wrap" id="cp-wrap">
-      <button class="col-picker-btn" onclick="toggleColPicker()" title="Colonnes visibles"><svg class="ic" aria-hidden="true"><use href="#i-cols"/></svg> Colonnes</button>
-      <div class="col-picker-drop" id="cp-drop">
-        <div class="cp-title">Colonnes obligatoires</div>
-        <div class="cp-grid">
-          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>Photo</label>
-          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>Réf</label>
-          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>Désignation</label>
-          <label class="cp-item cp-fixed"><input type="checkbox" checked disabled>Actions</label>
-        </div>
-        <div class="cp-title" style="margin-top:12px">Colonnes optionnelles</div>
-        <div class="cp-grid" id="cp-opts"></div>
-        <div style="display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
-          <button class="btn btn-sec btn-sm" style="flex:1" onclick="setAllCols(true)">Tout cocher</button>
-          <button class="btn btn-sec btn-sm" style="flex:1" onclick="setAllCols(false)">Tout décocher</button>
-        </div>
-      </div>
-    </div>
+    <div class="col-picker-wrap" id="cm-catalogue"></div>
     <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
   </div>
   <div id="cat-cont"></div>
@@ -628,7 +622,10 @@ textarea.fc{resize:vertical;min-height:70px}
       </div>
     </div>
     <div class="sim-result" id="sim-result">
-      <h2 class="sec-hdr" style="color:#fff"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Récapitulatif</h2>
+      <div class="sim-hdr-row" style="margin-bottom:14px">
+        <h2 class="sec-hdr" style="color:#fff"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg>Récapitulatif</h2>
+        <div class="col-picker-wrap" id="cm-simulation"></div>
+      </div>
       <div id="sim-rows"><div style="text-align:center;opacity:.4;padding:40px 0;font-size:13px">Sélectionnez un produit</div></div>
       <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-grad" onclick="window.print()"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg> Export PDF</button>
@@ -717,19 +714,7 @@ textarea.fc{resize:vertical;min-height:70px}
           <button class="view-btn active" id="dvg" onclick="setDevisView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
           <button class="view-btn" id="dvl" onclick="setDevisView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
         </div>
-        <div class="col-picker-wrap" id="dv-cp-wrap">
-          <button class="col-picker-btn" onclick="toggleDevisColPicker()"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Colonnes devis</button>
-          <div class="col-picker-drop" id="dv-cp-drop" style="min-width:300px">
-            <div class="cp-title">Informations produit</div>
-            <div class="cp-grid" id="dv-cp-prod"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--orange-t)">Infos transitaire</div>
-            <div class="cp-grid" id="dv-cp-trans"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--violet)">Devise source</div>
-            <div class="cp-grid" id="dv-cp-dev"></div>
-            <div class="cp-title" style="margin-top:10px;color:var(--ok)">Calcul client</div>
-            <div class="cp-grid" id="dv-cp-calc"></div>
-          </div>
-        </div>
+        <div class="col-picker-wrap" id="cm-devis"></div>
         <button class="btn btn-danger btn-sm" onclick="clearCart()"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Vider</button>
       </div>
     </div>
@@ -740,7 +725,7 @@ textarea.fc{resize:vertical;min-height:70px}
   <!-- Actions -->
   <div class="devis-footer">
     <button class="btn btn-sec" onclick="tab('catalogue')">← Retour catalogue</button>
-    <button class="btn btn-grad" onclick="generateDevisPDF()" style="font-size:14px;padding:12px 28px"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg> Générer le PDF</button>
+    <button class="btn btn-grad" onclick="openPdfConfig()" style="font-size:14px;padding:12px 28px"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg> Générer le PDF</button>
   </div>
 </div>
 
@@ -911,6 +896,36 @@ textarea.fc{resize:vertical;min-height:70px}
   </div>
 </div>
 
+<!-- PDF EXPORT — CONFIGURATION DES COLONNES -->
+<div class="overlay" id="pdf-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pdfm-title" style="max-width:600px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="pdfm-title">Export PDF — Colonnes à inclure</h2>
+      <button class="modal-x" onclick="closeMod('pdf-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Les colonnes essentielles (<b>Désignation, Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC</b>) sont toujours incluses. Ajoutez ici des colonnes descriptives — ce choix est enregistré séparément des tableaux de l'application.</div>
+      <div class="col-picker-wrap" id="cm-pdf"></div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('pdf-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="closeMod('pdf-modal');generateDevisPDF()"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg> Générer le PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DÉTAILS D'UNE LIGNE (mobile / colonnes masquées) -->
+<div class="overlay" id="detail-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detail-title" style="max-width:480px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="detail-title">Détails</h2>
+      <button class="modal-x" onclick="closeMod('detail-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1002,39 +1017,210 @@ const DP=[
   {grp:'hifu',                 cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
 ];
 
-const COL_DEFS=[
-  {k:'cat',    lbl:'Catégorie',                       def:true},
-  {k:'four',   lbl:'Fournisseur',                     def:true},
-  {k:'cbm',    lbl:'CBM',                             def:false},
-  {k:'poids',  lbl:'Poids',                           def:false},
-  {k:'achat',  lbl:'Achat EXW',                       def:false},
-  {k:'prach',  lbl:'Fret local',                      def:false},
-  {k:'revient',lbl:'Coût de Revient HT',              def:true},
-  {k:'fret',   lbl:'Frais logistiques (Transitaire)', def:true},
-  {k:'marge',  lbl:'Marge',                           def:true},
-  {k:'vente',  lbl:'Prix de Vente HT',                def:true},
-  {k:'ttc',    lbl:'Prix de Vente TTC',               def:true},
-  {k:'marche', lbl:'Prix marché',                     def:false},
-];
-let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
-let grouped=false,stratPrix='prix_bas',winOverrides={};
-const WK='gf_win';
+/* ===== GESTION UNIVERSELLE DES COLONNES (store + composant réutilisable) =====
+   Préférences persistées dans gf_cols : {vue:{visible:[clé…], touched:bool, known:[clé…]}}
+   - visible : colonnes affichées, dans l'ordre des définitions
+   - touched : l'utilisateur a personnalisé → désactive l'auto-masquage mobile
+   - known   : clés existant lors de la sauvegarde → une colonne ajoutée au code après coup
+               reprend sa valeur par défaut ; une colonne supprimée du code est ignorée.
+   @typedef {{k:string, lbl:string, def:boolean, mob?:boolean, g?:string}} ColumnDef
+   (def : visible par défaut · mob:false : auto-masquée sur mobile · g : groupe du dropdown) */
+const CMK='gf_cols';
+const CM_DEFS={
+  catalogue:[
+    {k:'cat',    lbl:'Catégorie',                       def:true, mob:false},
+    {k:'four',   lbl:'Fournisseur',                     def:true},
+    {k:'cbm',    lbl:'CBM',                             def:false,mob:false},
+    {k:'poids',  lbl:'Poids',                           def:false,mob:false},
+    {k:'achat',  lbl:'Achat EXW',                       def:false,mob:false},
+    {k:'prach',  lbl:'Fret local',                      def:false,mob:false},
+    {k:'revient',lbl:'Coût de Revient HT',              def:true, mob:false},
+    {k:'fret',   lbl:'Frais logistiques (Transitaire)', def:true, mob:false},
+    {k:'marge',  lbl:'Marge',                           def:true},
+    {k:'vente',  lbl:'Prix de Vente HT',                def:true},
+    {k:'ttc',    lbl:'Prix de Vente TTC',               def:true},
+    {k:'delai',  lbl:'Délai livraison',                 def:false,mob:false},
+    {k:'marche', lbl:'Prix marché',                     def:false,mob:false},
+  ],
+  simulation:[
+    {k:'produit',  lbl:'Produit',                          def:true},
+    {k:'ref',      lbl:'Référence',                        def:false,mob:false},
+    {k:'four',     lbl:'Fournisseur',                      def:true, mob:false},
+    {k:'qte',      lbl:'Quantité',                         def:true},
+    {k:'transport',lbl:'Transport / CBM / Poids',          def:true, mob:false},
+    {k:'achat',    lbl:'Coût d\'achat + frais (étape 1)',  def:true, mob:false},
+    {k:'revient_u',lbl:'Coût de revient unitaire',         def:true},
+    {k:'taux',     lbl:'Taux de change',                   def:true, mob:false},
+    {k:'marge',    lbl:'Marge unitaire (%)',               def:true},
+    {k:'marge_tot',lbl:'Marge totale',                     def:true, mob:false},
+    {k:'vente_ht', lbl:'Prix de Vente HT',                 def:true},
+    {k:'fret',     lbl:'Frais logistiques (Transitaire)',  def:true},
+    {k:'vente_ttc',lbl:'Prix de Vente TTC unitaire',       def:true},
+  ],
+  devis:[
+    {k:'photos',      g:'Produit',      lbl:'Photo',                    def:true, mob:false},
+    {k:'ref',         g:'Produit',      lbl:'Référence',                def:true, mob:false},
+    {k:'cat',         g:'Produit',      lbl:'Catégorie',                def:false,mob:false},
+    {k:'specs',       g:'Produit',      lbl:'Spécifications',           def:false,mob:false},
+    {k:'cbm',         g:'Produit',      lbl:'CBM (m³)',                 def:false,mob:false},
+    {k:'poids',       g:'Produit',      lbl:'Poids (kg)',               def:false,mob:false},
+    {k:'moq',         g:'Produit',      lbl:'MOQ',                      def:false,mob:false},
+    {k:'fournisseur', g:'Produit',      lbl:'Fournisseur',              def:false,mob:false},
+    {k:'transitaire', g:'Transitaire',  lbl:'Transitaire',              def:false,mob:false},
+    {k:'type_fret',   g:'Transitaire',  lbl:'Type de fret',             def:false,mob:false},
+    {k:'delai',       g:'Transitaire',  lbl:'Délai estimé',             def:false,mob:false},
+    {k:'dev_source',  g:'Devise source',lbl:'Prix en devise (RMB/USD…)',def:false,mob:false},
+    {k:'prix_exw',    g:'Calcul',       lbl:'Prix EXW (XOF)',           def:false,mob:false},
+    {k:'cout_revient',g:'Calcul',       lbl:'Coût de Revient Unit.',    def:true, mob:false},
+    {k:'frais_log',   g:'Calcul',       lbl:'Frais Log. Unit.',         def:true, mob:false},
+    {k:'marge',       g:'Calcul',       lbl:'Marge % (interne)',        def:true, mob:false},
+    {k:'prix_ht',     g:'Calcul',       lbl:'Prix Vente HT/u',          def:true},
+    {k:'prix_ttc',    g:'Calcul',       lbl:'Prix Vente TTC/u',         def:true},
+    {k:'total_ttc',   g:'Calcul',       lbl:'Total TTC ligne',          def:true, mob:false},
+  ],
+  // Colonnes descriptives du PDF — préférence séparée des tableaux UI ; le bloc prix est fixe
+  pdf:[
+    {k:'photos',     lbl:'Photo',             def:false},
+    {k:'ref',        lbl:'Référence',         def:false},
+    {k:'cat',        lbl:'Catégorie',         def:false},
+    {k:'specs',      lbl:'Spécifications',    def:false},
+    {k:'cbm',        lbl:'CBM (m³)',          def:false},
+    {k:'poids',      lbl:'Poids',             def:false},
+    {k:'moq',        lbl:'MOQ',               def:false},
+    {k:'transitaire',lbl:'Transitaire',       def:false},
+    {k:'type_fret',  lbl:'Mode de transport', def:false},
+    {k:'delai',      lbl:'Délai estimé',      def:false},
+    {k:'dev_source', lbl:'Prix devise source',def:false},
+  ],
+};
+// Colonnes toujours présentes, listées à titre indicatif dans le gestionnaire
+const CM_FIXED={
+  catalogue:['Photo','Réf','Désignation','Actions'],
+  simulation:['Prix de Vente total TTC','TVA interne (si assujetti)'],
+  devis:['Désignation','Qté','Total HT','Actions'],
+  pdf:['Désignation','Prix unitaire HT','Qté','Prix total HT','Frais logistiques','Prix total TTC'],
+};
+const CM_TITLES={catalogue:'Colonnes',simulation:'Lignes',devis:'Colonnes devis',pdf:'Colonnes PDF'};
+let colStore={};
+const isMob=()=>window.matchMedia('(max-width:767px)').matches;
 
-function initCols(){
-  const saved=LS_GET('gf_c',null);
-  COL_DEFS.forEach(c=>{cols[c.k]=saved??(c.def);if(saved)cols[c.k]=saved[c.k]!==undefined?saved[c.k]:c.def;});
-  const wrap=document.getElementById('cp-opts');
-  wrap.innerHTML=COL_DEFS.map(c=>`<label class="cp-item"><input type="checkbox" ${cols[c.k]?'checked':''} onchange="toggleCol('${c.k}',this.checked)">${c.lbl}</label>`).join('');
+function cmLoad(){
+  let saved=LS_GET(CMK,null),migrated=false;
+  if(!saved){saved=cmMigrateLegacy();migrated=!!saved;}
+  colStore={};
+  Object.keys(CM_DEFS).forEach(v=>{
+    const defs=CM_DEFS[v],sv=saved&&saved[v];
+    let visible=sv&&Array.isArray(sv.visible)?sv.visible.filter(k=>defs.some(d=>d.k===k)):null;
+    if(visible&&Array.isArray(sv.known))
+      defs.forEach(d=>{if(d.def&&!sv.known.includes(d.k)&&!visible.includes(d.k))visible.push(d.k);});
+    colStore[v]={visible:visible??defs.filter(d=>d.def).map(d=>d.k),touched:!!(sv&&sv.touched)};
+  });
+  if(migrated)cmSave();
 }
-function toggleCol(k,v){cols[k]=v;LS_SET('gf_c',cols);renderCat();}
-function setAllCols(v){COL_DEFS.forEach(c=>{cols[c.k]=v;});LS_SET('gf_c',cols);document.querySelectorAll('#cp-opts input').forEach(i=>i.checked=v);renderCat();}
-function toggleColPicker(){
-  const d=document.getElementById('cp-drop');d.classList.toggle('open');
-  if(d.classList.contains('open')){
-    const close=e=>{if(!document.getElementById('cp-wrap').contains(e.target)){d.classList.remove('open');document.removeEventListener('click',close);}};
+function cmMigrateLegacy(){
+  // Reprise des anciens réglages gf_c (catalogue) et gf_dp.show (devis)
+  const out={};
+  const c=LS_GET('gf_c',null);
+  if(c)out.catalogue={visible:Object.keys(c).filter(k=>c[k]),touched:true,known:Object.keys(c)};
+  const dp=LS_GET(DPK,null);
+  if(dp&&dp.show)out.devis={visible:Object.keys(dp.show).filter(k=>dp.show[k]),touched:true,known:Object.keys(dp.show)};
+  return Object.keys(out).length?out:null;
+}
+function cmSave(){
+  const o={};
+  Object.keys(colStore).forEach(v=>{o[v]={visible:colStore[v].visible,touched:colStore[v].touched,known:CM_DEFS[v].map(d=>d.k)};});
+  LS_SET(CMK,o);
+}
+// Ensemble effectif {clé:bool} — auto-masque les colonnes non essentielles sur mobile
+// tant que l'utilisateur n'a pas personnalisé la vue (touched)
+function cmVisible(view){
+  const st=colStore[view],defs=CM_DEFS[view];
+  let vis=st.visible;
+  if(isMob()&&!st.touched)vis=vis.filter(k=>{const d=defs.find(x=>x.k===k);return d&&d.mob!==false;});
+  const set={};defs.forEach(d=>{set[d.k]=vis.includes(d.k);});
+  return set;
+}
+const CM_RENDER={catalogue:()=>renderCat(),simulation:()=>simCalc(),devis:()=>renderDevisCart(),pdf:()=>{}};
+function cmAnnounce(msg){const el=document.getElementById('cm-live');if(el)el.textContent=msg;}
+function cmToggle(view,k,on){
+  const st=colStore[view];
+  st.touched=true;
+  st.visible=CM_DEFS[view].filter(d=>d.k===k?on:st.visible.includes(d.k)).map(d=>d.k);
+  cmSave();cmRefreshCount(view);
+  const d=CM_DEFS[view].find(x=>x.k===k);
+  cmAnnounce(`Colonne ${d?d.lbl:k} ${on?'affichée':'masquée'} — ${st.visible.length}/${CM_DEFS[view].length} colonnes visibles`);
+  CM_RENDER[view]();
+}
+function cmShowAll(view){
+  const st=colStore[view];st.touched=true;st.visible=CM_DEFS[view].map(d=>d.k);
+  cmSave();cmRefresh(view);cmAnnounce(`Toutes les colonnes affichées (${st.visible.length})`);CM_RENDER[view]();
+}
+function cmReset(view){
+  const st=colStore[view];st.visible=CM_DEFS[view].filter(d=>d.def).map(d=>d.k);st.touched=false;
+  cmSave();cmRefresh(view);cmAnnounce(`Colonnes réinitialisées — ${st.visible.length}/${CM_DEFS[view].length} visibles`);CM_RENDER[view]();
+}
+/* Composant ColumnManager : cmMount(vue, idHôte, {inline}) — bouton+dropdown, ou liste inline (modal PDF) */
+function cmMount(view,hostId,opts={}){
+  const host=document.getElementById(hostId);
+  if(!host)return;
+  host.dataset.cmView=view;
+  if(opts.inline)host.dataset.cmInline='1';
+  cmRefresh(view);
+}
+function cmRefresh(view){
+  document.querySelectorAll(`[data-cm-view="${view}"]`).forEach(host=>{
+    const inline=host.dataset.cmInline==='1';
+    const st=colStore[view],defs=CM_DEFS[view];
+    const wasOpen=!!host.querySelector('.col-picker-drop.open');
+    const focusLbl=document.activeElement&&host.contains(document.activeElement)?document.activeElement.getAttribute('aria-label'):null;
+    const groups={},order=[];
+    defs.forEach(d=>{const g=d.g||'';if(!(g in groups)){groups[g]=[];order.push(g);}groups[g].push(d);});
+    const list=order.map(g=>`
+      ${g?`<div class="cp-title" style="margin-top:10px">${g}</div>`:''}
+      <div class="cp-grid" role="group" aria-label="${g||'Colonnes optionnelles'}">
+        ${groups[g].map(d=>`<label class="cp-item"><input type="checkbox" ${st.visible.includes(d.k)?'checked':''} aria-label="Colonne ${d.lbl}" onchange="cmToggle('${view}','${d.k}',this.checked)">${d.lbl}</label>`).join('')}
+      </div>`).join('');
+    const fixed=(CM_FIXED[view]||[]).map(l=>`<label class="cp-item cp-fixed"><input type="checkbox" checked disabled aria-label="Colonne ${l}, toujours affichée">${l}</label>`).join('');
+    const body=`
+      ${fixed?`<div class="cp-title">Toujours affichées</div><div class="cp-grid">${fixed}</div><div class="cp-title" style="margin-top:12px">Colonnes optionnelles</div>`:''}
+      ${list}
+      <div class="cm-acts">
+        <button class="btn btn-sec btn-sm" onclick="cmShowAll('${view}')" aria-label="Afficher toutes les colonnes">Tout afficher</button>
+        <button class="btn btn-sec btn-sm" onclick="cmReset('${view}')" aria-label="Rétablir les colonnes par défaut">Réinitialiser</button>
+      </div>`;
+    if(inline){host.innerHTML=`<div class="cm-inline" aria-label="${CM_TITLES[view]}">${body}</div>`;}
+    else{host.innerHTML=`
+      <button class="col-picker-btn" aria-expanded="${wasOpen}" aria-haspopup="true" aria-controls="cmd-${view}" onclick="cmOpen(this)" title="Gérer les colonnes visibles">${ICO('cols')} ${CM_TITLES[view]} <span class="cm-count" aria-label="${st.visible.length} colonnes visibles sur ${defs.length}">${st.visible.length}/${defs.length}</span></button>
+      <div class="col-picker-drop${wasOpen?' open':''}" id="cmd-${view}" role="group" aria-label="Gestion des colonnes — ${CM_TITLES[view]}">${body}</div>`;}
+    if(focusLbl){const nf=[...host.querySelectorAll('[aria-label]')].find(el=>el.getAttribute('aria-label')===focusLbl);if(nf)nf.focus();}
+  });
+}
+function cmRefreshCount(view){
+  document.querySelectorAll(`[data-cm-view="${view}"] .cm-count`).forEach(el=>{
+    el.textContent=`${colStore[view].visible.length}/${CM_DEFS[view].length}`;
+  });
+}
+function cmOpen(btn){
+  const host=btn.closest('[data-cm-view]');
+  const d=host.querySelector('.col-picker-drop');
+  const open=!d.classList.contains('open');
+  d.classList.toggle('open',open);
+  btn.setAttribute('aria-expanded',open);
+  if(open){
+    const close=e=>{
+      if(host.contains(e.target))return;
+      const dd=host.querySelector('.col-picker-drop'),bb=host.querySelector('.col-picker-btn');
+      if(dd)dd.classList.remove('open');
+      if(bb)bb.setAttribute('aria-expanded','false');
+      document.removeEventListener('click',close);
+    };
     setTimeout(()=>document.addEventListener('click',close),10);
   }
 }
+/* ===== FIN GESTION DES COLONNES ===== */
+let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid',pics=[],simTr='Maritime',cols={};
+let grouped=false,stratPrix='prix_bas',winOverrides={};
+const WK='gf_win';
 
 function init(){
   // Fusion avec les défauts + migration : l'ancien champ `tva` devient `tvaInterne`
@@ -1042,7 +1228,7 @@ function init(){
   S={...DS,...s0,trf:{...DS.trf,...(s0.trf||{})},assu:{...DS.assu,...(s0.assu||{})}};
   if(s0.tva!=null&&s0.tvaInterne==null)S.tvaInterne=s0.tva;
   delete S.tva;
-  initCols();
+  cmLoad();
   // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
   const storedVer=parseInt(localStorage.getItem(VK)||'0');
   if(storedVer<DATA_VER){
@@ -1074,7 +1260,14 @@ function init(){
   });
   if(migrated)save('p');
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  loadS();loadDevis();renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
+  loadS();loadDevis();
+  cmMount('catalogue','cm-catalogue');
+  cmMount('simulation','cm-simulation');
+  cmMount('devis','cm-devis');
+  cmMount('pdf','cm-pdf',{inline:true});
+  // Auto-masquage mobile : re-rendre quand on franchit le seuil 768px
+  try{window.matchMedia('(max-width:767px)').addEventListener('change',()=>{renderCat();simCalc();renderDevisCart();});}catch(e){}
+  renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
 }
 
 function buildProds(){
@@ -1222,6 +1415,7 @@ function setView(v){
 
 /* ---- CATALOGUE ---- */
 function renderCat(){
+  cols=cmVisible('catalogue');
   const q=(document.getElementById('cat-search').value||'').toLowerCase();
   const fc=document.getElementById('f-cat').value;
   const ff=document.getElementById('f-four');
@@ -1377,6 +1571,7 @@ function prodGroupTable(groups){
     C.marge  ?'<th>Marge</th>'             :'',
     C.vente  ?'<th>Prix de Vente HT</th>'  :'',
     C.ttc    ?'<th>Prix de Vente TTC</th>' :'',
+    C.delai  ?'<th>Délai</th>'             :'',
     C.marche ?'<th>Marché</th>'            :'',
     '<th class="no-print">Actions</th>',
   ].join('');
@@ -1403,8 +1598,10 @@ function prodGroupTable(groups){
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
       ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.delai  ?`<td>${prodDelai(w)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
+        <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
@@ -1431,6 +1628,7 @@ function prodGroupTable(groups){
         ${C.marge  ?`<td style="color:var(--vert-t)">${N(cp.margeU)}</td>`:''}
         ${C.vente  ?`<td>${N(cp.pvuHT)}</td>`:''}
         ${C.ttc    ?`<td style="color:var(--bleu-t)">${N(cp.pvuTTC)}</td>`:''}
+        ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
         ${C.marche ?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
         <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?ICO('check'):ICO('quote')}</button></div></td>
       </tr>`;
@@ -1445,6 +1643,51 @@ function toggleGroupTblRow(key,btn){
   const open=rows.length&&rows[0].style.display!=='none';
   rows.forEach(r=>r.style.display=open?'none':'');
   if(btn)btn.classList.toggle('open',!open);
+}
+
+// Délai indicatif du transitaire par défaut selon le mode de transport
+function prodDelai(p){
+  const t0=trans.length?trans[0]:null;
+  const d=t0?(p.tr==='Aérien'?t0.aerd:t0.mard):'';
+  return d?d+' j':'—';
+}
+
+/* ---- MODAL « VOIR DÉTAILS » — toutes les infos d'une ligne, colonnes masquées comprises ---- */
+function openDetails(title,rows,img){
+  document.getElementById('detail-title').textContent=title;
+  document.getElementById('detail-body').innerHTML=
+    (img?`<img src="${img}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px" onerror="this.style.display='none'">`:'')+
+    rows.map(([l,v])=>`<div class="detail-row"><span>${l}</span><span>${v}</span></div>`).join('');
+  openMod('detail-modal');
+}
+function showProdDetails(id){
+  const p=prods.find(x=>x.id===id);if(!p)return;
+  const f=fours.find(x=>x.id===p.fid);const c=calc(p);
+  openDetails(p.nom,[
+    ['Référence',p.ref],['Catégorie',p.cat],['Fournisseur',f?f.nom:p.fn||'—'],
+    ['Prix EXW',`${p.prix} ${p.dev||'RMB'}`],['Fret local',p.prach?`${p.prach} ${p.dev||'RMB'}`:'—'],
+    ['Dimensions',`${p.l}×${p.la}×${p.h} ${p.dimU||'cm'}`],['CBM',Nd(c.cbm,4)+' m³'],['Poids',p.kg+' kg'],
+    ['Transport',p.tr],['Délai livraison',prodDelai(p)],['MOQ',p.moq||1],
+    ['Achat EXW (XOF)',N(c.exwUX)],['Coût de Revient HT',N(c.coutRevientUX)],
+    ['Frais logistiques (Transitaire)',N(c.fraisLogU)],
+    ['Marge',`${N(c.margeU)} (${Nd(c.margePct,1)}%)`],
+    ['Prix de Vente HT',N(c.pvuHT)],['Prix de Vente TTC',N(c.pvuTTC)],
+    ['Prix marché',p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'],
+  ],p.photos&&p.photos[0]);
+}
+function showDevisDetails(cid){
+  const item=devisCart.find(x=>x.cid===cid);if(!item)return;
+  const c=calcDevis(item),p=item.snap;
+  openDetails(p.nom,[
+    ['Référence',p.ref],['Fournisseur',p.fn||'—'],['Quantité',item.qty],
+    ['Coût de Revient Unit.',Ndv(c.coutRevientUX)],['Frais Log. Unit.',Ndv(c.fraisLogU)],
+    ['Marge (interne)',Nd(c.mgPct,1)+'%'],
+    ['Prix Vente HT/u',Ndv(c.pvuHT)],['Prix Vente TTC/u',Ndv(c.pvuTTC)],
+    ['Total HT',Ndv(c.pvtHT)],['Frais logistiques',Ndv(c.fraisLog)],
+    ...(c.tvaM?[['TVA interne',Ndv(c.tvaM)]]:[]),
+    ['Total TTC',Ndv(c.pvtTTC)],
+    ['Transitaire',p.trans_nom||'—'],['Délai estimé',p.trans_delai?p.trans_delai+' j':'—'],
+  ],p.photos&&p.photos[0]);
 }
 
 function fourLabel(f){
@@ -1501,6 +1744,7 @@ function prodTable(list){
     C.marge  ?'<th>Marge</th>'             :'',
     C.vente  ?'<th>Prix de Vente HT</th>'  :'',
     C.ttc    ?'<th>Prix de Vente TTC</th>' :'',
+    C.delai  ?'<th>Délai</th>'             :'',
     C.marche ?'<th>Marché</th>'            :'',
     '<th class="no-print">Actions</th>',
     '<th class="no-print">Devis</th>',
@@ -1523,8 +1767,10 @@ function prodTable(list){
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
       ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
+        <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
@@ -1935,33 +2181,38 @@ function simCalc(){
   const f=fours.find(x=>x.id===p.fid);
   const sym={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
   const D=v=>Nd(v,2)+' '+sym;
+  const V=cmVisible('simulation');
   document.getElementById('sim-rows').innerHTML=`
-    <div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>
-    <div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>
-    <div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>
+    ${V.produit?`<div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>`:''}
+    ${V.ref?`<div class="sim-row"><span>Référence</span><span>${p.ref}</span></div>`:''}
+    ${V.four?`<div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>`:''}
+    ${V.qte?`<div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>`:''}
+    ${V.transport?`
     <div class="sim-row"><span>Transport</span><span>${simTr==='Maritime'?ICO('ship'):ICO('plane')} ${simTr}</span></div>
     <div class="sim-row"><span>CBM total</span><span>${Nd(c.cbmTot,4)} m³</span></div>
-    <div class="sim-row"><span>Poids total</span><span>${Nd(p.kg*qty,2)} kg</span></div>
-    <div class="sim-sec">Étape 1 · Coût de revient HT (${c.dev})</div>
+    <div class="sim-row"><span>Poids total</span><span>${Nd(p.kg*qty,2)} kg</span></div>`:''}
+    ${V.achat||V.revient_u?`<div class="sim-sec">Étape 1 · Coût de revient HT (${c.dev})</div>`:''}
+    ${V.achat?`
     <div class="sim-row"><span>Coût d'achat HT (EXW × qté${parseFloat(p.prach)?' + fret local':''})</span><span>${D(c.coutAchat)}</span></div>
     ${c.fTrf?`<div class="sim-row"><span>Frais transfert de fonds${S.trf.mode==='pct'?' ('+S.trf.val+'%)':''}</span><span>${D(c.fTrf)}</span></div>`:''}
     ${c.fAss?`<div class="sim-row"><span>Trade Assurance${S.assu.mode==='pct'?' ('+S.assu.val+'%)':''}</span><span>${D(c.fAss)}</span></div>`:''}
-    <div class="sim-row"><span>Coût de revient HT</span><span style="font-weight:600">${D(c.coutRevient)}</span></div>
-    <div class="sim-row"><span>Coût de revient unitaire HT</span><span>${D(c.coutRevientU)}</span></div>
-    <div class="sim-sec">Étape 2 · Prix de Vente HT (XOF)</div>
-    <div class="sim-row"><span>Taux de change</span><span>1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</span></div>
-    <div class="sim-row"><span>Coût de revient unitaire (XOF)</span><span>${N(c.coutRevientUX)}</span></div>
-    <div class="sim-row"><span>Marge unitaire</span><span style="color:#4ade80">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
-    ${rem>0?`<div class="sim-row"><span>Remise (${rem}%)</span><span>incluse</span></div>`:''}
+    <div class="sim-row"><span>Coût de revient HT</span><span style="font-weight:600">${D(c.coutRevient)}</span></div>`:''}
+    ${V.revient_u?`<div class="sim-row"><span>Coût de revient unitaire HT</span><span>${D(c.coutRevientU)}</span></div>`:''}
+    ${V.taux||V.marge||V.vente_ht||V.revient_u?`<div class="sim-sec">Étape 2 · Prix de Vente HT (XOF)</div>`:''}
+    ${V.taux?`<div class="sim-row"><span>Taux de change</span><span>1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</span></div>`:''}
+    ${V.revient_u?`<div class="sim-row"><span>Coût de revient unitaire (XOF)</span><span>${N(c.coutRevientUX)}</span></div>`:''}
+    ${V.marge?`<div class="sim-row"><span>Marge unitaire</span><span style="color:#4ade80">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
+    ${rem>0?`<div class="sim-row"><span>Remise (${rem}%)</span><span>incluse</span></div>`:''}`:''}
+    ${V.vente_ht?`
     <div class="sim-row"><span>Prix de Vente unitaire HT</span><span style="font-weight:600">${N(c.pvuHT)}</span></div>
-    <div class="sim-row"><span>Prix de Vente total HT</span><span style="font-weight:600">${N(c.pvtHT)}</span></div>
-    <div class="sim-sec">Étape 3 · Prix de Vente TTC (estimation)</div>
-    <div class="sim-row"><span>Frais logistiques (Transitaire) — tout-compris</span><span>${N(c.fraisLog)}</span></div>
-    <div class="sim-row"><span>Prix de Vente unitaire TTC</span><span>${N(c.pvuTTC)}</span></div>
+    <div class="sim-row"><span>Prix de Vente total HT</span><span style="font-weight:600">${N(c.pvtHT)}</span></div>`:''}
+    ${V.fret||V.vente_ttc?`<div class="sim-sec">Étape 3 · Prix de Vente TTC (estimation)</div>`:''}
+    ${V.fret?`<div class="sim-row"><span>Frais logistiques (Transitaire) — tout-compris</span><span>${N(c.fraisLog)}</span></div>`:''}
+    ${V.vente_ttc?`<div class="sim-row"><span>Prix de Vente unitaire TTC</span><span>${N(c.pvuTTC)}</span></div>`:''}
     ${c.tvaM?`<div class="sim-row"><span>TVA interne (${S.tvaInterne}%) — client assujetti</span><span>${N(c.tvaM)}</span></div>`:''}
     <hr style="border-color:rgba(255,255,255,.08);margin:6px 0">
     <div class="sim-row sim-total"><span>PRIX DE VENTE TOTAL TTC</span><span>${N(c.totalAvecTVA)}</span></div>
-    <div class="sim-row sim-marge"><span>Marge totale</span><span>${N(c.margeTot)} (${Nd(c.margePct,1)}%)</span></div>`;
+    ${V.marge_tot?`<div class="sim-row sim-marge"><span>Marge totale</span><span>${N(c.margeTot)} (${Nd(c.margePct,1)}%)</span></div>`:''}`;
 }
 
 function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
@@ -1990,39 +2241,16 @@ let devisFX={dev:'XOF',taux:1};
 let fxCache={rates:null,ts:0};
 let fxReqSeq=0;
 
-const DEVIS_SHOW_DEFS=[
-  // Infos produit
-  {k:'photos',     g:'prod',  lbl:'Photo',                  def:true},
-  {k:'ref',        g:'prod',  lbl:'Référence',               def:true},
-  {k:'cat',        g:'prod',  lbl:'Catégorie',               def:false},
-  {k:'specs',      g:'prod',  lbl:'Spécifications',          def:false},
-  {k:'cbm',        g:'prod',  lbl:'CBM (m³)',                def:false},
-  {k:'poids',      g:'prod',  lbl:'Poids (kg)',              def:false},
-  {k:'moq',        g:'prod',  lbl:'MOQ',                     def:false},
-  // Infos transitaire
-  {k:'transitaire',g:'trans', lbl:'Transitaire',             def:false},
-  {k:'type_fret',  g:'trans', lbl:'Type de fret',            def:false},
-  {k:'delai',      g:'trans', lbl:'Délai estimé',            def:false},
-  // Devise source
-  {k:'dev_source', g:'dev',   lbl:'Prix en devise (RMB/USD…)',def:false},
-  // Calcul (colonnes internes : coût de revient et marge n'apparaissent JAMAIS sur le PDF client)
-  {k:'prix_exw',    g:'calc', lbl:'Prix EXW (XOF)',           def:false},
-  {k:'cout_revient',g:'calc', lbl:'Coût de Revient Unit.',    def:true},
-  {k:'frais_log',   g:'calc', lbl:'Frais Log. Unit.',         def:true},
-  {k:'marge',       g:'calc', lbl:'Marge % (interne)',        def:true},
-  {k:'prix_ht',     g:'calc', lbl:'Prix Vente HT/u',          def:true},
-  {k:'prix_ttc',    g:'calc', lbl:'Prix Vente TTC/u',         def:true},
-];
-
-const DV_SHOW_DEFAULT=Object.fromEntries(DEVIS_SHOW_DEFS.map(d=>[d.k,d.def]));
-const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35,show:{...DV_SHOW_DEFAULT}};
+// Les colonnes du devis et du PDF sont gérées par le gestionnaire universel (CM_DEFS.devis / CM_DEFS.pdf)
+const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35};
 
 /* ---- CHARGEMENT / PERSISTANCE ---- */
 function loadDevis(){
   devisCart=LS_GET(DK,[]);
   devisClient=LS_GET(DCK,null)||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
   const saved=LS_GET(DPK,null);
-  devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved,show:{...DV_SHOW_DEFAULT,...(saved.show||{})}}:{...DV_PREFS_DEFAULT,show:{...DV_SHOW_DEFAULT}};
+  devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved}:{...DV_PREFS_DEFAULT};
+  delete devisPrefs.show; // migré vers gf_cols (cmMigrateLegacy)
   if(saved&&saved.fx){devisFX={dev:saved.fx.dev||'XOF',taux:saved.fx.taux||1};}
   updateCartBadge();
 }
@@ -2208,27 +2436,6 @@ function setDevisView(v){
   renderDevisCart();
 }
 
-/* ---- SÉLECTEUR DE COLONNES DEVIS ---- */
-function initDevisColPicker(){
-  const grpIds={prod:'dv-cp-prod',trans:'dv-cp-trans',dev:'dv-cp-dev',calc:'dv-cp-calc'};
-  Object.values(grpIds).forEach(id=>document.getElementById(id).innerHTML='');
-  DEVIS_SHOW_DEFS.forEach(c=>{
-    const el=document.createElement('label');el.className='cp-item';
-    el.innerHTML=`<input type="checkbox" ${devisPrefs.show[c.k]?'checked':''} onchange="toggleDevisCol('${c.k}',this.checked)">${c.lbl}`;
-    document.getElementById(grpIds[c.g]).appendChild(el);
-  });
-}
-
-function toggleDevisCol(k,v){devisPrefs.show[k]=v;saveDevisPrefs();renderDevisCart();}
-
-function toggleDevisColPicker(){
-  const d=document.getElementById('dv-cp-drop');d.classList.toggle('open');
-  if(d.classList.contains('open')){
-    const close=e=>{if(!document.getElementById('dv-cp-wrap').contains(e.target)){d.classList.remove('open');document.removeEventListener('click',close);}};
-    setTimeout(()=>document.addEventListener('click',close),10);
-  }
-}
-
 /* ---- RENDU DE L'ONGLET DEVIS ---- */
 function renderDevis(){
   document.getElementById('dv-nom').value=devisClient.nom||'';
@@ -2247,7 +2454,6 @@ function renderDevis(){
   if(tauxInp)tauxInp.value=devisFX.dev==='XOF'?1:devisFX.taux;
   const lbl=document.getElementById('dv-taux-lbl');
   if(lbl)lbl.textContent='XOF pour 1 '+(DV_NAMES[devisFX.dev]||devisFX.dev);
-  initDevisColPicker();
   setStrategy(devisPrefs.strategy||'marge_fixe');
   renderDevisCart();
 }
@@ -2264,6 +2470,7 @@ function renderDevisCart(){
 }
 
 function buildDevisGrid(){
+  const SH=cmVisible('devis');
   return`<div class="grid">${devisCart.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const imgHtml=p.photos&&p.photos[0]
@@ -2275,8 +2482,8 @@ function buildDevisGrid(){
         <div class="card-ref">${p.ref}</div>
         <div class="card-title">${p.nom}</div>
         <div class="card-cat">${p.cat} · ${TRI(p.tr)} ${p.tr||''}</div>
-        ${devisPrefs.show.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${ICO('factory')} ${p.fn}</div>`:''}
-        ${devisPrefs.show.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">${ICO('ship')} ${p.trans_nom}</div>`:''}
+        ${SH.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${ICO('factory')} ${p.fn}</div>`:''}
+        ${SH.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">${ICO('ship')} ${p.trans_nom}</div>`:''}
         <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
           <div class="cart-price-tag">${Ndv(c.pvuHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">Prix de Vente HT/u</small></div>
           <div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.pvuTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
@@ -2293,12 +2500,13 @@ function buildDevisGrid(){
 }
 
 function buildDevisTable(){
-  const SH=devisPrefs.show;
+  const SH=cmVisible('devis');
   const ths=[
     SH.photos?'<th>Photo</th>':'',
     '<th>Désignation</th>',
     SH.ref?'<th>Réf</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
+    SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.specs?'<th>Specs</th>':'',
     SH.cbm?'<th>CBM</th>':'',
     SH.poids?'<th>Poids</th>':'',
@@ -2314,6 +2522,7 @@ function buildDevisTable(){
     SH.prix_ht?`<th>Prix Vente HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     SH.prix_ttc?`<th>Prix Vente TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th>Qté</th>',`<th>Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
+    SH.total_ttc?`<th>Total TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th class="no-print">Actions</th>',
   ].join('');
   const rows=devisCart.map(item=>{
@@ -2325,6 +2534,7 @@ function buildDevisTable(){
       <td style="font-weight:500;max-width:160px">${p.nom}</td>
       ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
+      ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
       ${SH.specs?`<td style="font-size:11px;color:var(--muted)">${p.specs||'—'}</td>`:''}
       ${SH.cbm?`<td style="font-size:11px">${Nd(c.cbm,4)} m³</td>`:''}
       ${SH.poids?`<td style="font-size:11px">${p.poids||p.kg||'—'} kg</td>`:''}
@@ -2345,7 +2555,11 @@ function buildDevisTable(){
         <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
       </div></td>
       <td style="font-weight:700">${Ndv(c.pvtHT)}</td>
-      <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button></td>
+      ${SH.total_ttc?`<td style="font-weight:700;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
+      <td class="no-print"><div style="display:flex;gap:4px">
+        <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
+        <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
+      </div></td>
     </tr>`;
   }).join('');
   return`<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -2379,12 +2593,17 @@ function renderDevisTotal(){
 }
 
 /* ---- GÉNÉRATION PDF (impression navigateur via template HTML dédié) ---- */
+function openPdfConfig(){
+  if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
+  cmRefresh('pdf');
+  openMod('pdf-modal');
+}
 function generateDevisPDF(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
   const now=new Date();
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
-  const SH=devisPrefs.show;
+  const SH=cmVisible('pdf'); // préférence PDF distincte des tableaux UI
   // Bloc client
   const cl=devisClient;
   const clientHtml=[
@@ -2529,7 +2748,11 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     const ov=document.querySelector('.overlay.open');
     if(ov){closeMod(ov.id);return;}
-    document.querySelectorAll('.col-picker-drop.open').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.col-picker-drop.open').forEach(d=>{
+      d.classList.remove('open');
+      const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
+      if(b)b.setAttribute('aria-expanded','false');
+    });
     return;
   }
   if(e.key==='Tab'){
