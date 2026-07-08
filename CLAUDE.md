@@ -46,12 +46,13 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines)
 
 | Key | Content |
 |-----|---------|
-| `gf_s` | Global settings (exchange rate, freight rates, margin %, TVA) |
+| `gf_s` | Global settings (exchange rate, all-inclusive forwarder rates, margin %, transfer fees `trf`, Trade Assurance `assu`, internal VAT `tvaInterne`) |
 | `gf_p` | Products array |
 | `gf_f` | Suppliers array |
 | `gf_t` | Freight forwarders array |
-| `gf_c` | Column picker state (object of `{colKey: boolean}`) |
+| `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis|pdf: {visible: [key…], touched: bool, known: [key…]}}`. Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
 | `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
+| `gf_audit` | Calculation audit trail (last 100 entries: settings changes + generated devis PDFs), exportable as JSON from the settings panel |
 
 `DATA_VER` constant controls localStorage migrations — bump it to force a reset of `gf_p` and `gf_f` when the data schema changes.
 
@@ -74,21 +75,42 @@ let winOverrides // {grpKey: prodId} — manually promoted winners
 let cols      // {colKey: boolean} — column picker state
 ```
 
-### Pricing formula
+### Pricing model (calcEngine — single source of truth)
 
-Margin is applied **only on EXW price**, never on freight:
+All prices flow through `calcEngine(inputs)` in `index.html` (between the `===== MOTEUR DE CALCUL` / `===== FIN MOTEUR` markers — pure functions, extractable for Node tests). `calc(p, o)` adapts a product + settings, `calcDevis(item)` adapts a cart item + devis strategy. Amounts are rounded to 2 decimals (`r2`).
 
 ```
-Marge XOF     = Prix EXW × taux_marge %
-Vente HT      = Prix EXW + Marge
-Prix net HT   = Vente HT − Remise
-Prix total HT = Prix net HT + Préacheminement + Fret/Douane
-TTC           = Prix total HT × (1 + TVA %)
+ÉTAPE 1 — Coût de revient HT (devise source)
+  Coût d'achat HT     = Prix EXW × Qté + Fret local (p.prach, per order, same currency)
+  Frais transfert     = S.trf   → % of coût d'achat OR fixed amount
+  Trade Assurance     = S.assu  → optional (off by default), % OR fixed
+  Coût de revient HT  = Coût d'achat + Transfert + Assurance   (unitaire = / Qté)
+
+ÉTAPE 2 — Prix de Vente HT (XOF) — conversion BEFORE margin
+  Coût revient U (XOF) = Coût revient unitaire × taux de change
+  Marge U              = Coût revient U (XOF) × taux_marge %
+  Prix de Vente U HT   = Coût revient U (XOF) + Marge U  (− remise éventuelle)
+
+ÉTAPE 3 — Prix de Vente TTC (estimation)
+  CBM                  = L×l×h / 1e6 (cm, default) or L×l×h (m) — p.dimU
+  Frais logistiques    = Aérien: kg × Qté × tarifAerien | Maritime: CBM × Qté × tarifMaritime
+                         (per-forwarder rates override globals; ALL-INCLUSIVE: fret + douane + taxes)
+  Prix de Vente TTC    = Prix de Vente HT + Frais logistiques
 ```
 
-Two distinct freight types:
-- **Préacheminement** (`p.prach`) — inland freight from supplier to forwarder, given per-product by the supplier, stored in the same currency as EXW
-- **Fret/Douane** — international freight + customs, calculated automatically: `CBM × tarifMaritime` or `poids × tarifAerien`
+**TVA rule**: no VAT is ever added on top of frais logistiques (already tax-inclusive). `S.tvaInterne` only appears as a separate line for VAT-registered clients (`devisClient.assujetti` checkbox / simulation select), computed on the merchandise HT amount. Internal columns (coût de revient, marge, EXW) never appear on the client PDF.
+
+### Universal column manager (ColumnManager)
+
+Column visibility for **Catalogue / Simulation / Devis / PDF export** flows through one store + one reusable component (between the `===== GESTION UNIVERSELLE DES COLONNES` / `===== FIN GESTION DES COLONNES` markers):
+
+- `CM_DEFS` — column definitions per view: `{k, lbl, def (visible by default), mob:false (auto-hidden on mobile), g (dropdown group)}`. `CM_FIXED` lists always-on columns shown as disabled items.
+- `cmMount(view, hostId, {inline})` — renders the component into a host div (button + dropdown with count badge `visible/total`, "Tout afficher", "Réinitialiser"; `inline:true` renders a flat list, used in the PDF config modal).
+- `cmVisible(view)` — returns the effective `{key: bool}` set. On viewports <768px, non-essential columns (`mob:false`) are auto-hidden **until** the user customizes the view (`touched`).
+- `cmToggle/cmShowAll/cmReset` mutate + `cmSave()` to `gf_cols` + re-render via `CM_RENDER[view]`; changes are announced to screen readers through the `#cm-live` live region.
+- Stale-key safety: saved keys no longer in `CM_DEFS` are dropped; columns added to the code after a save (tracked via `known`) pick up their `def` value.
+- PDF columns are a **separate** preference (`pdf` view), configured in the `pdf-modal` opened by `openPdfConfig()` before `generateDevisPDF()`. The PDF price block (Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC) is always included; internal columns (coût de revient, marge, EXW) are never exportable to the client PDF.
+- Table rows get a "Voir détails" (eye) button → `showProdDetails` / `showDevisDetails` open `detail-modal` with every field, including hidden columns (mobile fallback).
 
 ### Grouped view
 
