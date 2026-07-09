@@ -58,8 +58,9 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines)
 
 ### Default data
 
-- `DF` — 2 real suppliers (Shaanxi Yateli Technology Limited / Oman Medical Beauty Manufacture) with contacts, logos (raw GitHub CDN URLs), Alibaba links, and PDF quote links
-- `DP` — 19 default products across 5 categories, each with a `grp` key grouping identical products from different suppliers into 11 groups
+- `DF` — 2 real suppliers (Shaanxi Yateli Technology Limited / Oman Medical Beauty Manufacture) with contacts, logos (raw GitHub CDN URLs), Alibaba links, and PDF quote links (latest: Quotes7.6 Yateli / Quotes7.7 Oman)
+- `DP` — 37 default products across 8 categories (`grp` key groups identical products from different suppliers, e.g. `pdt-grand`, `pdt-dome`). Products from the 7.6/7.7 quotes carry an `imgs` gallery array (up to 3 photos, shown as clickable thumbnails on the product card via `cardGallery`/`swapCardImg`)
+- `DT` — 1 default freight forwarder (E & C Logistics, groupage.cn, China → West Africa) with all-inclusive rates (230 000 XOF/CBM maritime · 11 000 XOF/kg air), delays, and logo; seeded into `trans` at init if absent (matched by name)
 
 ### Key JS globals
 
@@ -121,9 +122,12 @@ When `grouped=true`, `groupList(filteredProducts)` returns one entry per `grp` k
 Product images are served from raw GitHub CDN:
 ```js
 const RAWBASE = 'https://raw.githubusercontent.com/dinaagz/Go-Flow/main/';
-const IMG = n => RAWBASE + 'assets/Products%20images/1%20(' + n + ').jpeg';
+const IMG  = n => RAWBASE + 'assets/Products%20images/1%20(' + n + ').jpeg'; // série 1 (1)–1 (11)
+const IMG2 = n => RAWBASE + 'assets/Products%20images/2%20(' + n + ').jpeg'; // série 2 (1)–2 (42), gaps: 25, 32, 40
 ```
-Images 1–11 map to specific product types (img1=RF chariot, img2=RF stylo, img3=Skin compact, img4=Pico compact, img5=Hydrafacial dôme LED, img6=Hydrafacial 17-en-1, img7=Skin grand, img8=Pico grand, img9=HIFU, img10=Hydrafacial dôme+lit, img11=Pico compact SANO).
+Série 1 (originals): img1=RF chariot, img2=RF stylo, img3=Skin compact, img4=Pico compact, img5=Hydrafacial dôme LED, img6=Hydrafacial 17-en-1, img7=Skin grand, img8=Pico grand, img9=HIFU, img10=Hydrafacial dôme+lit, img11=Pico compact SANO.
+
+Série 2 (quotes 7.6/7.7): 1-3+41=détartreur compact, 42+1=détartreur tactile, 4/29/30=blanchiment GlorySmile, 6/27=V34, 10/28=poudre 5 Days, 7=dôme LED Oman, 8=dôme PDT Yateli, 9/23/24=gel conducteur, 11/33=support inox, 12/17/34=scalpel, 13/26=lampe PDT sur pied, 14=écran LED, 15/16/37=refroidisseur d'air, 18/21=protège-dents, 19/35=Hydra.Pen, 20/36=parasol, 31=ouvre-bouche, 38/39=galerie Hydrafacial 14-en-1. Unused: 5, 22.
 
 ## Brand / visual identity
 
