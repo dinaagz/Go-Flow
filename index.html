@@ -282,6 +282,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .sim-hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .sim-hdr-row .sec-hdr{margin-bottom:0}
+.card-gal{display:flex;gap:5px;margin-top:8px}
+.card-gal img{width:34px;height:34px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.card-gal img:hover{border-color:var(--bleu);transform:scale(1.08)}
 .detail-row{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border)}
 .detail-row span:first-child{color:var(--muted)}
 .detail-row span:last-child{font-weight:600;text-align:right}
@@ -535,6 +538,7 @@ textarea.fc{resize:vertical;min-height:70px}
       <option value="">Toutes catégories</option>
       <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
       <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+      <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
     </select>
     <select class="filt" id="f-four" onchange="renderCat()"><option value="">Tous fournisseurs</option></select>
     <div class="view-tog">
@@ -752,6 +756,7 @@ textarea.fc{resize:vertical;min-height:70px}
             <option value="">Sélectionner...</option>
             <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
             <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+            <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
           </select>
         </div>
         <div class="fgrp"><label class="flbl" for="p-four">Fournisseur</label><select class="fc" id="p-four"></select></div>
@@ -933,13 +938,13 @@ const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
 // Stockage résilient : données corrompues → valeur de repli ; quota plein → toast au lieu d'un crash silencieux
 function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
 function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Stockage local plein — réduisez le nombre ou la taille des photos',true);}}
-const DATA_VER=3;
+const DATA_VER=4;
 // Tarifs transitaire TOUT-COMPRIS (fret + douane + taxes) — la TVA n'est jamais ajoutée par-dessus.
 // trf  : frais de transfert de fonds {mode:'pct'|'fixe', val} appliqués sur le coût d'achat HT
 // assu : Trade Assurance optionnelle (désactivée par défaut), même structure + interrupteur `on`
 // tvaInterne : TVA affichée séparément UNIQUEMENT pour les clients professionnels assujettis
 const DS={tauxChange:95,tarifAerien:11000,tarifMaritime:230000,tauxMarge:35,tvaInterne:18,trf:{mode:'pct',val:0},assu:{on:false,mode:'pct',val:1.5}};
-const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF'};
+const CATS={Hydrafacial:'HYD','Picolaser/Tatouage':'PCL','Analyse de peau':'ADP','RF Microneedling':'RFM',HIFU:'HIF',Dentaire:'DEN','Photothérapie LED':'PDT','Équipement & Accessoires':'EQP'};
 const ICO=(n,c='')=>`<svg class="ic${c?' '+c:''}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const TRI=t=>t==='Aérien'?ICO('plane'):ICO('ship');
 const PH_LG='<span class="ph-lg">'+ICO('box')+'</span>';
@@ -948,6 +953,7 @@ function phFallback(img){const w=img.parentElement;if(w)w.innerHTML=PH_LG;}
 
 const RAWBASE='https://raw.githubusercontent.com/dinaagz/Go-Flow/main/';
 const IMG=n=>RAWBASE+'assets/Products%20images/1%20('+n+').jpeg';
+const IMG2=n=>RAWBASE+'assets/Products%20images/2%20('+n+').jpeg';
 
 // Fournisseurs réels
 const DF=[
@@ -968,7 +974,7 @@ const DF=[
     desc:'Fabricant spécialisé en équipements esthétiques et médicaux professionnels. Référence Alibaba : yatelihk.',
     com:'',
     logo:RAWBASE+'assets/supplier/Logo%20Yateli.avif',
-    devis:RAWBASE+'assets/Quotes/Quotes_Shaanxi%20Yateli%20Technology%20Limited.pdf'
+    devis:RAWBASE+'assets/Quotes/Quotes7.6_Shaanxi%20Yateli%20Technology%20Limited.pdf'
   },
   {
     id:'F002',
@@ -987,7 +993,7 @@ const DF=[
     desc:'Fabricant d\'équipements esthétiques et de beauté professionnels. Référence Alibaba : omanbeauty.',
     com:'',
     logo:RAWBASE+'assets/supplier/logo%20Oman%20Beauty.png',
-    devis:RAWBASE+'assets/Quotes/Quotes_Oman%20Medical%20Beauty%20Manufacture.pdf'
+    devis:RAWBASE+'assets/Quotes/Quotes7.7_Oman%20Medical%20Beauty%20Manufacture.pdf'
   }
 ];
 
@@ -996,7 +1002,7 @@ const DF=[
 // img5=Hydrafacial dome LED, img6=Hydrafacial 17en1, img7=Skin grand ecran,
 // img8=Pico grand SANO, img9=HIFU, img10=Hydrafacial dome+lit LED, img11=Pico compact SANO
 const DP=[
-  {grp:'hydrafacial-14en1',   cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',img:IMG(6)},
+  {grp:'hydrafacial-14en1',   cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 14-en-1',l:49,la:54,h:92,kg:48,prix:2999,tr:'Maritime',specs:'49×54×92 cm',imgs:[IMG(6),IMG2(38),IMG2(39)]},
   {grp:'hydrafacial-17en1',   cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:5200,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
   {grp:'hydrafacial-17en1',   cat:'Hydrafacial',fn:'Oman Medical Beauty Manufacture',nom:'Hydrafacial 17-en-1',l:54,la:122,h:60,kg:55,prix:6372,tr:'Maritime',specs:'54×122×60 cm',img:IMG(6)},
   {grp:'hydrafacial-dome-led',cat:'Hydrafacial',fn:'Shaanxi Yateli Technology Limited',nom:'Hydrafacial dôme LED + masque',l:65,la:62,h:122,kg:55,prix:6200,tr:'Maritime',specs:'65×62×122 cm (50 kg) + masque 55×48×46 cm (5 kg)',img:IMG(5)},
@@ -1014,8 +1020,38 @@ const DP=[
   {grp:'rf-chariot',           cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3300,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
   {grp:'rf-chariot',           cat:'RF Microneedling',fn:'Oman Medical Beauty Manufacture',nom:'RF Microneedle sur chariot',l:50,la:50,h:103,kg:28,prix:3730,tr:'Maritime',specs:'50×50×103 cm',img:IMG(1)},
   {grp:'hifu',                 cat:'HIFU',fn:'Shaanxi Yateli Technology Limited',nom:'HIFU liftant visage/corps',l:66,la:59,h:55,kg:22,prix:3900,tr:'Maritime',specs:'66×59×55 cm',img:IMG(9)},
-  {grp:'hifu',                 cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)}
+  {grp:'hifu',                 cat:'HIFU',fn:'Oman Medical Beauty Manufacture',nom:'HIFU liftant visage/corps',l:62,la:55,h:56,kg:27,prix:6726,tr:'Maritime',specs:'62×55×56 cm',img:IMG(9)},
+  // Quote Yateli 7.6 — images assets/Products images/2 (n).jpeg
+  {grp:'pdt-grand',cat:'Photothérapie LED',fn:'Shaanxi Yateli Technology Limited',nom:'Lampe PDT professionnelle sur pied',l:116.5,la:52.5,h:60,kg:21.2,prix:1699,tr:'Maritime',specs:'Unité 116.5×52.5×60 cm (16.7 kg) + lampe 80.5×30×37 cm (4.5 kg)',imgs:[IMG2(13),IMG2(26)]},
+  {grp:'',cat:'RF Microneedling',fn:'Shaanxi Yateli Technology Limited',nom:'Hydra.Pen stylo microneedling',l:20,la:11,h:14,kg:0.4,prix:240,tr:'Aérien',specs:'20×11×14 cm — 0.4 kg',imgs:[IMG2(19),IMG2(35)]},
+  {grp:'',cat:'Équipement & Accessoires',fn:'Shaanxi Yateli Technology Limited',nom:'Refroidisseur d\'air sur pied',l:37.5,la:27,h:101.2,kg:6.3,prix:1699,tr:'Maritime',specs:'37.5×27×101.2 cm — 6.3 kg · 55 W · rotation 270°',imgs:[IMG2(15),IMG2(37),IMG2(16)]},
+  {grp:'',cat:'Équipement & Accessoires',fn:'Shaanxi Yateli Technology Limited',nom:'Parasol déporté professionnel',l:270,la:40,h:16,kg:45,prix:1299,tr:'Maritime',specs:'270×40×16 cm + 84×82×20 cm — 45 kg',imgs:[IMG2(20),IMG2(36)]},
+  {grp:'',cat:'Équipement & Accessoires',fn:'Shaanxi Yateli Technology Limited',nom:'Support inox à roulettes',l:0,la:0,h:0,kg:4,prix:99,tr:'Aérien',specs:'4 kg — base 5 pieds à roulettes',imgs:[IMG2(11),IMG2(33)]},
+  {grp:'',cat:'Équipement & Accessoires',fn:'Shaanxi Yateli Technology Limited',nom:'Écran LED rotatif sur pied',l:81,la:68,h:21,kg:20,prix:3399,tr:'Maritime',specs:'81×68×21 cm — 20 kg',imgs:[IMG2(14)]},
+  {grp:'pdt-dome',cat:'Photothérapie LED',fn:'Shaanxi Yateli Technology Limited',nom:'Dôme LED photothérapie PDT',l:34.5,la:27.5,h:20,kg:2.1,prix:249,tr:'Aérien',specs:'34.5×27.5×20 cm — 2.1 kg',imgs:[IMG2(8)]},
+  {grp:'',cat:'Équipement & Accessoires',fn:'Shaanxi Yateli Technology Limited',nom:'Gel conducteur MELAO (lot de 3)',l:0,la:0,h:0,kg:1,prix:40,tr:'Aérien',moq:3,specs:'Tube 1 kg — lot de 3',imgs:[IMG2(9),IMG2(23),IMG2(24)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Protège-dents silicone',l:0,la:0,h:0,kg:0.5,prix:13,tr:'Aérien',specs:'0.5 kg',imgs:[IMG2(21),IMG2(18)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Scalpel + lames chirurgicales (offert)',l:0,la:0,h:0,kg:0.2,prix:0,tr:'Aérien',specs:'0.2 kg — offert avec la commande',imgs:[IMG2(34),IMG2(12),IMG2(17)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Ouvre-bouche écarteur (offert)',l:0,la:0,h:0,kg:0.5,prix:0,tr:'Aérien',specs:'0.5 kg — offert avec la commande',imgs:[IMG2(31)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Kit blanchiment dentaire GlorySmile',l:0,la:0,h:0,kg:0.5,prix:19,tr:'Aérien',specs:'0.5 kg — seringues de gel + applicateur',imgs:[IMG2(4),IMG2(29),IMG2(30)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Dentifrice correcteur V34 GlorySmile',l:0,la:0,h:0,kg:0.5,prix:12,tr:'Aérien',specs:'0.5 kg — correcteur de teinte violet',imgs:[IMG2(6),IMG2(27)]},
+  {grp:'',cat:'Dentaire',fn:'Shaanxi Yateli Technology Limited',nom:'Poudre blanchissante 5 Days (offert)',l:0,la:0,h:0,kg:0.5,prix:0,tr:'Aérien',specs:'0.5 kg — offert avec la commande',imgs:[IMG2(10),IMG2(28)]},
+  // Quote Oman 7.7
+  {grp:'',cat:'Dentaire',fn:'Oman Medical Beauty Manufacture',nom:'Détartreur ultrasonique compact',l:37,la:10,h:36,kg:4,prix:1490,tr:'Maritime',specs:'37×10×36 cm — 4 kg · détartrage + traitement canalaire',imgs:[IMG2(2),IMG2(3),IMG2(41)]},
+  {grp:'',cat:'Dentaire',fn:'Oman Medical Beauty Manufacture',nom:'Détartreur ultrasonique écran tactile',l:45,la:40,h:35,kg:9,prix:5000,tr:'Maritime',specs:'45×40×35 cm — 9 kg · détartrage + traitement canalaire',imgs:[IMG2(42),IMG2(1)]},
+  {grp:'pdt-dome',cat:'Photothérapie LED',fn:'Oman Medical Beauty Manufacture',nom:'Dôme LED spectromètre',l:36,la:29,h:22,kg:4,prix:880,tr:'Aérien',specs:'36×29×22 cm — 4 kg · peau + pousse des cheveux',imgs:[IMG2(7)]},
+  {grp:'pdt-grand',cat:'Photothérapie LED',fn:'Oman Medical Beauty Manufacture',nom:'Lampe PDT spectromètre sur pied',l:116.5,la:52.5,h:60,kg:21.2,prix:2000,tr:'Maritime',specs:'Lampe 80.5×30×37 cm (4.5 kg) + unité principale (16.7 kg)',imgs:[IMG2(26),IMG2(13)]}
 ];
+
+// Transitaire par défaut — E & C Logistics (groupage.cn), spécialiste Chine → Afrique de l'Ouest
+// Tarifs tout-compris corridor Chine–Lomé (fret + douane + taxes), modifiables dans l'onglet Transitaires
+const DT=[{
+  id:'T001',nom:'E & C Logistics',dep:'Chine',arr:'Togo',
+  contact:'easyway@ewchina.net',wa:'+86 159 2035 6527',tel:'400-900-9962',
+  type:'Multimodale',ent:0,
+  mar:230000,mard:60,aer:11000,aerd:7,ass:'0',
+  logo:RAWBASE+'assets/Freight%20Forwarders/E%20%26%20C%20Logistics/images/logo2.d70eae83.png'
+}];
 
 /* ===== GESTION UNIVERSELLE DES COLONNES (store + composant réutilisable) =====
    Préférences persistées dans gf_cols : {vue:{visible:[clé…], touched:bool, known:[clé…]}}
@@ -1252,6 +1288,8 @@ function init(){
   });
   save('f');
   trans=LS_GET(TK,[]);
+  // Semis du transitaire par défaut s'il n'existe pas encore dans la liste
+  if(!trans.some(t=>t.nom===DT[0].nom)){trans.unshift({...DT[0]});save('t');}
   winOverrides=LS_GET(WK,{});
   // Silent migration: add grp field to products that lack it
   let migrated=false;
@@ -1277,7 +1315,7 @@ function buildProds(){
     const code=CATS[d.cat]||'PRD';
     const ref=`${code}-${String(cc[d.cat]).padStart(3,'0')}-${String(g).padStart(3,'0')}`;
     const f=fours.find(x=>x.nom===d.fn);
-    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,grp:d.grp||'',fid:f?f.id:'',fn:d.fn,prix:d.prix,prach:0,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:1,desc:'',specs:d.specs,photos:d.img?[d.img]:[]};
+    return{id:'P'+String(g).padStart(4,'0'),ref,nom:d.nom,cat:d.cat,grp:d.grp||'',fid:f?f.id:'',fn:d.fn,prix:d.prix,prach:0,dev:'RMB',l:d.l,la:d.la,h:d.h,kg:d.kg,tr:d.tr,marge:'',rem:0,conc:'',moq:d.moq||1,desc:'',specs:d.specs,photos:d.imgs?[...d.imgs]:(d.img?[d.img]:[])};
   });
 }
 
@@ -1514,6 +1552,17 @@ function toggleCostDetail(id,ev){
   if(btn)btn.classList.toggle('open');
 }
 
+/* Galerie d'images sur la carte : miniatures cliquables qui remplacent l'image principale */
+function cardGallery(p){
+  if(!p.photos||p.photos.length<2)return'';
+  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${String(p.nom||'').replace(/"/g,'&quot;')}" onerror="this.remove()" onclick="swapCardImg(this)">`).join('')}</div>`;
+}
+function swapCardImg(t){
+  const card=t.closest('.card');if(!card)return;
+  const m=card.querySelector('.card-img img');
+  if(m){m.src=t.src;m.style.display='';const ph=card.querySelector('.card-img .card-img-placeholder');if(ph)ph.style.display='none';}
+}
+
 function prodGroupCard(g){
   const{key,prods:gps,winner:w}=g;
   const others=gps.filter(p=>p.id!==w.id);
@@ -1546,6 +1595,7 @@ function prodGroupCard(g){
     <div class="card-ref">${w.ref}</div>
     <div class="card-title">${w.nom}</div>
     <div class="card-cat">${cols.cat?w.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(w.tr)} ${w.tr}</div>
+    ${cardGallery(w)}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
@@ -1720,6 +1770,7 @@ function prodCard(p){
     <div class="card-ref">${p.ref}</div>
     <div class="card-title">${p.nom}</div>
     <div class="card-cat">${cols.cat?p.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(p.tr)} ${p.tr}</div>
+    ${cardGallery(p)}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
