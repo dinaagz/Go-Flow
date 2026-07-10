@@ -320,6 +320,45 @@ textarea.fc{resize:vertical;min-height:70px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .fx-spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(0,106,204,.2);border-top-color:var(--bleu-t);border-radius:50%;animation:spin .7s linear infinite}
 .fx-status{font-size:11px;margin-top:5px;min-height:16px}
+/* ===== IMPORT EN MASSE ===== */
+.imp-drop{border:2px dashed var(--border2);border-radius:14px;padding:34px 20px;text-align:center;cursor:pointer;transition:all .18s;color:var(--muted);background:var(--gris);font-size:13px;line-height:1.7}
+.imp-drop:hover,.imp-drop.drag{border-color:var(--bleu);background:#F4FAFF;color:var(--bleu-t)}
+.imp-drop .ic{width:30px;height:30px;stroke-width:1.5;display:block;margin:0 auto 8px}
+.imp-file-line{display:flex;align-items:center;gap:9px;background:var(--gris);border:1px solid var(--border);border-radius:10px;padding:9px 13px;font-size:12.5px;margin-bottom:14px;flex-wrap:wrap}
+.imp-map{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:14px}
+@media(max-width:560px){.imp-map{grid-template-columns:1fr}}
+.imp-map-row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.imp-map-row .flbl{flex-shrink:0;min-width:118px;text-transform:none;letter-spacing:0;font-size:12px}
+.imp-map-row select{flex:1;padding:7px 26px 7px 10px;font-size:12px;min-width:0}
+.imp-prev-wrap{overflow:auto;max-height:280px;border:1px solid var(--border);border-radius:10px;margin-bottom:14px}
+.imp-prev-wrap table{font-size:11.5px}
+.imp-prev-wrap input{width:100%;min-width:70px;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:'Poppins',sans-serif;font-size:11.5px;outline:none;color:var(--text)}
+.imp-prev-wrap input:focus{border-color:var(--bleu);background:#fff}
+.imp-summary{border-radius:10px;padding:11px 14px;font-size:12px;line-height:1.7;margin-bottom:12px}
+.imp-summary.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-brd)}
+.imp-summary.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd)}
+.progress{height:8px;background:var(--gris);border:1px solid var(--border);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--grad);border-radius:99px;transition:width .15s linear}
+.prog-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
+/* ===== EXPORT IMAGES DESIGN ===== */
+.btn-sec[aria-pressed="true"]{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t)}
+.exp-check{position:absolute;top:10px;right:10px;z-index:5;background:rgba(255,255,255,.94);border-radius:9px;padding:6px;display:inline-flex;box-shadow:var(--sh-sm);cursor:pointer}
+.exp-check input{width:17px;height:17px;accent-color:var(--bleu-t);cursor:pointer}
+td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertical-align:middle;margin-right:4px}
+.exp-bar{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--nuit);color:#fff;border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px;z-index:180;box-shadow:var(--sh-xl);font-size:12.5px;flex-wrap:wrap;justify-content:center;max-width:94vw}
+.exp-bar .btn-ghost{color:rgba(255,255,255,.75)}
+.exp-bar .btn-ghost:hover{background:rgba(255,255,255,.12);color:#fff}
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:520px){.tpl-grid{grid-template-columns:repeat(2,1fr)}}
+.tpl-btn{border:1.5px solid var(--border2);border-radius:10px;background:var(--surface);padding:9px 6px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:500;text-align:center;transition:all .15s;color:var(--text)}
+.tpl-btn:hover{border-color:var(--bleu)}
+.tpl-btn.active{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t);font-weight:600}
+.tpl-btn .tpl-sw{display:block;height:34px;border-radius:7px;margin-bottom:6px;border:1px solid var(--border)}
+.exp-canvas-wrap{background:var(--gris);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:10px;align-self:start}
+#exp-canvas{width:100%;max-width:380px;height:auto;border-radius:10px;box-shadow:var(--sh-md);background:#fff}
+.exp-nav{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.exp-grid2{display:grid;grid-template-columns:300px 1fr;gap:18px}
+@media(max-width:760px){.exp-grid2{grid-template-columns:1fr}}
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -424,6 +463,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></symbol>
 <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
 <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
 <symbol id="i-printer" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
 <symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
@@ -552,6 +592,8 @@ textarea.fc{resize:vertical;min-height:70px}
       <option value="meilleur_rapport">Meilleur rapport</option>
     </select>
     <div class="col-picker-wrap" id="cm-catalogue"></div>
+    <button class="btn btn-sec" onclick="openImportModal('produits')" title="Importer des produits en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
+    <button class="btn btn-sec" id="exp-mode-btn" onclick="expToggleMode()" title="Exporter des produits en images design" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Export image</button>
     <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
   </div>
   <div id="cat-cont"></div>
@@ -561,6 +603,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div id="t-fournisseurs" role="tabpanel" aria-labelledby="tab-fournisseurs" style="display:none">
   <div class="toolbar">
     <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFour()"></div>
+    <button class="btn btn-sec" onclick="openImportModal('fournisseurs')" title="Importer des fournisseurs en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openFourModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Fournisseur</button>
   </div>
   <div id="four-cont"></div>
@@ -570,6 +613,7 @@ textarea.fc{resize:vertical;min-height:70px}
 <div id="t-transitaires" role="tabpanel" aria-labelledby="tab-transitaires" style="display:none">
   <div class="toolbar">
     <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTrans()"></div>
+    <button class="btn btn-sec" onclick="openImportModal('transitaires')" title="Importer des transitaires en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openTransModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Transitaire</button>
   </div>
   <div id="trans-cont"></div>
@@ -928,6 +972,110 @@ textarea.fc{resize:vertical;min-height:70px}
     </div>
     <div class="modal-body" id="detail-body"></div>
   </div>
+</div>
+
+<!-- IMPORT EN MASSE -->
+<div class="overlay" id="import-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="im-title" style="max-width:780px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="im-title">Importer des données</h2>
+      <button class="modal-x" onclick="closeMod('import-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="imp-step1">
+        <div class="fg" style="margin-bottom:14px">
+          <div class="fgrp"><label class="flbl" for="imp-type">Type de données</label>
+            <select class="fc" id="imp-type" onchange="impTypeChange()">
+              <option value="produits">Produits</option>
+              <option value="fournisseurs">Fournisseurs</option>
+              <option value="transitaires">Transitaires</option>
+            </select>
+          </div>
+          <div class="fgrp"><label class="flbl">Formats acceptés</label>
+            <div style="font-size:12px;color:var(--muted);padding:9px 0;line-height:1.6">CSV · Excel (.xlsx / .xls) · PDF · HTML<br>Le format est détecté automatiquement à partir du fichier.</div>
+          </div>
+        </div>
+        <div class="imp-drop" id="imp-drop" role="button" tabindex="0" aria-label="Déposer un fichier ici ou cliquer pour le sélectionner"
+          onclick="document.getElementById('imp-file').click()"
+          onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('imp-file').click()}">
+          <svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg>
+          <b>Glissez-déposez votre fichier ici</b><br>ou cliquez pour le sélectionner
+        </div>
+        <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
+        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="width:100%"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+      </div>
+      <div id="imp-step2" style="display:none">
+        <div class="imp-file-line" id="imp-file-line"></div>
+        <div id="imp-map-sec">
+          <div class="flbl" style="margin-bottom:8px">Correspondance des colonnes <span style="text-transform:none;letter-spacing:0;font-weight:400">(colonne du fichier → champ de l'application)</span></div>
+          <div class="imp-map" id="imp-map"></div>
+        </div>
+        <div class="flbl" style="margin-bottom:8px" id="imp-prev-lbl">Aperçu</div>
+        <div class="imp-prev-wrap" id="imp-prev"></div>
+        <div id="imp-errs" aria-live="polite"></div>
+        <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
+        <div class="fact" style="margin-top:0">
+          <button class="btn btn-sec" onclick="impBack()">← Autre fichier</button>
+          <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Valider l'import</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT IMAGES DESIGN -->
+<div class="overlay" id="export-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="em-title" style="max-width:880px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="em-title">Exporter en images design</h2>
+      <button class="modal-x" onclick="closeMod('export-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="exp-grid2">
+        <div>
+          <div class="flbl" style="margin-bottom:8px">Template</div>
+          <div class="tpl-grid" id="exp-tpls" role="group" aria-label="Choix du template"></div>
+          <div class="fg" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+            <div class="fgrp"><label class="flbl" for="exp-bg">Couleur de fond</label><input type="color" class="fc" id="exp-bg" value="#FFFFFF" style="height:42px;padding:4px" oninput="expPrefChange()"></div>
+            <div class="fgrp"><label class="flbl" for="exp-txt">Couleur du texte</label><input type="color" class="fc" id="exp-txt" value="#1A1D33" style="height:42px;padding:4px" oninput="expPrefChange()"></div>
+          </div>
+          <div class="fgrp" style="margin-bottom:12px"><label class="flbl" for="exp-logo">Logo Go Group</label>
+            <select class="fc" id="exp-logo" onchange="expPrefChange()">
+              <option value="tl">Haut gauche</option><option value="tr">Haut droite</option>
+              <option value="bl">Bas gauche</option><option value="br">Bas droite</option>
+              <option value="none">Masqué</option>
+            </select>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;margin-bottom:8px">
+            <input type="checkbox" id="exp-marge" onchange="expPrefChange()" style="width:15px;height:15px;accent-color:var(--bleu-t)"> Afficher la marge <span style="color:var(--muted)">(usage interne)</span>
+          </label>
+          <div style="font-size:11px;color:var(--muted);line-height:1.6">PNG 1080×1080 px — prêt pour les réseaux sociaux. Vos réglages sont mémorisés.</div>
+        </div>
+        <div class="exp-canvas-wrap">
+          <canvas id="exp-canvas" width="1080" height="1080" role="img" aria-label="Aperçu de l'image générée"></canvas>
+          <div class="exp-nav">
+            <button class="btn btn-sec btn-sm" onclick="expNav(-1)" aria-label="Produit précédent"><svg class="ic" style="transform:rotate(180deg)" aria-hidden="true"><use href="#i-chev"/></svg></button>
+            <span id="exp-nav-lbl">1/1</span>
+            <button class="btn btn-sec btn-sm" onclick="expNav(1)" aria-label="Produit suivant"><svg class="ic" aria-hidden="true"><use href="#i-chev"/></svg></button>
+          </div>
+        </div>
+      </div>
+      <div id="exp-prog" style="display:none;margin-top:14px"><div class="progress"><div class="progress-fill" id="exp-prog-fill"></div></div><div class="prog-lbl" id="exp-prog-lbl"></div></div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('export-modal')">Annuler</button>
+        <button class="btn btn-sec" id="exp-dl-one" onclick="expDownload(false)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> PNG séparés</button>
+        <button class="btn btn-primary" id="exp-dl-zip" onclick="expDownload(true)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Tout en ZIP</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Barre de sélection pour l'export image -->
+<div class="exp-bar" id="exp-bar" style="display:none" role="region" aria-label="Sélection pour export image">
+  <span id="exp-count" aria-live="polite">0 produit sélectionné</span>
+  <button class="btn btn-sec btn-sm" onclick="expSelectAll()">Tout sélectionner</button>
+  <button class="btn btn-primary btn-sm" onclick="openExportModal()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Exporter en image</button>
+  <button class="btn btn-ghost btn-sm" onclick="expToggleMode()"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg> Annuler</button>
 </div>
 
 <div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
@@ -1590,7 +1738,7 @@ function prodGroupCard(g){
     </div>`;
   }).join('');
   return`<div class="card">
-  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:''}</div>
+  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(w.id)}${others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:''}</div>
   <div class="card-body">
     <div class="card-ref">${w.ref}</div>
     <div class="card-title">${w.nom}</div>
@@ -1634,7 +1782,7 @@ function prodGroupTable(groups){
     const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives" aria-label="Voir alternatives">${ICO('chev')}</button>`:'';
     const winRow=`<tr>
       <td class="no-print">${expandBtn}</td>
-      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
+      <td>${expBox(w.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
       <td><code style="font-size:10px">${w.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>
       ${C.cat    ?`<td><span class="pill-cat">${w.cat}</span></td>`:''}
@@ -1765,7 +1913,7 @@ function prodCard(p){
   const c=calc(p);
   const priceRows=cardPriceRows(p,c);
   return`<div class="card">
-  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span></div>
+  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(p.id)}</div>
   <div class="card-body">
     <div class="card-ref">${p.ref}</div>
     <div class="card-title">${p.nom}</div>
@@ -1804,7 +1952,7 @@ function prodTable(list){
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     return`<tr>
-      <td>${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
+      <td>${expBox(p.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
       <td><code style="font-size:10px">${p.ref}</code></td>
       <td style="font-weight:500;max-width:180px">${p.nom}</td>
       ${C.cat    ?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
@@ -2780,6 +2928,751 @@ function generateDevisPDF(){
 }
 
 /* ---- FIN MODULE DEVIS ---- */
+
+/* ============================================================
+   MODULE IMPORT EN MASSE — CSV / Excel / PDF / HTML
+   CSV : parseur natif (guillemets, délimiteur auto ; , tab)
+   Excel : SheetJS chargé à la demande · PDF : pdf.js à la demande
+   HTML : DOMParser (plus grande table, sinon extraction texte)
+   Le dernier mapping de colonnes est mémorisé par type (gf_imp).
+   ============================================================ */
+const IMPK='gf_imp';
+const impNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+const impT=v=>String(v==null?'':v).trim();
+const impNum=v=>{if(v==null||v==='')return 0;const n=parseFloat(String(v).replace(/\s/g,'').replace(/,/g,'.').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;};
+const impUrl=v=>/^https?:\/\//.test(impT(v))?impT(v):'';
+const impId=(pfx,ix)=>pfx+String(Date.now()).slice(-5)+String(ix%1000).padStart(3,'0');
+const IMP_LBL={produits:'produits',fournisseurs:'fournisseurs',transitaires:'transitaires'};
+const IMP_FIELDS={
+  produits:[
+    {k:'nom',lbl:'Nom / Désignation',req:true,syn:['nom','designation','produit','product','productname','name','item','article','libelle']},
+    {k:'cat',lbl:'Catégorie',syn:['categorie','category','cat','famille']},
+    {k:'four',lbl:'Fournisseur',syn:['fournisseur','supplier','fabricant','vendor','marque','brand']},
+    {k:'prix',lbl:'Prix EXW',num:true,syn:['prix','prixexw','exw','price','unitprice','prixunitaire','cout','cost']},
+    {k:'dev',lbl:'Devise',syn:['devise','currency','monnaie']},
+    {k:'prach',lbl:'Fret local',num:true,syn:['fretlocal','prach','fret','freight']},
+    {k:'l',lbl:'Longueur',num:true,syn:['longueur','length','long','l']},
+    {k:'la',lbl:'Largeur',num:true,syn:['largeur','width','larg','la']},
+    {k:'h',lbl:'Hauteur',num:true,syn:['hauteur','height','haut','h']},
+    {k:'kg',lbl:'Poids (kg)',num:true,syn:['poids','weight','kg','poidskg']},
+    {k:'tr',lbl:'Transport',syn:['transport','livraison','shipping','tr']},
+    {k:'marge',lbl:'Marge %',num:true,syn:['marge','margin','margepct']},
+    {k:'moq',lbl:'MOQ',num:true,syn:['moq','minorder','quantitemini']},
+    {k:'desc',lbl:'Description',syn:['description','desc','details']},
+    {k:'specs',lbl:'Spécifications',syn:['specifications','specs','specificites','caracteristiques']},
+    {k:'photo',lbl:'Photo (URL)',syn:['photo','image','img','imageurl','photourl','picture']},
+  ],
+  fournisseurs:[
+    {k:'nom',lbl:'Nom entreprise',req:true,syn:['nom','entreprise','company','societe','supplier','fournisseur','name']},
+    {k:'contact',lbl:'Contact',syn:['contact','personne','representant']},
+    {k:'pays',lbl:'Pays',syn:['pays','country']},
+    {k:'email',lbl:'Email',syn:['email','mail','courriel']},
+    {k:'wa',lbl:'WhatsApp',syn:['whatsapp','telephone','phone','mobile','tel','wa']},
+    {k:'wc',lbl:'WeChat',syn:['wechat','weixin','wc']},
+    {k:'dom',lbl:'Domaine',syn:['domaine','activite','secteur','business','domain']},
+    {k:'eval',lbl:'Évaluation /5',num:true,syn:['evaluation','eval','note','rating','etoiles']},
+    {k:'ali_url',lbl:'Lien Alibaba',syn:['alibaba','aliurl','lienalibaba','lien','url','site','website']},
+    {k:'lang',lbl:'Langues',syn:['langues','languages','lang']},
+    {k:'mkt',lbl:'Marchés',syn:['marches','markets','mkt']},
+    {k:'desc',lbl:'Description',syn:['description','desc']},
+    {k:'logo',lbl:'Logo (URL)',syn:['logo','logourl']},
+  ],
+  transitaires:[
+    {k:'nom',lbl:'Nom entreprise',req:true,syn:['nom','entreprise','company','transitaire','forwarder','name']},
+    {k:'dep',lbl:'Pays départ',syn:['depart','paysdepart','origine','origin','from']},
+    {k:'arr',lbl:'Pays arrivée',syn:['arrivee','paysarrivee','destination','to']},
+    {k:'contact',lbl:'Contact',syn:['contact','email','mail']},
+    {k:'wa',lbl:'WhatsApp',syn:['whatsapp','mobile','wa']},
+    {k:'tel',lbl:'Téléphone',syn:['telephone','phone','tel']},
+    {k:'type',lbl:'Type logistique',syn:['type','logistique']},
+    {k:'mar',lbl:'Tarif maritime (XOF/CBM)',num:true,syn:['maritime','tarifmaritime','cbm','sea','mar']},
+    {k:'mard',lbl:'Délai maritime (j)',num:true,syn:['delaimaritime','mard']},
+    {k:'aer',lbl:'Tarif aérien (XOF/kg)',num:true,syn:['aerien','tarifaerien','air','aer']},
+    {k:'aerd',lbl:'Délai aérien (j)',num:true,syn:['delaiaerien','aerd']},
+    {k:'logo',lbl:'Logo (URL)',syn:['logo','logourl']},
+  ],
+};
+let impState=null,impCtx=null;
+
+/* ---- Chargement de bibliothèques à la demande (CDN) ---- */
+const impLibs={};
+function ensureLib(globalName,src){
+  if(window[globalName])return Promise.resolve();
+  if(!impLibs[src])impLibs[src]=new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src=src;
+    s.onload=()=>res();s.onerror=()=>{delete impLibs[src];rej(new Error('bibliothèque inaccessible — connexion Internet requise'));};
+    document.head.appendChild(s);
+  });
+  return impLibs[src];
+}
+async function ensurePDF(){
+  await ensureLib('pdfjsLib','https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+/* ---- Ouverture / navigation ---- */
+function openImportModal(type){
+  document.getElementById('imp-type').value=type||'produits';
+  impBack();
+  openMod('import-modal');
+}
+function impBack(){
+  impState=null;
+  document.getElementById('imp-step1').style.display='';
+  document.getElementById('imp-step2').style.display='none';
+  document.getElementById('imp-file').value='';
+  document.getElementById('imp-load').style.display='none';
+  document.getElementById('imp-errs').innerHTML='';
+  document.getElementById('imp-prog').style.display='none';
+  document.getElementById('imp-go').disabled=false;
+}
+function impTypeChange(){if(impState){impRenderMap();impRenderPrev();}}
+function impLoading(on,msg){
+  document.getElementById('imp-load').style.display=on?'block':'none';
+  if(msg)document.getElementById('imp-load-lbl').textContent=msg;
+}
+function impFileInput(inp){const f=inp.files[0];if(f)impHandleFile(f);inp.value='';}
+(function(){
+  const dz=document.getElementById('imp-drop');
+  if(!dz)return;
+  ['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+  dz.addEventListener('drop',e=>{const f=e.dataTransfer.files&&e.dataTransfer.files[0];if(f)impHandleFile(f);});
+})();
+
+/* ---- Lecture des fichiers ---- */
+async function impHandleFile(file){
+  const ext=(file.name.split('.').pop()||'').toLowerCase();
+  try{
+    if(ext==='csv'){
+      impLoading(true,'Lecture du CSV…');
+      impSetTabular(file,parseCSVText(await file.text()));
+    }else if(ext==='xlsx'||ext==='xls'){
+      impLoading(true,'Chargement du lecteur Excel…');
+      await ensureLib('XLSX','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      impLoading(true,'Lecture du fichier Excel…');
+      const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'});
+      const grid=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}).map(r=>r.map(v=>String(v??'')));
+      impSetTabular(file,grid);
+    }else if(ext==='pdf'){
+      impLoading(true,'Chargement du lecteur PDF…');
+      await ensurePDF();
+      impLoading(true,'Extraction du texte du PDF…');
+      impSetExtracted(file,impExtractRows(await pdfToLines(await file.arrayBuffer())),'PDF');
+    }else if(ext==='html'||ext==='htm'){
+      impLoading(true,'Analyse du HTML…');
+      impFromHTML(file,await file.text());
+    }else{
+      toast('Format non pris en charge : .'+ext+' — utilisez CSV, Excel, PDF ou HTML',true);return;
+    }
+  }catch(e){
+    console.error('Import:',e);
+    impLoading(false);
+    toast('Import impossible — '+(e.message||e),true);
+    return;
+  }
+  impLoading(false);
+}
+function parseCSVText(text){
+  text=text.replace(/^﻿/,'').replace(/\r\n?/g,'\n');
+  const head=text.split('\n')[0]||'';
+  const delim=[';',',','\t'].map(d=>[d,head.split(d).length-1]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=[];let row=[],cell='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'){if(text[i+1]==='"'){cell+='"';i++;}else inQ=false;}
+      else cell+=ch;
+    }
+    else if(ch==='"')inQ=true;
+    else if(ch===delim){row.push(cell);cell='';}
+    else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+    else cell+=ch;
+  }
+  if(cell!==''||row.length){row.push(cell);rows.push(row);}
+  return rows.filter(r=>r.some(c=>String(c).trim()!==''));
+}
+async function pdfToLines(buf){
+  const doc=await pdfjsLib.getDocument({data:buf}).promise;
+  const lines=[];
+  for(let pg=1;pg<=doc.numPages;pg++){
+    const tc=await(await doc.getPage(pg)).getTextContent();
+    const byY={};
+    tc.items.forEach(it=>{
+      if(!it.str||!it.str.trim())return;
+      const y=Math.round(it.transform[5]/4)*4; // regroupe les items par ligne visuelle
+      (byY[y]=byY[y]||[]).push(it);
+    });
+    Object.keys(byY).map(Number).sort((a,b)=>b-a).forEach(y=>{
+      lines.push(byY[y].sort((a,b)=>a.transform[4]-b.transform[4]).map(it=>it.str).join(' ').replace(/\s+/g,' ').trim());
+    });
+  }
+  return lines;
+}
+// Heuristique nom + prix sur du texte libre (PDF / HTML sans table)
+function impExtractRows(lines){
+  // « devise puis nombre » testé en premier — évite de capturer le 1 de « 14-en-1 ¥2999 »
+  const reCurFirst=/(?:[¥$€£]|USD|RMB|CNY|EUR|XOF|FCFA)\s*([\d][\d\s.,]{0,11})/i;
+  const reNumFirst=/([\d][\d\s.,]{0,11}?)\s*(?:[¥$€£]|USD|RMB|CNY|EUR|XOF|FCFA)(?![a-z0-9])/i;
+  const out=[];
+  lines.forEach(l=>{
+    if(l.length<6)return;
+    const m=l.match(reCurFirst)||l.match(reNumFirst);
+    if(!m)return;
+    const prix=impNum(m[1]);
+    if(!prix)return;
+    let nom=l.slice(0,m.index).replace(/[\s·:|,;–-]+$/,'').trim();
+    if(!nom)nom=l.slice(m.index+m[0].length).replace(/^[\s·:|,;–-]+/,'').trim();
+    if(nom.length<3||/^(total|soustotal|tva|prix|montant|quantite|qty|subtotal|page)/.test(impNorm(nom)))return;
+    out.push([nom.slice(0,120),String(prix),'']);
+  });
+  return out;
+}
+function impFromHTML(file,txt){
+  const doc=new DOMParser().parseFromString(txt,'text/html');
+  let best=null;
+  doc.querySelectorAll('table').forEach(t=>{
+    const n=t.querySelectorAll('tr').length;
+    if(n>1&&(!best||n>best.querySelectorAll('tr').length))best=t;
+  });
+  if(best){
+    const grid=[...best.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('th,td')].map(td=>td.textContent.replace(/\s+/g,' ').trim()));
+    impSetTabular(file,grid.filter(r=>r.some(c=>c!=='')));
+  }else{
+    // innerText d'un document non rendu ne sépare pas les blocs : on force des \n aux frontières
+    const flat=(doc.body?doc.body.innerHTML:txt).replace(/<(br|\/p|\/div|\/li|\/tr|\/h[1-6]|\/section|\/article)[^>]*>/gi,'\n');
+    const text=new DOMParser().parseFromString(flat,'text/html').body.textContent||'';
+    const lines=text.split('\n').map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
+    impSetExtracted(file,impExtractRows(lines),'HTML');
+  }
+}
+function impSetTabular(file,grid){
+  if(!grid||grid.length<2)throw new Error('aucune donnée exploitable (ligne d\'en-tête + lignes de données attendues)');
+  impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1)};
+  impShowStep2();
+}
+function impSetExtracted(file,rows,srcLbl){
+  if(!rows.length)throw new Error('aucun produit détecté dans ce '+srcLbl+' — essayez le format CSV ou Excel');
+  impState={mode:'edit',fileName:file.name,headers:['Nom','Prix','Description'],rows};
+  impShowStep2();
+}
+function impShowStep2(){
+  document.getElementById('imp-step1').style.display='none';
+  document.getElementById('imp-step2').style.display='block';
+  document.getElementById('imp-errs').innerHTML='';
+  document.getElementById('imp-prog').style.display='none';
+  document.getElementById('imp-go').disabled=false;
+  const n=impState.rows.length;
+  document.getElementById('imp-file-line').innerHTML=`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
+  impRenderMap();impRenderPrev();
+}
+
+/* ---- Mapping colonnes → champs (auto-détection + mémorisation) ---- */
+function impRenderMap(){
+  const type=document.getElementById('imp-type').value;
+  const sec=document.getElementById('imp-map-sec');
+  if(impState.mode==='edit'){sec.style.display='none';return;}
+  sec.style.display='block';
+  const saved=(LS_GET(IMPK,{}).map||{})[type]||{};
+  const fields=IMP_FIELDS[type],used=[];
+  const guess={};
+  fields.forEach(f=>{
+    let idx=impState.headers.findIndex(h=>saved[impNorm(h)]===f.k);
+    if(idx<0)idx=impState.headers.findIndex((h,i)=>{
+      if(used.includes(i))return false;
+      const nh=impNorm(h);
+      return f.syn.some(s=>nh===s||(s.length>3&&nh.includes(s)));
+    });
+    if(idx>-1)used.push(idx);
+    guess[f.k]=idx;
+  });
+  document.getElementById('imp-map').innerHTML=fields.map(f=>`
+    <div class="imp-map-row">
+      <span class="flbl">${f.lbl}${f.req?' *':''}</span>
+      <select class="fc" id="imap-${f.k}" onchange="impRenderPrev()" aria-label="Colonne du fichier pour ${f.lbl}">
+        <option value="-1">— ignorer —</option>
+        ${impState.headers.map((h,i)=>`<option value="${i}" ${guess[f.k]===i?'selected':''}>${h.replace(/</g,'&lt;')}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+function impMapping(type){
+  const m={};
+  if(impState.mode==='edit'){m.nom=0;if(IMP_FIELDS[type].some(f=>f.k==='prix'))m.prix=1;m.desc=2;return m;}
+  IMP_FIELDS[type].forEach(f=>{const el=document.getElementById('imap-'+f.k);const i=el?parseInt(el.value):-1;if(i>-1)m[f.k]=i;});
+  return m;
+}
+function impRenderPrev(){
+  const editable=impState.mode==='edit';
+  const rows=editable?impState.rows:impState.rows.slice(0,6);
+  document.getElementById('imp-prev-lbl').textContent=editable?'Données extraites — modifiables avant validation':`Aperçu des ${Math.min(6,impState.rows.length)} premières lignes`;
+  document.getElementById('imp-prev').innerHTML=`<table><thead><tr>${editable?'<th></th>':''}${impState.headers.map(h=>`<th>${String(h).replace(/</g,'&lt;')}</th>`).join('')}</tr></thead><tbody>${
+    rows.map((r,ri)=>`<tr>${editable?`<td><button class="expand-cell" onclick="impDelRow(${ri})" title="Retirer cette ligne" aria-label="Retirer la ligne ${ri+1}">${ICO('trash')}</button></td>`:''}${impState.headers.map((h,ci)=>`<td>${
+      editable
+        ?`<input value="${String(r[ci]??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" oninput="impState.rows[${ri}][${ci}]=this.value" aria-label="${h} — ligne ${ri+1}">`
+        :String(r[ci]??'').replace(/</g,'&lt;').slice(0,60)
+    }</td>`).join('')}</tr>`).join('')
+  }</tbody></table>`;
+}
+function impDelRow(i){impState.rows.splice(i,1);impShowStep2();}
+
+/* ---- Validation + import (par lots, avec barre de progression) ---- */
+function impExistingKeys(type){
+  const s=new Set();
+  if(type==='produits')prods.forEach(p=>s.add(impNorm(p.nom)+'|'+(p.fid||'')));
+  if(type==='fournisseurs')fours.forEach(f=>s.add(impNorm(f.nom)));
+  if(type==='transitaires')trans.forEach(t=>s.add(impNorm(t.nom)));
+  return s;
+}
+function impCat(v){
+  const n=impNorm(v);
+  if(!n)return'Équipement & Accessoires';
+  const keys=Object.keys(CATS);
+  return keys.find(c=>impNorm(c)===n)||keys.find(c=>impNorm(c).includes(n)||n.includes(impNorm(c)))||'Équipement & Accessoires';
+}
+function impBuild(type,o,ix,existing){
+  const nom=impT(o.nom);
+  if(!nom)return{err:'nom manquant'};
+  if(type==='produits'){
+    const rawPrix=impT(o.prix);
+    if(rawPrix&&!/\d/.test(rawPrix))return{err:`prix illisible « ${rawPrix} »`};
+    const fn=impT(o.four),nf=impNorm(fn);
+    const f=nf?fours.find(x=>{const n=impNorm(x.nom);return n===nf||n.includes(nf)||nf.includes(n);}):null;
+    const key=impNorm(nom)+'|'+(f?f.id:'');
+    if(existing.has(key))return{err:'doublon — déjà au catalogue'};
+    existing.add(key);
+    const cat=impCat(o.cat);
+    impCtx.tot++;
+    const cn=prods.filter(p=>p.cat===cat).length+(impCtx.cc[cat]=(impCtx.cc[cat]||0)+1);
+    return{ent:{
+      id:impId('P',ix),
+      ref:`${CATS[cat]||'PRD'}-${String(cn).padStart(3,'0')}-${String(impCtx.tot).padStart(3,'0')}`,
+      nom,cat,grp:'',fid:f?f.id:'',fn:f?f.nom:fn,
+      prix:impNum(rawPrix),prach:impNum(o.prach),
+      dev:(String(o.dev||'').toUpperCase().match(/RMB|USD|EUR|XOF/)||['RMB'])[0],
+      l:impNum(o.l),la:impNum(o.la),h:impNum(o.h),dimU:'cm',kg:impNum(o.kg),
+      tr:/a[ée]r|air|avion|plane/i.test(impT(o.tr))?'Aérien':'Maritime',
+      marge:impT(o.marge)?String(impNum(o.marge)):'',rem:0,conc:'',
+      moq:Math.max(1,Math.round(impNum(o.moq))||1),
+      desc:impT(o.desc),specs:impT(o.specs),
+      photos:impUrl(o.photo)?[impUrl(o.photo)]:[]
+    }};
+  }
+  if(type==='fournisseurs'){
+    const email=impT(o.email);
+    if(email&&!/^\S+@\S+\.\S+$/.test(email))return{err:`email invalide « ${email} »`};
+    const key=impNorm(nom);
+    if(existing.has(key))return{err:'doublon — fournisseur déjà enregistré'};
+    existing.add(key);
+    let ev=Math.round(impNum(o.eval));ev=ev?Math.min(5,Math.max(1,ev)):3;
+    return{ent:{id:impId('F',ix),nom,contact:impT(o.contact),pays:impT(o.pays),email,
+      wa:impT(o.wa),wc:impT(o.wc),dom:impT(o.dom),an:'',eval:ev,
+      ali:impUrl(o.ali_url)?'Non vérifié':'Non disponible',ali_url:impUrl(o.ali_url),devis:'',
+      lang:impT(o.lang),mkt:impT(o.mkt),desc:impT(o.desc),com:'',logo:impUrl(o.logo)}};
+  }
+  // transitaires
+  const key=impNorm(nom);
+  if(existing.has(key))return{err:'doublon — transitaire déjà enregistré'};
+  existing.add(key);
+  return{ent:{id:impId('T',ix),nom,dep:impT(o.dep),arr:impT(o.arr),contact:impT(o.contact),
+    wa:impT(o.wa),tel:impT(o.tel),type:impT(o.type)||'Multimodale',ent:0,
+    mar:impNum(o.mar)||'',mard:impNum(o.mard)||'',aer:impNum(o.aer)||'',aerd:impNum(o.aerd)||'',
+    ass:'0',logo:impUrl(o.logo)}};
+}
+function impRun(){
+  const type=document.getElementById('imp-type').value;
+  const map=impMapping(type);
+  if(map.nom==null){toast('Associez la colonne « Nom » — champ obligatoire',true);return;}
+  if(impState.mode==='map'){
+    const prefs=LS_GET(IMPK,{});prefs.map=prefs.map||{};
+    const m={};Object.keys(map).forEach(k=>{m[impNorm(impState.headers[map[k]])]=k;});
+    prefs.map[type]=m;LS_SET(IMPK,prefs);
+  }
+  const rows=impState.rows;
+  const added=[],errs=[];
+  const existing=impExistingKeys(type);
+  impCtx={cc:{},tot:prods.length};
+  document.getElementById('imp-go').disabled=true;
+  document.getElementById('imp-errs').innerHTML='';
+  const prog=document.getElementById('imp-prog');prog.style.display='block';
+  const fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
+  fill.style.width='0%';
+  let i=0;
+  const CH=25,hdrOff=impState.mode==='map'?2:1;
+  (function step(){
+    const end=Math.min(i+CH,rows.length);
+    for(;i<end;i++){
+      const o={};Object.keys(map).forEach(k=>{o[k]=rows[i][map[k]];});
+      const r=impBuild(type,o,i,existing);
+      if(r.err)errs.push({n:i+hdrOff,msg:r.err});
+      else added.push(r.ent);
+    }
+    fill.style.width=Math.round(i/rows.length*100)+'%';
+    lbl.textContent=`${i}/${rows.length} lignes traitées…`;
+    if(i<rows.length){setTimeout(step,0);return;}
+    impFinish(type,added,errs);
+  })();
+}
+function impFinish(type,added,errs){
+  if(added.length){
+    if(type==='produits'){prods=prods.concat(added);save('p');renderCat();popSim();}
+    if(type==='fournisseurs'){fours=fours.concat(added);save('f');renderFour();renderCat();popSim();}
+    if(type==='transitaires'){trans=trans.concat(added);save('t');renderTrans();popSim();}
+  }
+  document.getElementById('imp-prog-fill').style.width='100%';
+  document.getElementById('imp-prog-lbl').textContent='Terminé';
+  const errHtml=errs.length?`<div class="imp-summary warn"><b>${errs.length} ligne${errs.length>1?'s':''} ignorée${errs.length>1?'s':''} :</b><br>${errs.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${errs.length>8?'<br>… et '+(errs.length-8)+' autres':''}</div>`:'';
+  document.getElementById('imp-errs').innerHTML=
+    `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+errHtml;
+  auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length});
+  toast(added.length?`${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓`:'Aucune ligne importée — voir le détail dans la fenêtre',!added.length);
+}
+/* ===== FIN MODULE IMPORT ===== */
+
+/* ============================================================
+   MODULE EXPORT IMAGES DESIGN — PNG 1080×1080 via canvas
+   Sélection par cases à cocher dans le Catalogue, 6 templates,
+   couleurs personnalisables, logo positionnable, aperçu live,
+   téléchargement PNG unitaires ou ZIP (writer natif sans lib).
+   Préférences mémorisées dans gf_exp.
+   ============================================================ */
+const EXK='gf_exp';
+const EXP_TPLS=[
+  {k:'classique',lbl:'Classique',sw:'linear-gradient(180deg,#fff 60%,#F2F4FA 60%)'},
+  {k:'gradient',lbl:'Gradient Go',sw:'linear-gradient(135deg,#FF2244,#FF6600,#FFD700,#00CC77,#0099FF,#7733FF)'},
+  {k:'nuit',lbl:'Nuit premium',sw:'#1A1A2E'},
+  {k:'minimal',lbl:'Minimal',sw:'#F4F6FA'},
+  {k:'badge',lbl:'Badge prix',sw:'radial-gradient(circle at 72% 28%,#FFD700 20%,#E9EDF6 21%)'},
+  {k:'catalogue',lbl:'Fiche catalogue',sw:'linear-gradient(90deg,#E9EDF6 50%,#fff 50%)'},
+];
+let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0;
+let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,...LS_GET(EXK,{})};
+
+/* ---- Mode sélection dans le Catalogue ---- */
+function expBox(id){
+  if(!expMode)return'';
+  return`<label class="exp-check"><input type="checkbox" ${expSel.has(id)?'checked':''} onchange="expToggle('${id}',this.checked)" aria-label="Sélectionner ce produit pour l'export image"></label>`;
+}
+function expToggle(id,on){if(on)expSel.add(id);else expSel.delete(id);expBarUpdate();}
+function expToggleMode(){
+  expMode=!expMode;
+  if(!expMode)expSel.clear();
+  const b=document.getElementById('exp-mode-btn');
+  if(b)b.setAttribute('aria-pressed',expMode);
+  document.getElementById('exp-bar').style.display=expMode?'flex':'none';
+  expBarUpdate();renderCat();
+  if(expMode)toast('Cochez les produits à exporter, puis « Exporter en image »');
+}
+function expBarUpdate(){
+  const n=expSel.size;
+  document.getElementById('exp-count').textContent=`${n} produit${n>1?'s':''} sélectionné${n>1?'s':''}`;
+}
+function expSelectAll(){
+  const q=(document.getElementById('cat-search').value||'').toLowerCase();
+  const fc=document.getElementById('f-cat').value,fv=document.getElementById('f-four').value;
+  prods.filter(p=>(!q||p.nom.toLowerCase().includes(q)||p.ref.toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q))&&(!fc||p.cat===fc)&&(!fv||p.fid===fv))
+    .forEach(p=>expSel.add(p.id));
+  expBarUpdate();renderCat();
+}
+
+/* ---- Modal de personnalisation + aperçu ---- */
+function openExportModal(){
+  if(!expSel.size){toast('Cochez au moins un produit à exporter',true);return;}
+  expIdx=0;
+  document.getElementById('exp-bg').value=expPrefs.bg;
+  document.getElementById('exp-txt').value=expPrefs.txt;
+  document.getElementById('exp-logo').value=expPrefs.logoPos;
+  document.getElementById('exp-marge').checked=!!expPrefs.showMarge;
+  expRenderTpls();
+  openMod('export-modal');
+  expPreview();
+}
+function expRenderTpls(){
+  document.getElementById('exp-tpls').innerHTML=EXP_TPLS.map(t=>
+    `<button class="tpl-btn${expPrefs.tpl===t.k?' active':''}" onclick="expSetTpl('${t.k}')" aria-pressed="${expPrefs.tpl===t.k}"><span class="tpl-sw" style="background:${t.sw}"></span>${t.lbl}</button>`).join('');
+}
+function expSetTpl(k){expPrefs.tpl=k;LS_SET(EXK,expPrefs);expRenderTpls();expPreview();}
+function expPrefChange(){
+  expPrefs.bg=document.getElementById('exp-bg').value;
+  expPrefs.txt=document.getElementById('exp-txt').value;
+  expPrefs.logoPos=document.getElementById('exp-logo').value;
+  expPrefs.showMarge=document.getElementById('exp-marge').checked;
+  LS_SET(EXK,expPrefs);expPreview();
+}
+function expNav(d){const n=expSel.size;if(!n)return;expIdx=(expIdx+d+n)%n;expPreview();}
+async function expPreview(){
+  const ids=[...expSel];if(!ids.length)return;
+  if(expIdx>=ids.length)expIdx=0;
+  document.getElementById('exp-nav-lbl').textContent=`${expIdx+1}/${ids.length}`;
+  const p=prods.find(x=>x.id===ids[expIdx]);if(!p)return;
+  const seq=++expPrevSeq;
+  await document.fonts.ready;
+  const img=await expLoadImg(p.photos&&p.photos[0]);
+  if(seq!==expPrevSeq)return; // une prévisualisation plus récente est en cours
+  expDraw(document.getElementById('exp-canvas'),p,img);
+}
+// crossOrigin obligatoire : une image sans CORS rendrait le canvas inexportable (taint)
+function expLoadImg(src){
+  return new Promise(res=>{
+    if(!src)return res(null);
+    const im=new Image();
+    im.crossOrigin='anonymous';
+    im.onload=()=>res(im);im.onerror=()=>res(null);
+    im.src=src;
+  });
+}
+
+/* ---- Rendu canvas 1080×1080 ---- */
+function expRRect(x,px,py,w,h,r){
+  x.beginPath();x.moveTo(px+r,py);
+  x.arcTo(px+w,py,px+w,py+h,r);x.arcTo(px+w,py+h,px,py+h,r);
+  x.arcTo(px,py+h,px,py,r);x.arcTo(px,py,px+w,py,r);x.closePath();
+}
+function expCover(x,img,px,py,w,h,r){
+  x.save();
+  if(r)expRRect(x,px,py,w,h,r);else{x.beginPath();x.rect(px,py,w,h);}
+  x.clip();
+  if(img){
+    const s=Math.max(w/img.width,h/img.height);
+    x.drawImage(img,px+(w-img.width*s)/2,py+(h-img.height*s)/2,img.width*s,img.height*s);
+  }else{
+    x.fillStyle='#E9EDF6';x.fillRect(px,py,w,h);
+    x.strokeStyle='#C4CBDE';x.lineWidth=7;x.lineJoin='round';
+    const cx=px+w/2,cy=py+h/2;
+    x.strokeRect(cx-70,cy-70,140,140);
+    x.beginPath();x.moveTo(cx-70,cy-22);x.lineTo(cx+70,cy-22);x.moveTo(cx,cy-22);x.lineTo(cx,cy+70);x.stroke();
+  }
+  x.restore();
+}
+function expGrad(x,x0,y0,x1,y1){
+  const g=x.createLinearGradient(x0,y0,x1,y1);
+  [['#FF2244',0],['#FF6600',.2],['#FFD700',.4],['#00CC77',.6],['#0099FF',.8],['#7733FF',1]].forEach(([c,s])=>g.addColorStop(s,c));
+  return g;
+}
+function expWrap(x,text,px,py,maxW,lh,maxLines){
+  const words=String(text||'').split(/\s+/);let line='',lines=[];
+  words.forEach(w=>{const t=line?line+' '+w:w;if(x.measureText(t).width>maxW&&line){lines.push(line);line=w;}else line=t;});
+  if(line)lines.push(line);
+  if(lines.length>maxLines){lines=lines.slice(0,maxLines);lines[maxLines-1]=lines[maxLines-1].slice(0,-2)+'…';}
+  lines.forEach((l,i)=>x.fillText(l,px,py+i*lh));
+  return lines.length;
+}
+function expFitFont(x,text,maxW,fam,weight,size,min){
+  let s=size;
+  do{x.font=`${weight} ${s}px ${fam}`;if(x.measureText(text).width<=maxW)break;s-=2;}while(s>min);
+  return s;
+}
+function expLogo(x,pos,color,shadow){
+  if(pos==='none')return;
+  x.save();x.textAlign='left';x.font='900 40px Montserrat,sans-serif';
+  if(shadow){x.shadowColor='rgba(10,12,30,.55)';x.shadowBlur=14;x.shadowOffsetY=2;}
+  const t1='Go',t2='.',t3='Group',pad=48;
+  const w=x.measureText(t1+t2+t3).width;
+  const px=(pos==='tl'||pos==='bl')?pad:1080-pad-w;
+  const py=(pos==='tl'||pos==='tr')?pad+34:1080-pad+8;
+  x.fillStyle=color;x.fillText(t1,px,py);
+  x.fillStyle='#0099FF';x.fillText(t2,px+x.measureText(t1).width,py);
+  x.fillStyle=color;x.fillText(t3,px+x.measureText(t1+t2).width,py);
+  x.restore();
+}
+// Bloc prix HT / marge / TTC aligné sur deux colonnes
+function expPrices(x,c,o,y,color,accent,x0,x1){
+  const row=(lbl,val,big)=>{
+    x.font=(big?'600 33px':'500 29px')+' Poppins,sans-serif';
+    x.fillStyle=color;x.globalAlpha=.72;x.fillText(lbl,x0,y);x.globalAlpha=1;
+    x.textAlign='right';
+    x.font=(big?'800 54px':'700 38px')+' Montserrat,sans-serif';
+    x.fillStyle=big?accent:color;x.fillText(val,x1,y);
+    x.textAlign='left';
+    y+=big?0:62;
+  };
+  row('Prix de Vente HT',N(c.pvuHT));
+  if(o.showMarge)row(`Marge (${Nd(c.margePct,1)}%)`,N(c.margeU));
+  row('Prix de Vente TTC',N(c.pvuTTC),true);
+}
+function expDraw(cv,p,img){
+  const x=cv.getContext('2d');
+  const W=1080,H=1080;
+  cv.width=W;cv.height=H;
+  const c=calc(p),o=expPrefs;
+  x.textAlign='left';x.textBaseline='alphabetic';
+  const yP=o.showMarge?832:894; // départ du bloc prix
+  switch(o.tpl){
+    case'gradient':{
+      x.fillStyle=expGrad(x,0,0,W,H);x.fillRect(0,0,W,H);
+      x.fillStyle='#fff';expRRect(x,50,50,980,980,32);x.fill();
+      expCover(x,img,90,90,900,500,20);
+      x.fillStyle=o.txt;x.font='800 52px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,90,682,900,60,2);
+      x.font='500 27px Poppins,sans-serif';x.globalAlpha=.6;x.fillText(p.cat||'',90,682+n*60+2);x.globalAlpha=1;
+      expPrices(x,c,o,o.showMarge?848:900,o.txt,'#0066CC',90,990);
+      break;
+    }
+    case'nuit':{
+      x.fillStyle='#1A1A2E';x.fillRect(0,0,W,H);
+      x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,10);
+      expCover(x,img,60,64,960,530,24);
+      x.fillStyle='#fff';x.font='800 54px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,60,688,960,64,2);
+      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.55;x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,688+n*64+2);x.globalAlpha=1;
+      expPrices(x,c,o,yP,'#fff','#FFD700',60,1020);
+      expLogo(x,o.logoPos,'#fff');
+      break;
+    }
+    case'minimal':{
+      x.fillStyle=o.bg;x.fillRect(0,0,W,H);
+      expCover(x,img,250,84,580,580,18);
+      x.textAlign='center';
+      x.fillStyle=o.txt;x.font='700 48px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,W/2,750,900,58,2);
+      x.font='400 26px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.cat||'',W/2,750+n*58+2);x.globalAlpha=1;
+      x.globalAlpha=.16;x.strokeStyle=o.txt;x.lineWidth=2;
+      x.beginPath();x.moveTo(240,878);x.lineTo(840,878);x.stroke();x.globalAlpha=1;
+      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.7;
+      x.fillStyle=o.txt;
+      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),W/2,930);
+      x.globalAlpha=1;
+      x.font='800 58px Montserrat,sans-serif';
+      x.fillText(N(c.pvuTTC)+'  TTC',W/2,1006);
+      x.textAlign='left';
+      expLogo(x,o.logoPos==='bl'||o.logoPos==='br'?(o.logoPos==='bl'?'tl':'tr'):o.logoPos,o.txt);
+      break;
+    }
+    case'badge':{
+      expCover(x,img,0,0,W,H,0);
+      const g=x.createLinearGradient(0,H-460,0,H);
+      g.addColorStop(0,'rgba(10,12,30,0)');g.addColorStop(1,'rgba(10,12,30,.9)');
+      x.fillStyle=g;x.fillRect(0,H-460,W,460);
+      x.fillStyle='#FFD700';x.beginPath();x.arc(880,190,148,0,7);x.fill();
+      x.fillStyle=expGrad(x,732,42,1028,338);x.lineWidth=8;x.strokeStyle=x.fillStyle;
+      x.beginPath();x.arc(880,190,158,0,7);x.stroke();
+      x.fillStyle='#1A1A2E';x.textAlign='center';
+      x.font='700 30px Poppins,sans-serif';x.fillText('Prix TTC',880,150);
+      const num=Math.round(c.pvuTTC).toLocaleString('fr-FR');
+      expFitFont(x,num,240,'Montserrat,sans-serif',800,54,26);x.fillText(num,880,212);
+      x.font='700 28px Poppins,sans-serif';x.fillText('XOF',880,252);
+      x.textAlign='left';
+      x.fillStyle='#fff';x.font='800 56px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,60,H-230,960,64,2);
+      x.font='500 30px Poppins,sans-serif';x.globalAlpha=.8;
+      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),60,H-230+n*64+4);
+      x.globalAlpha=1;
+      expLogo(x,o.logoPos==='br'?'tl':o.logoPos,'#fff',true);
+      break;
+    }
+    case'catalogue':{
+      x.fillStyle=o.bg;x.fillRect(0,0,W,H);
+      expCover(x,img,0,0,528,H,0);
+      x.fillStyle=expGrad(x,0,0,0,H);x.fillRect(528,0,12,H);
+      const x0=600,x1=1020;
+      x.fillStyle=o.txt;x.globalAlpha=.55;
+      x.font='600 26px Poppins,sans-serif';x.fillText((p.cat||'').toUpperCase(),x0,160);
+      x.globalAlpha=1;
+      x.font='800 50px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,x0,230,x1-x0,60,3);
+      if(p.specs){x.font='400 24px Poppins,sans-serif';x.globalAlpha=.6;expWrap(x,p.specs,x0,230+n*60+16,x1-x0,34,2);x.globalAlpha=1;}
+      let y=640;
+      const line=(lbl,val,big,accent)=>{
+        x.font='500 26px Poppins,sans-serif';x.fillStyle=o.txt;x.globalAlpha=.6;x.fillText(lbl,x0,y);x.globalAlpha=1;
+        x.font=(big?'800 60px':'700 42px')+' Montserrat,sans-serif';
+        x.fillStyle=accent||o.txt;x.fillText(val,x0,y+(big?66:48));
+        y+=big?150:112;
+      };
+      line('Prix de Vente HT',N(c.pvuHT));
+      if(o.showMarge)line('Marge ('+Nd(c.margePct,1)+'%)',N(c.margeU));
+      line('Prix de Vente TTC',N(c.pvuTTC),true,'#0066CC');
+      expLogo(x,o.logoPos==='tl'||o.logoPos==='bl'?'tr':o.logoPos,o.txt);
+      break;
+    }
+    default:{ // classique
+      x.fillStyle=o.bg;x.fillRect(0,0,W,H);
+      x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,14);
+      expCover(x,img,60,74,960,540,24);
+      x.fillStyle=o.txt;x.font='800 54px Montserrat,sans-serif';
+      const n=expWrap(x,p.nom,60,700,960,64,2);
+      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.6;
+      x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,700+n*64+2);x.globalAlpha=1;
+      expPrices(x,c,o,yP,o.txt,'#0066CC',60,1020);
+      expLogo(x,o.logoPos,o.txt);
+    }
+  }
+}
+
+/* ---- Téléchargement PNG / ZIP + progression ---- */
+function expSlug(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60);}
+function expSaveBlob(blob,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+async function expDownload(zip){
+  const ids=[...expSel];
+  if(!ids.length)return;
+  const prog=document.getElementById('exp-prog'),fill=document.getElementById('exp-prog-fill'),lbl=document.getElementById('exp-prog-lbl');
+  const b1=document.getElementById('exp-dl-one'),b2=document.getElementById('exp-dl-zip');
+  prog.style.display='block';fill.style.width='0%';
+  b1.disabled=b2.disabled=true;
+  try{
+    await document.fonts.ready;
+    const cv=document.createElement('canvas');cv.width=1080;cv.height=1080;
+    const files=[];
+    for(let i=0;i<ids.length;i++){
+      const p=prods.find(x=>x.id===ids[i]);
+      if(!p)continue;
+      lbl.textContent=`Génération ${i+1}/${ids.length} — ${p.nom}`;
+      const img=await expLoadImg(p.photos&&p.photos[0]);
+      expDraw(cv,p,img);
+      const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+      if(!blob)throw new Error('génération PNG impossible (image externe sans CORS ?)');
+      const name='GoFlow_'+expSlug(p.ref+'_'+p.nom)+'.png';
+      if(zip)files.push({name,blob});
+      else{expSaveBlob(blob,name);await new Promise(r=>setTimeout(r,350));}
+      fill.style.width=Math.round((i+1)/ids.length*100)+'%';
+    }
+    if(zip){
+      lbl.textContent='Assemblage du ZIP…';
+      expSaveBlob(await zipStore(files),'GoFlow_Images_'+new Date().toISOString().slice(0,10)+'.zip');
+    }
+    lbl.textContent='Terminé ✓';
+    auditLog('export_images',{template:expPrefs.tpl,nb:files.length||ids.length,zip:!!zip});
+    toast(`${ids.length} image${ids.length>1?'s':''} ${zip?'dans le ZIP ':''}téléchargée${ids.length>1?'s':''} ✓`);
+  }catch(e){
+    console.error('Export images:',e);
+    toast('Export échoué — '+(e.message||e),true);
+  }finally{
+    b1.disabled=b2.disabled=false;
+    setTimeout(()=>{prog.style.display='none';},1800);
+  }
+}
+/* ZIP « store » minimal (sans compression) — suffisant pour des PNG déjà compressés */
+const zipCRCTable=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c;}return t;})();
+function zipCRC(u8){let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=zipCRCTable[(c^u8[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+async function zipStore(files){
+  const enc=new TextEncoder();
+  const parts=[],central=[];let offset=0,cdLen=0;
+  for(const f of files){
+    const data=new Uint8Array(await f.blob.arrayBuffer());
+    const name=enc.encode(f.name);
+    const crc=zipCRC(data);
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,data.length,true);lh.setUint32(22,data.length,true);
+    lh.setUint16(26,name.length,true);
+    parts.push(lh.buffer,name,data);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,data.length,true);ch.setUint32(24,data.length,true);
+    ch.setUint16(28,name.length,true);ch.setUint32(42,offset,true);
+    central.push(ch.buffer,name);
+    cdLen+=46+name.length;
+    offset+=30+name.length+data.length;
+  }
+  const end=new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true);
+  end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);
+  end.setUint32(12,cdLen,true);end.setUint32(16,offset,true);
+  return new Blob([...parts,...central,end.buffer],{type:'application/zip'});
+}
+/* ===== FIN MODULE EXPORT IMAGES ===== */
 
 /* ---- UTILS ---- */
 let modReturnFocus=null;
