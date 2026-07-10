@@ -31,7 +31,7 @@ sed -n '/<script>/,/<\/script>/p' index.html | grep -v '<script>' | grep -v '</s
 
 ## Architecture
 
-Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines). No framework.
+Everything lives in `index.html` — CSS, HTML, and JS in one file (~4400 lines). No framework.
 
 ### App shell (premium SaaS layout)
 
@@ -53,8 +53,8 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines)
 | `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis|pdf: {visible: [key…], touched: bool, known: [key…]}}`. Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
 | `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
 | `gf_audit` | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel |
-| `gf_imp` | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}}` |
-| `gf_exp` | Image-export prefs: `{tpl, bg, txt, logoPos, showMarge}` |
+| `gf_imp` | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}, lastHtml: {name, txt, ts}}` (`lastHtml` = last imported HTML ≤400 KB, re-parsable from step 1) |
+| `gf_exp` | Image-export prefs: `{tpl, bg, txt, logoPos, infosOn, infosOrder}`. `infosOn`/`infosOrder` = info lines shown on exported images (same keys as `CM_DEFS.catalogue`); `null` = synced with the catalogue's visible columns. Legacy `showMarge` only feeds the sync default |
 
 `DATA_VER` constant controls localStorage migrations — bump it to force a reset of `gf_p` and `gf_f` when the data schema changes.
 
@@ -119,15 +119,19 @@ Column visibility for **Catalogue / Simulation / Devis / PDF export** flows thro
 
 "Importer" buttons in Catalogue / Fournisseurs / Transitaires open `import-modal` (`openImportModal(type)`):
 
-- **CSV**: native parser `parseCSVText` (auto delimiter `;`/`,`/tab, quoted fields, BOM strip). **Excel**: SheetJS lazy-loaded from CDN (`ensureLib`). **PDF**: pdf.js lazy-loaded, text grouped into visual lines (`pdfToLines`) then name+price heuristic (`impExtractRows`, currency-first pattern wins). **HTML**: DOMParser — biggest `<table>`, else block-aware text extraction.
-- Tabular sources → column-mapping UI (`IMP_FIELDS` per type with accent-insensitive synonym auto-guess via `impNorm`; last mapping remembered in `gf_imp`) + read-only 6-row preview. Extracted sources (PDF/HTML) → fully editable preview (inputs bound to `impState.rows`, row delete).
+- **CSV**: native parser `parseCSVText` (auto delimiter `;`/`,`/tab, quoted fields, BOM strip). **Excel**: SheetJS lazy-loaded from CDN (`ensureLib`). **PDF**: pdf.js lazy-loaded, text grouped into visual lines (`pdfToLines`) then name+price heuristic (`impExtractRows`, currency-first pattern wins). **HTML**: rich parse (see below).
+- Tabular sources → column-mapping UI (`IMP_FIELDS` per type with accent-insensitive synonym auto-guess via `impNorm`; last mapping remembered in `gf_imp`) + 6-row preview. Extracted sources (PDF/HTML) → fully editable preview (inputs bound to `impState.rows`, row delete), 4 columns: Nom / Prix / Description / Image URL.
+- **Product images**: `Image URL` column (`impResolveImg`) accepts web/data URLs as-is; local paths (`C:\…`) and bare filenames resolve to `assets/Products images/<basename>`. Preview table shows a resolved thumbnail per row. Missing/unreadable image = non-blocking warning (product imported without image; warnings listed by `impFinish`). "Uploader des images en masse" (`impBulkImgs`, folder or files) downscales images to 700 px JPEG data-URLs and auto-assigns them to rows by filename↔product-name match (`impEnsureImgCol` creates the column if absent).
 - `impRun` processes rows in chunks of 25 (progress bar), validates (required nom, readable prix, email format, duplicate detection vs existing data), builds entities via `impBuild` (fuzzy supplier match, category match, ref generation consistent with `genRef`), then `impFinish` saves + re-renders + logs to `gf_audit` + shows ok/warn summary.
+- **Rich HTML parse** (`impRichParse`): title/meta, h1–h3, paragraphs, bullet lists, images (src+alt, absolutized against canonical/og:url via `impAbsUrl`), links, emails (mailto+regex), phones (tel:+regex), `<address>`. For **produits**: biggest `<table>` → mapping, else heuristic rows from headings/lists/paragraphs with images auto-matched by alt/filename (`impAutoImgs`); a "Contenu extrait" panel (`impRenderRich`) shows editable sections (Infos générales / Description / Contact / Images / Listes / custom fields) with per-field delete, "Ajouter un champ", per-image row assignment, and a ZIP download of extracted images named `assets/Products images/…` (`impImgsZip`, reuses `zipStore`). Original HTML kept in `gf_imp.lastHtml` with a re-parse button on step 1.
+- **Fournisseur/transitaire HTML → fiche** (`impSetFiche`, mode `'fiche'`): `impExtractFiche` pre-fills nom (h1/title before `|–—` separators), logo (img with "logo" in src/alt/class), description (meta description or best paragraph), email/phone/address, site (canonical/og:url), and for transitaires the routes + logistics mode guessed from page text. `impRenderFiche` shows an editor (all fields of `IMP_FICHE_FIELDS`, logo picker over site images, ZIP → `assets/supplier/`) plus a live card preview (`impFichePrev`); `impRunFiche` validates through `impBuild` (dup/email checks) then saves. Switching the type re-parses the stored HTML (`impTypeChange`).
 
 ### Image export (module between `MODULE EXPORT IMAGES DESIGN` / `FIN MODULE EXPORT IMAGES` markers)
 
 "Export image" button in Catalogue toggles selection mode (`expToggleMode` → checkboxes `expBox()` on cards/table rows + fixed bottom `#exp-bar`). `openExportModal()` opens the customization modal:
 
-- 6 canvas templates (`EXP_TPLS`: classique, gradient, nuit, minimal, badge, catalogue) rendered by `expDraw` at 1080×1080; bg/text color pickers, Go.Group wordmark position (`expLogo`), optional margin line; live preview with per-product navigation; prefs persisted in `gf_exp`.
+- 6 canvas templates (`EXP_TPLS`: classique, gradient, nuit, minimal, badge, catalogue) rendered by `expDraw` at 1080×1080; bg/text color pickers, Go.Group wordmark position (`expLogo`); live preview with per-product navigation; prefs persisted in `gf_exp`.
+- **Info lines** (`EXP_INFOS`, same keys as `CM_DEFS.catalogue`): by default the exported image shows the catalogue's currently visible columns (`expInfoState`, `infosOn===null` = synced); the modal's "Informations à afficher" list lets the user check/uncheck all 13 infos and reorder them by drag & drop (or ▲▼ buttons); choices persist in `gf_exp.infosOn/infosOrder`, "Colonnes du catalogue" resyncs. Templates render the selected rows via `expRowsBlock` (label left / value right, adaptive row height + `expRowsH`), image height shrinks to make room.
 - Images loaded with `crossOrigin='anonymous'` (raw GitHub sends CORS headers) with placeholder fallback — the canvas is never tainted. Prices come from `calc(p)` (PV HT / PV TTC / marge).
 - Download: individual PNGs (`canvas.toBlob`) or a single ZIP built by the dependency-free store-only writer `zipStore` (CRC32, no compression — PNGs are already compressed). Progress bar during batch generation.
 

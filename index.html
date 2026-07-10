@@ -2987,8 +2987,13 @@ function generateDevisPDF(){
    MODULE IMPORT EN MASSE — CSV / Excel / PDF / HTML
    CSV : parseur natif (guillemets, délimiteur auto ; , tab)
    Excel : SheetJS chargé à la demande · PDF : pdf.js à la demande
-   HTML : DOMParser (plus grande table, sinon extraction texte)
-   Le dernier mapping de colonnes est mémorisé par type (gf_imp).
+   HTML : analyse riche (titres, textes, images, contacts, listes) —
+   produits : table ou heuristique nom+prix + panneau « contenu extrait » ;
+   fournisseurs/transitaires : fiche pré-remplie à valider manuellement.
+   Colonne « Image URL » : URL web, chemin local ou nom de fichier
+   (résolu vers assets/Products images/), aperçu avant import,
+   avertissement non bloquant si absente + upload d'images en masse.
+   Dernier mapping mémorisé par type + dernier HTML re-parsable (gf_imp).
    ============================================================ */
 const IMPK='gf_imp';
 const impNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
@@ -4100,12 +4105,12 @@ function expFitText(x,text,maxW){
 function expRowsH(rows,maxH){
   if(!rows.length)return 0;
   const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
-  return Math.round(u*Math.max(32,Math.min(62,Math.floor(maxH/u))));
+  return Math.round(u*Math.max(24,Math.min(62,Math.floor(maxH/u))));
 }
 function expRowsBlock(x,rows,o){
   if(!rows.length)return;
   const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
-  const rh=Math.max(32,Math.min(62,Math.floor(o.maxH/u)));
+  const rh=Math.max(24,Math.min(62,Math.floor(o.maxH/u)));
   let y=o.yBot-Math.round(u*rh);
   x.save();
   rows.forEach(r=>{
