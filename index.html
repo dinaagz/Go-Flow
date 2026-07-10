@@ -334,6 +334,18 @@ textarea.fc{resize:vertical;min-height:70px}
 .imp-prev-wrap table{font-size:11.5px}
 .imp-prev-wrap input{width:100%;min-width:70px;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:'Poppins',sans-serif;font-size:11.5px;outline:none;color:var(--text)}
 .imp-prev-wrap input:focus{border-color:var(--bleu);background:#fff}
+.fiche-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:12px}
+@media(max-width:640px){.fiche-grid{grid-template-columns:1fr}}
+.fiche-imgbtn{cursor:pointer}
+.fiche-imgbtn.sel{border-color:var(--bleu);box-shadow:0 0 0 2px rgba(0,153,255,.25)}
+.fiche-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--gris);position:sticky;top:0}
+.fiche-head{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.fiche-head img{width:52px;height:52px;object-fit:contain;border-radius:9px;background:#fff;border:1px solid var(--border)}
+.fiche-nom{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;line-height:1.3}
+.fiche-sub{font-size:11px;color:var(--muted)}
+.fiche-desc{font-size:11.5px;opacity:.85;line-height:1.6;margin-bottom:8px;max-height:90px;overflow:auto}
+.fiche-line{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;margin-bottom:5px;word-break:break-word}
+.fiche-line .ic{width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--muted)}
 .rich-sect{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface)}
 .rich-sect summary{cursor:pointer;padding:9px 12px;font-size:12px;font-weight:600;color:var(--text);user-select:none}
 .rich-sect[open] summary{border-bottom:1px solid var(--border)}
@@ -1055,7 +1067,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
         <div class="fact" style="margin-top:0">
           <button class="btn btn-sec" onclick="impBack()">← Autre fichier</button>
-          <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Valider l'import</button>
+          <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> <span id="imp-go-lbl">Valider l'import</span></button>
         </div>
       </div>
     </div>
@@ -3083,7 +3095,13 @@ function impBack(){
   document.getElementById('imp-go').disabled=false;
   impRenderLastHtml();
 }
-function impTypeChange(){if(impState){impRenderMap();impRenderPrev();impUpdTools();}}
+function impTypeChange(){
+  if(!impState)return;
+  // Source HTML : on re-analyse selon le nouveau type (tableau produits ↔ fiche)
+  if(impState.rawHtml){try{impFromHTML({name:impState.fileName},impState.rawHtml);}catch(e){toast('Re-analyse impossible — '+(e.message||e),true);}return;}
+  if(impState.mode==='fiche')return;
+  impRenderMap();impRenderPrev();impUpdTools();
+}
 // Bouton « Uploader des images en masse » : visible uniquement pour un import produits
 function impUpdTools(){
   const el=document.getElementById('imp-img-tools');
@@ -3249,6 +3267,9 @@ function impFromHTML(file,txt){
   const doc=new DOMParser().parseFromString(txt,'text/html');
   const rich=impRichParse(doc);
   impSaveLastHtml(file.name,txt);
+  // Fournisseur / transitaire : le HTML (site web) devient une fiche à valider (étape 4)
+  const type=document.getElementById('imp-type').value;
+  if(type==='fournisseurs'||type==='transitaires'){impSetFiche(file,type,rich,txt);return;}
   let best=null;
   doc.querySelectorAll('table').forEach(t=>{
     const n=t.querySelectorAll('tr').length;
@@ -3308,9 +3329,18 @@ function impShowStep2(){
   document.getElementById('imp-errs').innerHTML='';
   document.getElementById('imp-prog').style.display='none';
   document.getElementById('imp-go').disabled=false;
+  const fiche=impState.mode==='fiche';
   const n=impState.rows.length;
-  document.getElementById('imp-file-line').innerHTML=`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
-  impRenderMap();impRenderPrev();impUpdTools();impRenderRich();
+  document.getElementById('imp-file-line').innerHTML=fiche
+    ?`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — <span style="color:var(--warn)">fiche extraite automatiquement : vérification manuelle obligatoire avant création</span>`
+    :`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
+  document.getElementById('imp-map-sec').style.display=fiche?'none':'';
+  document.getElementById('imp-prev-lbl').style.display=fiche?'none':'';
+  document.getElementById('imp-prev').style.display=fiche?'none':'';
+  const go=document.getElementById('imp-go-lbl');
+  if(go)go.textContent=fiche?(impState.type==='fournisseurs'?'Créer la fiche fournisseur':'Créer la fiche transitaire'):'Valider l\'import';
+  if(!fiche){impRenderMap();impRenderPrev();}
+  impUpdTools();impRenderRich();impRenderFiche();
 }
 
 /* ---- Mapping colonnes → champs (auto-détection + mémorisation) ---- */
@@ -3439,6 +3469,7 @@ function impBuild(type,o,ix,existing){
 }
 function impRun(){
   const type=document.getElementById('imp-type').value;
+  if(impState&&impState.mode==='fiche'){impRunFiche(type);return;}
   const map=impMapping(type);
   if(map.nom==null){toast('Associez la colonne « Nom » — champ obligatoire',true);return;}
   if(impState.mode==='map'){
@@ -3486,6 +3517,148 @@ function impFinish(type,added,errs,warns=[]){
     `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+warnHtml+errHtml;
   auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length,avertissements:warns.length});
   toast(added.length?`${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓`:'Aucune ligne importée — voir le détail dans la fenêtre',!added.length);
+}
+
+/* ---- Fiche fournisseur / transitaire depuis un site HTML (étape 4) ----
+   Extraction heuristique (nom, logo, description, contacts, routes) puis
+   validation manuelle obligatoire dans un éditeur avec aperçu de la fiche. */
+const IMP_FICHE_FIELDS={
+  fournisseurs:[
+    {k:'nom',lbl:'Nom entreprise *'},
+    {k:'contact',lbl:'Personne de contact'},
+    {k:'pays',lbl:'Pays'},
+    {k:'email',lbl:'Email'},
+    {k:'wa',lbl:'WhatsApp / Téléphone'},
+    {k:'wc',lbl:'WeChat'},
+    {k:'dom',lbl:'Domaine d\'activité'},
+    {k:'ali_url',lbl:'Site web / Alibaba'},
+    {k:'lang',lbl:'Langues'},
+    {k:'mkt',lbl:'Marchés'},
+    {k:'adresse',lbl:'Adresse'},
+  ],
+  transitaires:[
+    {k:'nom',lbl:'Nom entreprise *'},
+    {k:'contact',lbl:'Contact (email)'},
+    {k:'tel',lbl:'Téléphone'},
+    {k:'wa',lbl:'WhatsApp'},
+    {k:'dep',lbl:'Pays de départ'},
+    {k:'arr',lbl:'Pays d\'arrivée'},
+    {k:'type',lbl:'Type logistique'},
+    {k:'mar',lbl:'Tarif maritime (XOF/CBM)'},
+    {k:'mard',lbl:'Délai maritime (j)'},
+    {k:'aer',lbl:'Tarif aérien (XOF/kg)'},
+    {k:'aerd',lbl:'Délai aérien (j)'},
+    {k:'site',lbl:'Site web'},
+    {k:'adresse',lbl:'Adresse'},
+  ],
+};
+function impExtractFiche(type,rich){
+  const h1=(rich.headings.find(h=>h.tag==='h1')||{}).txt||'';
+  const nom=((h1||rich.title||'').split(/\s*[|–—•·]\s*/)[0]||'').trim().slice(0,80);
+  const logo=(rich.images.find(im=>im.abs&&/logo/i.test(im.src+' '+im.alt+' '+im.hint))||{}).abs||'';
+  const desc=(rich.metaDesc||[...rich.paragraphs.slice(0,4)].sort((a,b)=>b.length-a.length)[0]||'').slice(0,500);
+  const t=rich.textLow||'';
+  const base={nom,logo,desc,adresse:rich.address||''};
+  if(type==='fournisseurs')return{...base,
+    contact:'',pays:/chin|shenzhen|guangzhou|ningbo|yiwu|shanghai|shaanxi/.test(t)?'Chine':'',
+    email:rich.emails[0]||'',wa:rich.phones[0]||'',wc:'',dom:'',
+    ali_url:rich.site||'',lang:'',mkt:''};
+  const modes=(/a[ée]rien|air freight|air cargo|avion/.test(t)?1:0)+(/maritime|sea freight|ocean|bateau|conteneur|container/.test(t)?2:0);
+  return{...base,
+    contact:rich.emails[0]||'',tel:rich.phones[0]||'',wa:rich.phones[1]||rich.phones[0]||'',
+    dep:/chin|china|guangzhou|shenzhen/.test(t)?'Chine':'',
+    arr:/togo|lom[eé]|afrique|africa|west africa|abidjan|cotonou|dakar/.test(t)?'Afrique de l\'Ouest':'',
+    type:modes===3?'Multimodale':modes===1?'Aérienne':modes===2?'Maritime':'Multimodale',
+    mar:'',mard:'',aer:'',aerd:'',site:rich.site||''};
+}
+function impSetFiche(file,type,rich,rawHtml){
+  impState={mode:'fiche',fileName:file.name,type,fiche:impExtractFiche(type,rich),rich,rawHtml,headers:[],rows:[]};
+  impShowStep2();
+}
+function impRenderFiche(){
+  const sec=document.getElementById('imp-fiche-sec');
+  if(!sec)return;
+  if(!impState||impState.mode!=='fiche'){sec.style.display='none';sec.innerHTML='';return;}
+  sec.style.display='block';
+  const f=impState.fiche,type=impState.type;
+  const okImgs=impState.rich?impState.rich.images.filter(im=>im.abs):[];
+  sec.innerHTML=`
+    <div class="fiche-grid">
+      <div>
+        <div class="fg" style="grid-template-columns:1fr 1fr">
+          ${IMP_FICHE_FIELDS[type].map(fd=>`<div class="fgrp"><label class="flbl" for="fic-${fd.k}">${fd.lbl}</label><input class="fc" id="fic-${fd.k}" value="${impEsc(f[fd.k])}" oninput="impState.fiche.${fd.k}=this.value;impFichePrev()"></div>`).join('')}
+        </div>
+        <div class="fgrp" style="margin-top:8px"><label class="flbl" for="fic-desc">Description</label><textarea class="fc" id="fic-desc" rows="3" oninput="impState.fiche.desc=this.value;impFichePrev()">${impEsc(f.desc)}</textarea></div>
+        <div class="fgrp" style="margin-top:8px"><label class="flbl" for="fic-logo">Logo (URL)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <img id="fic-logo-prev" class="imp-thumb" src="${impEsc(f.logo)}" alt="" style="${f.logo?'':'display:none'}" onerror="this.style.display='none'">
+            <input class="fc" id="fic-logo" value="${impEsc(f.logo)}" style="flex:1" oninput="impState.fiche.logo=this.value;impFicheLogoPrev()">
+          </div>
+        </div>
+        ${okImgs.length?`
+        <div class="flbl" style="margin:12px 0 6px">Images du site (${okImgs.length}) — cliquez pour définir le logo</div>
+        <div class="rich-imgs">${okImgs.slice(0,12).map((im,i)=>`<button class="rich-img fiche-imgbtn${f.logo===im.abs?' sel':''}" onclick="impFicheSetLogo(${i})" title="Utiliser comme logo" aria-label="Utiliser cette image comme logo"><img src="${impEsc(im.abs)}" alt="${impEsc(im.alt)}" loading="lazy" onerror="this.closest('.rich-img').classList.add('bad')"></button>`).join('')}</div>
+        <div style="margin-top:10px"><button class="btn btn-sec btn-sm" onclick="impImgsZip('supplier')">${ICO('download')} Télécharger logo + images (ZIP → assets/supplier/)</button></div>`:''}
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Aperçu de la fiche</div>
+        <div class="fiche-card" id="fiche-card"></div>
+      </div>
+    </div>`;
+  impFichePrev();
+}
+function impFicheSetLogo(i){
+  const im=impState.rich.images.filter(x=>x.abs)[i];
+  if(!im)return;
+  impState.fiche.logo=impState.fiche.logo===im.abs?'':im.abs;
+  impRenderFiche();
+}
+function impFicheLogoPrev(){
+  const im=document.getElementById('fic-logo-prev');
+  if(!im)return;
+  const u=impT(impState.fiche.logo);
+  im.src=u;im.style.display=u?'':'none';
+  impFichePrev();
+}
+function impFichePrev(){
+  const el=document.getElementById('fiche-card');
+  if(!el||!impState||impState.mode!=='fiche')return;
+  const f=impState.fiche,type=impState.type;
+  const line=(ico,val)=>impT(val)?`<div class="fiche-line">${ICO(ico)}<span>${impEsc(val)}</span></div>`:'';
+  el.innerHTML=`
+    <div class="fiche-head">
+      ${impT(f.logo)?`<img src="${impEsc(f.logo)}" alt="" onerror="this.style.display='none'">`:''}
+      <div><div class="fiche-nom">${impEsc(f.nom)||'<span style="color:var(--muted)">Nom manquant</span>'}</div>
+      <div class="fiche-sub">${impEsc(type==='fournisseurs'?[f.pays,f.dom].filter(Boolean).join(' · '):[f.dep&&'De '+f.dep,f.arr&&'vers '+f.arr,f.type].filter(Boolean).join(' · '))}</div></div>
+    </div>
+    ${impT(f.desc)?`<div class="fiche-desc">${impEsc(f.desc)}</div>`:''}
+    ${line('mail',type==='fournisseurs'?f.email:f.contact)}
+    ${line('phone',type==='fournisseurs'?f.wa:(f.tel||f.wa))}
+    ${line('globe',type==='fournisseurs'?f.ali_url:f.site)}
+    ${type==='fournisseurs'?line('user',f.contact):''}
+    ${line('target',f.adresse)}
+    ${type==='transitaires'?line('ship',impT(f.mar)?f.mar+' XOF/CBM · '+(f.mard||'—')+' j':''):''}
+    ${type==='transitaires'?line('plane',impT(f.aer)?f.aer+' XOF/kg · '+(f.aerd||'—')+' j':''):''}`;
+}
+/* Création de la fiche — réutilise impBuild (validation email, doublons, format
+   d'entité) pour rester cohérent avec l'import tabulaire. */
+function impRunFiche(type){
+  const f=impState.fiche;
+  if(!impT(f.nom)){toast('Le nom de l\'entreprise est obligatoire',true);return;}
+  const o=type==='fournisseurs'
+    ?{nom:f.nom,contact:f.contact,pays:f.pays,email:f.email,wa:f.wa,wc:f.wc,dom:f.dom,
+      ali_url:f.ali_url,lang:f.lang,mkt:f.mkt,logo:f.logo,
+      desc:[impT(f.desc),impT(f.adresse)?'Adresse : '+impT(f.adresse):''].filter(Boolean).join('\n')}
+    :{nom:f.nom,dep:f.dep,arr:f.arr,contact:f.contact,wa:f.wa,tel:f.tel,type:f.type,
+      mar:f.mar,mard:f.mard,aer:f.aer,aerd:f.aerd,logo:f.logo};
+  const r=impBuild(type,o,0,impExistingKeys(type));
+  if(r.err){
+    document.getElementById('imp-errs').innerHTML=`<div class="imp-summary warn"><b>Création impossible :</b> ${r.err}</div>`;
+    toast('Création impossible — '+r.err,true);return;
+  }
+  if(type==='transitaires')r.ent.desc=[impT(f.desc),impT(f.site)?'Site : '+impT(f.site):'',impT(f.adresse)?'Adresse : '+impT(f.adresse):''].filter(Boolean).join('\n');
+  impFinish(type,[r.ent],[],[]);
+  document.getElementById('imp-go').disabled=true; // évite une double création au re-clic
 }
 
 /* ---- Panneau « contenu extrait » du HTML : sections éditables (étape 3) ---- */
