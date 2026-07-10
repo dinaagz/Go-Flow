@@ -334,6 +334,9 @@ textarea.fc{resize:vertical;min-height:70px}
 .imp-prev-wrap table{font-size:11.5px}
 .imp-prev-wrap input{width:100%;min-width:70px;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:'Poppins',sans-serif;font-size:11.5px;outline:none;color:var(--text)}
 .imp-prev-wrap input:focus{border-color:var(--bleu);background:#fff}
+.imp-thumb{width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--border);background:var(--gris);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);vertical-align:middle}
+.imp-thumb.bad{opacity:.3}
+.imp-thumb.none .ic{width:15px;height:15px}
 .imp-summary{border-radius:10px;padding:11px 14px;font-size:12px;line-height:1.7;margin-bottom:12px}
 .imp-summary.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-brd)}
 .imp-summary.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd)}
@@ -1020,6 +1023,13 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
       </div>
       <div id="imp-step2" style="display:none">
         <div class="imp-file-line" id="imp-file-line"></div>
+        <div id="imp-img-tools" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn-sec btn-sm" onclick="document.getElementById('imp-img-dir').click()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Uploader des images en masse (dossier)</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-img-files').click()">ou sélectionner des fichiers…</button>
+          <span style="font-size:11px;color:var(--muted)">Association automatique par nom de fichier (ex. hydrafacial.jpg → produit « Hydrafacial »).</span>
+          <input type="file" id="imp-img-dir" webkitdirectory multiple style="display:none" onchange="impBulkImgs(this)">
+          <input type="file" id="imp-img-files" accept="image/*" multiple style="display:none" onchange="impBulkImgs(this)">
+        </div>
         <div id="imp-map-sec">
           <div class="flbl" style="margin-bottom:8px">Correspondance des colonnes <span style="text-transform:none;letter-spacing:0;font-weight:400">(colonne du fichier → champ de l'application)</span></div>
           <div class="imp-map" id="imp-map"></div>
@@ -2958,7 +2968,21 @@ const impNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g
 const impT=v=>String(v==null?'':v).trim();
 const impNum=v=>{if(v==null||v==='')return 0;const n=parseFloat(String(v).replace(/\s/g,'').replace(/,/g,'.').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;};
 const impUrl=v=>/^https?:\/\//.test(impT(v))?impT(v):'';
+const impLogoUrl=v=>{const s=impT(v);return/^(https?:|data:image\/)/i.test(s)?s:'';};
 const impId=(pfx,ix)=>pfx+String(Date.now()).slice(-5)+String(ix%1000).padStart(3,'0');
+const IMP_IMG_DIR='assets/Products%20images/';
+const impImgExt=/\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
+/* Résout la colonne « Image URL » : URL web ou data: conservée telle quelle ;
+   chemin local (C:\Images\… ou /Images/…) ou simple nom de fichier → le fichier
+   est supposé présent dans assets/Products images/ (nom de base conservé). */
+function impResolveImg(v){
+  const s=impT(v);
+  if(!s)return'';
+  if(/^(https?:|data:image\/)/i.test(s))return s;
+  const base=s.split(/[\\/]/).pop();
+  if(!base||!impImgExt.test(base))return'';
+  return IMP_IMG_DIR+encodeURIComponent(base);
+}
 const IMP_LBL={produits:'produits',fournisseurs:'fournisseurs',transitaires:'transitaires'};
 const IMP_FIELDS={
   produits:[
@@ -2977,7 +3001,7 @@ const IMP_FIELDS={
     {k:'moq',lbl:'MOQ',num:true,syn:['moq','minorder','quantitemini']},
     {k:'desc',lbl:'Description',syn:['description','desc','details']},
     {k:'specs',lbl:'Spécifications',syn:['specifications','specs','specificites','caracteristiques']},
-    {k:'photo',lbl:'Photo (URL)',syn:['photo','image','img','imageurl','photourl','picture']},
+    {k:'photo',lbl:'Image URL',req:true,syn:['photo','image','img','imageurl','imgurl','urlimage','photourl','picture','lienimage','cheminimage']},
   ],
   fournisseurs:[
     {k:'nom',lbl:'Nom entreprise',req:true,syn:['nom','entreprise','company','societe','supplier','fournisseur','name']},
@@ -3043,7 +3067,12 @@ function impBack(){
   document.getElementById('imp-prog').style.display='none';
   document.getElementById('imp-go').disabled=false;
 }
-function impTypeChange(){if(impState){impRenderMap();impRenderPrev();}}
+function impTypeChange(){if(impState){impRenderMap();impRenderPrev();impUpdTools();}}
+// Bouton « Uploader des images en masse » : visible uniquement pour un import produits
+function impUpdTools(){
+  const el=document.getElementById('imp-img-tools');
+  if(el)el.style.display=(impState&&impState.mode!=='fiche'&&document.getElementById('imp-type').value==='produits')?'flex':'none';
+}
 function impLoading(on,msg){
   document.getElementById('imp-load').style.display=on?'block':'none';
   if(msg)document.getElementById('imp-load-lbl').textContent=msg;
@@ -3141,7 +3170,7 @@ function impExtractRows(lines){
     let nom=l.slice(0,m.index).replace(/[\s·:|,;–-]+$/,'').trim();
     if(!nom)nom=l.slice(m.index+m[0].length).replace(/^[\s·:|,;–-]+/,'').trim();
     if(nom.length<3||/^(total|soustotal|tva|prix|montant|quantite|qty|subtotal|page)/.test(impNorm(nom)))return;
-    out.push([nom.slice(0,120),String(prix),'']);
+    out.push([nom.slice(0,120),String(prix),'','']);
   });
   return out;
 }
@@ -3168,9 +3197,10 @@ function impSetTabular(file,grid){
   impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1)};
   impShowStep2();
 }
-function impSetExtracted(file,rows,srcLbl){
+function impSetExtracted(file,rows,srcLbl,extra){
   if(!rows.length)throw new Error('aucun produit détecté dans ce '+srcLbl+' — essayez le format CSV ou Excel');
-  impState={mode:'edit',fileName:file.name,headers:['Nom','Prix','Description'],rows};
+  rows.forEach(r=>{while(r.length<4)r.push('');});
+  impState={mode:'edit',fileName:file.name,headers:['Nom','Prix','Description','Image URL'],rows,...(extra||{})};
   impShowStep2();
 }
 function impShowStep2(){
@@ -3181,7 +3211,7 @@ function impShowStep2(){
   document.getElementById('imp-go').disabled=false;
   const n=impState.rows.length;
   document.getElementById('imp-file-line').innerHTML=`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
-  impRenderMap();impRenderPrev();
+  impRenderMap();impRenderPrev();impUpdTools();
 }
 
 /* ---- Mapping colonnes → champs (auto-détection + mémorisation) ---- */
@@ -3214,18 +3244,28 @@ function impRenderMap(){
 }
 function impMapping(type){
   const m={};
-  if(impState.mode==='edit'){m.nom=0;if(IMP_FIELDS[type].some(f=>f.k==='prix'))m.prix=1;m.desc=2;return m;}
+  if(impState.mode==='edit'){m.nom=0;if(IMP_FIELDS[type].some(f=>f.k==='prix'))m.prix=1;m.desc=2;if(IMP_FIELDS[type].some(f=>f.k==='photo'))m.photo=3;return m;}
   IMP_FIELDS[type].forEach(f=>{const el=document.getElementById('imap-'+f.k);const i=el?parseInt(el.value):-1;if(i>-1)m[f.k]=i;});
   return m;
 }
 function impRenderPrev(){
   const editable=impState.mode==='edit';
+  const type=document.getElementById('imp-type').value;
+  const imgCol=type==='produits'?impMapping(type).photo:null;
+  const showImg=imgCol!=null&&imgCol>-1;
   const rows=editable?impState.rows:impState.rows.slice(0,6);
   document.getElementById('imp-prev-lbl').textContent=editable?'Données extraites — modifiables avant validation':`Aperçu des ${Math.min(6,impState.rows.length)} premières lignes`;
-  document.getElementById('imp-prev').innerHTML=`<table><thead><tr>${editable?'<th></th>':''}${impState.headers.map(h=>`<th>${String(h).replace(/</g,'&lt;')}</th>`).join('')}</tr></thead><tbody>${
-    rows.map((r,ri)=>`<tr>${editable?`<td><button class="expand-cell" onclick="impDelRow(${ri})" title="Retirer cette ligne" aria-label="Retirer la ligne ${ri+1}">${ICO('trash')}</button></td>`:''}${impState.headers.map((h,ci)=>`<td>${
+  // Aperçu de l'image résolue (URL web / chemin local / nom de fichier → assets)
+  const thumb=r=>{
+    const raw=impT(r[imgCol]),u=impResolveImg(raw);
+    return`<td>${u
+      ?`<img class="imp-thumb" src="${u.replace(/"/g,'&quot;')}" alt="" loading="lazy" onerror="this.classList.add('bad');this.title='Image introuvable — le produit sera importé sans image'">`
+      :`<span class="imp-thumb none" title="${raw?'Lien image illisible — le produit sera importé sans image':'Aucune image'}">${ICO('image')}</span>`}</td>`;
+  };
+  document.getElementById('imp-prev').innerHTML=`<table><thead><tr>${editable?'<th></th>':''}${showImg?'<th>Aperçu</th>':''}${impState.headers.map(h=>`<th>${String(h).replace(/</g,'&lt;')}</th>`).join('')}</tr></thead><tbody>${
+    rows.map((r,ri)=>`<tr>${editable?`<td><button class="expand-cell" onclick="impDelRow(${ri})" title="Retirer cette ligne" aria-label="Retirer la ligne ${ri+1}">${ICO('trash')}</button></td>`:''}${showImg?thumb(r):''}${impState.headers.map((h,ci)=>`<td>${
       editable
-        ?`<input value="${String(r[ci]??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" oninput="impState.rows[${ri}][${ci}]=this.value" aria-label="${h} — ligne ${ri+1}">`
+        ?`<input value="${String(r[ci]??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" oninput="impState.rows[${ri}][${ci}]=this.value" onchange="if(${showImg?'true':'false'})impRenderPrev()" aria-label="${h} — ligne ${ri+1}">`
         :String(r[ci]??'').replace(/</g,'&lt;').slice(0,60)
     }</td>`).join('')}</tr>`).join('')
   }</tbody></table>`;
@@ -3258,9 +3298,12 @@ function impBuild(type,o,ix,existing){
     if(existing.has(key))return{err:'doublon — déjà au catalogue'};
     existing.add(key);
     const cat=impCat(o.cat);
+    // Image : jamais bloquante — le produit est importé sans image, avec avertissement
+    const rawImg=impT(o.photo),img=impResolveImg(rawImg);
+    const warn=img||impCtx.noImgCol?'':(rawImg?`image illisible « ${rawImg.slice(0,40)} » — importé sans image`:'image manquante — importé sans image');
     impCtx.tot++;
     const cn=prods.filter(p=>p.cat===cat).length+(impCtx.cc[cat]=(impCtx.cc[cat]||0)+1);
-    return{ent:{
+    return{warn,ent:{
       id:impId('P',ix),
       ref:`${CATS[cat]||'PRD'}-${String(cn).padStart(3,'0')}-${String(impCtx.tot).padStart(3,'0')}`,
       nom,cat,grp:'',fid:f?f.id:'',fn:f?f.nom:fn,
@@ -3271,7 +3314,7 @@ function impBuild(type,o,ix,existing){
       marge:impT(o.marge)?String(impNum(o.marge)):'',rem:0,conc:'',
       moq:Math.max(1,Math.round(impNum(o.moq))||1),
       desc:impT(o.desc),specs:impT(o.specs),
-      photos:impUrl(o.photo)?[impUrl(o.photo)]:[]
+      photos:img?[img]:[]
     }};
   }
   if(type==='fournisseurs'){
@@ -3284,7 +3327,7 @@ function impBuild(type,o,ix,existing){
     return{ent:{id:impId('F',ix),nom,contact:impT(o.contact),pays:impT(o.pays),email,
       wa:impT(o.wa),wc:impT(o.wc),dom:impT(o.dom),an:'',eval:ev,
       ali:impUrl(o.ali_url)?'Non vérifié':'Non disponible',ali_url:impUrl(o.ali_url),devis:'',
-      lang:impT(o.lang),mkt:impT(o.mkt),desc:impT(o.desc),com:'',logo:impUrl(o.logo)}};
+      lang:impT(o.lang),mkt:impT(o.mkt),desc:impT(o.desc),com:'',logo:impLogoUrl(o.logo)}};
   }
   // transitaires
   const key=impNorm(nom);
@@ -3293,7 +3336,7 @@ function impBuild(type,o,ix,existing){
   return{ent:{id:impId('T',ix),nom,dep:impT(o.dep),arr:impT(o.arr),contact:impT(o.contact),
     wa:impT(o.wa),tel:impT(o.tel),type:impT(o.type)||'Multimodale',ent:0,
     mar:impNum(o.mar)||'',mard:impNum(o.mard)||'',aer:impNum(o.aer)||'',aerd:impNum(o.aerd)||'',
-    ass:'0',logo:impUrl(o.logo)}};
+    ass:'0',logo:impLogoUrl(o.logo)}};
 }
 function impRun(){
   const type=document.getElementById('imp-type').value;
@@ -3305,9 +3348,10 @@ function impRun(){
     prefs.map[type]=m;LS_SET(IMPK,prefs);
   }
   const rows=impState.rows;
-  const added=[],errs=[];
+  const added=[],errs=[],warns=[];
   const existing=impExistingKeys(type);
-  impCtx={cc:{},tot:prods.length};
+  impCtx={cc:{},tot:prods.length,noImgCol:type==='produits'&&map.photo==null};
+  if(impCtx.noImgCol)warns.push({n:'—',msg:'colonne « Image URL » non associée — tous les produits seront importés sans image'});
   document.getElementById('imp-go').disabled=true;
   document.getElementById('imp-errs').innerHTML='';
   const prog=document.getElementById('imp-prog');prog.style.display='block';
@@ -3321,15 +3365,15 @@ function impRun(){
       const o={};Object.keys(map).forEach(k=>{o[k]=rows[i][map[k]];});
       const r=impBuild(type,o,i,existing);
       if(r.err)errs.push({n:i+hdrOff,msg:r.err});
-      else added.push(r.ent);
+      else{added.push(r.ent);if(r.warn)warns.push({n:i+hdrOff,msg:r.warn});}
     }
     fill.style.width=Math.round(i/rows.length*100)+'%';
     lbl.textContent=`${i}/${rows.length} lignes traitées…`;
     if(i<rows.length){setTimeout(step,0);return;}
-    impFinish(type,added,errs);
+    impFinish(type,added,errs,warns);
   })();
 }
-function impFinish(type,added,errs){
+function impFinish(type,added,errs,warns=[]){
   if(added.length){
     if(type==='produits'){prods=prods.concat(added);save('p');renderCat();popSim();}
     if(type==='fournisseurs'){fours=fours.concat(added);save('f');renderFour();renderCat();popSim();}
@@ -3338,10 +3382,81 @@ function impFinish(type,added,errs){
   document.getElementById('imp-prog-fill').style.width='100%';
   document.getElementById('imp-prog-lbl').textContent='Terminé';
   const errHtml=errs.length?`<div class="imp-summary warn"><b>${errs.length} ligne${errs.length>1?'s':''} ignorée${errs.length>1?'s':''} :</b><br>${errs.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${errs.length>8?'<br>… et '+(errs.length-8)+' autres':''}</div>`:'';
+  const warnHtml=warns.length?`<div class="imp-summary warn"><b>${warns.length} avertissement${warns.length>1?'s':''} (lignes importées) :</b><br>${warns.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${warns.length>8?'<br>… et '+(warns.length-8)+' autres':''}</div>`:'';
   document.getElementById('imp-errs').innerHTML=
-    `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+errHtml;
-  auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length});
+    `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+warnHtml+errHtml;
+  auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length,avertissements:warns.length});
   toast(added.length?`${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓`:'Aucune ligne importée — voir le détail dans la fenêtre',!added.length);
+}
+
+/* ---- Upload d'images en masse : dossier (ou fichiers) → association par nom ----
+   Les images sont réduites (700 px max, JPEG) et stockées en data-URL dans la
+   colonne « Image URL » de la ligne dont le nom de produit correspond au nom
+   de fichier (ex. hydrafacial.jpg → « Hydrafacial 17-en-1 »). */
+function impFileToDataURL(f,max=700){
+  return new Promise(res=>{
+    const url=URL.createObjectURL(f);
+    const im=new Image();
+    im.onload=()=>{
+      const s=Math.min(1,max/Math.max(im.width,im.height));
+      const cv=document.createElement('canvas');
+      cv.width=Math.max(1,Math.round(im.width*s));cv.height=Math.max(1,Math.round(im.height*s));
+      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      URL.revokeObjectURL(url);
+      res(cv.toDataURL('image/jpeg',.82));
+    };
+    im.onerror=()=>{URL.revokeObjectURL(url);res('');};
+    im.src=url;
+  });
+}
+async function impBulkImgs(inp){
+  const files=[...inp.files].filter(f=>/^image\//.test(f.type)||impImgExt.test(f.name));
+  inp.value='';
+  if(!impState||document.getElementById('imp-type').value!=='produits')return;
+  if(!files.length){toast('Aucune image dans la sélection',true);return;}
+  const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
+  prog.style.display='block';fill.style.width='0%';lbl.textContent='Lecture des images…';
+  // Mémorise le mapping en cours avant d'ajouter la colonne (le re-rendu le perdrait)
+  const saveSel={};
+  if(impState.mode==='map')IMP_FIELDS.produits.forEach(f=>{const el=document.getElementById('imap-'+f.k);if(el)saveSel[f.k]=el.value;});
+  let col=impMapping('produits').photo;
+  if(col==null){
+    impState.headers.push('Image URL');
+    impState.rows.forEach(r=>r.push(''));
+    col=impState.headers.length-1;
+  }
+  const nomCol=impMapping('produits').nom??0;
+  const keyOf=n=>impNorm(String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/,''));
+  const items=[];
+  for(let i=0;i<files.length;i++){
+    const d=await impFileToDataURL(files[i]);
+    if(d)items.push({key:keyOf(files[i].name),data:d});
+    fill.style.width=Math.round((i+1)/files.length*100)+'%';
+    lbl.textContent=`Lecture des images… ${i+1}/${files.length}`;
+  }
+  let hits=0;
+  impState.rows.forEach(r=>{
+    const pn=impNorm(r[nomCol]);
+    if(!pn)return;
+    let best=null,bs=0;
+    items.forEach(it=>{
+      if(!it.key)return;
+      let s=0;
+      if(it.key===pn)s=3;
+      else if(pn.includes(it.key)&&it.key.length>=4)s=2;
+      else if(it.key.includes(pn)&&pn.length>=4)s=1;
+      if(s>bs){bs=s;best=it;}
+    });
+    if(best){r[col]=best.data;hits++;}
+  });
+  if(impState.mode==='map'){
+    impRenderMap();
+    Object.keys(saveSel).forEach(k=>{const el=document.getElementById('imap-'+k);if(el&&saveSel[k]!=null)el.value=saveSel[k];});
+    const ph=document.getElementById('imap-photo');if(ph)ph.value=String(col);
+  }
+  impRenderPrev();
+  prog.style.display='none';
+  toast(hits?`${hits} produit${hits>1?'s':''} associé${hits>1?'s':''} à une image ✓`:'Aucune correspondance entre noms de fichiers et noms de produits',!hits);
 }
 /* ===== FIN MODULE IMPORT ===== */
 
