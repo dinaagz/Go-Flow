@@ -359,6 +359,20 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 .exp-nav{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .exp-grid2{display:grid;grid-template-columns:300px 1fr;gap:18px}
 @media(max-width:760px){.exp-grid2{grid-template-columns:1fr}}
+.exp-info-list{border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:236px;overflow:auto;margin-bottom:7px}
+.exp-info-row{display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid var(--border);border-top:2px solid transparent;font-size:12px;background:var(--surface)}
+.exp-info-row:last-child{border-bottom:none}
+.exp-info-row.off label{color:var(--muted)}
+.exp-info-row.drag-over{border-top-color:var(--bleu)}
+.exp-info-row label{display:flex;align-items:center;gap:7px;flex:1;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-info-row input{width:14px;height:14px;accent-color:var(--bleu-t);flex-shrink:0}
+.exp-drag{cursor:grab;color:var(--muted);user-select:none;flex-shrink:0;display:inline-flex;flex-direction:column;gap:2px}
+.exp-drag i{display:block;width:12px;height:2px;border-radius:2px;background:currentColor}
+.exp-updown{display:flex;gap:1px;flex-shrink:0}
+.exp-updown button{border:none;background:none;cursor:pointer;color:var(--muted);padding:2px;border-radius:5px;display:inline-flex}
+.exp-updown button:hover{background:var(--gris);color:var(--text)}
+.exp-updown button:disabled{opacity:.25;cursor:default}
+.exp-updown .ic{width:13px;height:13px}
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -1046,9 +1060,12 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
               <option value="none">Masqué</option>
             </select>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;margin-bottom:8px">
-            <input type="checkbox" id="exp-marge" onchange="expPrefChange()" style="width:15px;height:15px;accent-color:var(--bleu-t)"> Afficher la marge <span style="color:var(--muted)">(usage interne)</span>
-          </label>
+          <div class="flbl" style="margin-bottom:6px">Informations à afficher</div>
+          <div class="exp-info-list" id="exp-infos" role="group" aria-label="Informations affichées sur l'image — cochez pour afficher, glissez pour réordonner"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+            <span id="exp-infos-hint" style="font-size:10.5px;color:var(--muted)"></span>
+            <button class="btn btn-sec btn-sm" id="exp-sync-btn" onclick="expSyncCat()" title="Reprendre les colonnes actuellement visibles dans le catalogue">Colonnes du catalogue</button>
+          </div>
           <div style="font-size:11px;color:var(--muted);line-height:1.6">PNG 1080×1080 px — prêt pour les réseaux sociaux. Vos réglages sont mémorisés.</div>
         </div>
         <div class="exp-canvas-wrap">
@@ -3333,6 +3350,8 @@ function impFinish(type,added,errs){
    Sélection par cases à cocher dans le Catalogue, 6 templates,
    couleurs personnalisables, logo positionnable, aperçu live,
    téléchargement PNG unitaires ou ZIP (writer natif sans lib).
+   Infos affichées : mêmes clés que les colonnes du catalogue —
+   synchro par défaut, personnalisables + réordonnables (drag & drop).
    Préférences mémorisées dans gf_exp.
    ============================================================ */
 const EXK='gf_exp';
@@ -3344,8 +3363,99 @@ const EXP_TPLS=[
   {k:'badge',lbl:'Badge prix',sw:'radial-gradient(circle at 72% 28%,#FFD700 20%,#E9EDF6 21%)'},
   {k:'catalogue',lbl:'Fiche catalogue',sw:'linear-gradient(90deg,#E9EDF6 50%,#fff 50%)'},
 ];
-let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0;
-let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,...LS_GET(EXK,{})};
+let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0,expDragKey=null;
+let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,infosOn:null,infosOrder:null,...LS_GET(EXK,{})};
+
+/* ---- Informations affichées sur l'image ----
+   Mêmes clés que les colonnes du catalogue (CM_DEFS.catalogue) : tant que
+   l'utilisateur n'a pas personnalisé (infosOn===null), l'export reprend
+   les colonnes visibles du catalogue ; ses choix et leur ordre sont ensuite
+   mémorisés dans gf_exp (infosOn / infosOrder). */
+const EXP_INFOS=[
+  {k:'cat',    lbl:'Catégorie',          v:p=>p.cat||''},
+  {k:'four',   lbl:'Fournisseur',        v:p=>{const f=fours.find(x=>x.id===p.fid);return f?f.nom:(p.fn||'');}},
+  {k:'cbm',    lbl:'CBM',                v:(p,c)=>c.cbm?Nd(c.cbm,4)+' m³':''},
+  {k:'poids',  lbl:'Poids',              v:p=>p.kg?p.kg+' kg':''},
+  {k:'achat',  lbl:'Achat EXW',          v:(p,c)=>N(c.exwUX)},
+  {k:'prach',  lbl:'Fret local',         v:(p,c)=>c.fretLocalX?N(c.fretLocalX):''},
+  {k:'revient',lbl:'Coût de Revient HT', v:(p,c)=>N(c.coutRevientUX)},
+  {k:'fret',   lbl:'Frais logistiques',  v:(p,c)=>N(c.fraisLogU)},
+  {k:'marge',  lbl:'Marge',              v:(p,c)=>N(c.margeU)+' ('+Nd(c.margePct,1)+'%)'},
+  {k:'vente',  lbl:'Prix de Vente HT',   v:(p,c)=>N(c.pvuHT)},
+  {k:'ttc',    lbl:'Prix de Vente TTC',  v:(p,c)=>N(c.pvuTTC),big:true},
+  {k:'delai',  lbl:'Délai livraison',    v:p=>prodDelai(p)},
+  {k:'marche', lbl:'Prix marché',        v:p=>p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':''},
+];
+// État effectif {order:[clé…], on:[clé…]} — infosOn null en prefs = synchro catalogue
+function expInfoState(){
+  const all=EXP_INFOS.map(i=>i.k);
+  const so=Array.isArray(expPrefs.infosOrder)?expPrefs.infosOrder.filter(k=>all.includes(k)):[];
+  const order=so.concat(all.filter(k=>!so.includes(k)));
+  let on;
+  if(Array.isArray(expPrefs.infosOn))on=expPrefs.infosOn.filter(k=>all.includes(k));
+  else{
+    const vis=cmVisible('catalogue');
+    on=all.filter(k=>vis[k]);
+    if(expPrefs.showMarge&&!on.includes('marge'))on.push('marge'); // reprise de l'ancienne préférence
+  }
+  return{order,on};
+}
+function expInfoSave(st){
+  expPrefs.infosOrder=st.order;expPrefs.infosOn=st.on;
+  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+}
+function expInfoToggle(k,on){
+  const st=expInfoState();
+  st.on=st.order.filter(x=>x===k?on:st.on.includes(x));
+  expInfoSave(st);
+}
+function expInfoMove(k,d){
+  const st=expInfoState();
+  const i=st.order.indexOf(k),j=i+d;
+  if(i<0||j<0||j>=st.order.length)return;
+  st.order.splice(j,0,st.order.splice(i,1)[0]);
+  st.on=st.order.filter(x=>st.on.includes(x));
+  expInfoSave(st);
+}
+function expInfoMoveTo(k,before){
+  const st=expInfoState();
+  const from=st.order.indexOf(k),to=st.order.indexOf(before);
+  if(from<0||to<0||from===to)return;
+  st.order.splice(to,0,st.order.splice(from,1)[0]);
+  st.on=st.order.filter(x=>st.on.includes(x));
+  expInfoSave(st);
+}
+function expSyncCat(){
+  expPrefs.infosOn=null;expPrefs.infosOrder=null;
+  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+  toast('Informations synchronisées avec les colonnes du catalogue ✓');
+}
+function expInfoDragStart(e,k){expDragKey=k;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',k);}catch(_){}}
+function expInfoDragOver(e,k){if(!expDragKey||expDragKey===k)return;e.preventDefault();e.dataTransfer.dropEffect='move';e.currentTarget.classList.add('drag-over');}
+function expInfoDrop(e,k){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(expDragKey&&expDragKey!==k)expInfoMoveTo(expDragKey,k);
+  expDragKey=null;
+}
+function expRenderInfos(){
+  const host=document.getElementById('exp-infos');if(!host)return;
+  const st=expInfoState();
+  host.innerHTML=st.order.map((k,i)=>{
+    const d=EXP_INFOS.find(x=>x.k===k),on=st.on.includes(k);
+    return`<div class="exp-info-row${on?'':' off'}" draggable="true" ondragstart="expInfoDragStart(event,'${k}')" ondragover="expInfoDragOver(event,'${k}')" ondragleave="this.classList.remove('drag-over')" ondrop="expInfoDrop(event,'${k}')" ondragend="expDragKey=null">
+      <span class="exp-drag" title="Glisser pour réordonner" aria-hidden="true"><i></i><i></i><i></i></span>
+      <label><input type="checkbox" ${on?'checked':''} onchange="expInfoToggle('${k}',this.checked)" aria-label="Afficher ${d.lbl} sur l'image">${d.lbl}</label>
+      <span class="exp-updown">
+        <button onclick="expInfoMove('${k}',-1)" ${i===0?'disabled':''} aria-label="Monter ${d.lbl}"><svg class="ic" style="transform:rotate(-90deg)" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        <button onclick="expInfoMove('${k}',1)" ${i===st.order.length-1?'disabled':''} aria-label="Descendre ${d.lbl}"><svg class="ic" style="transform:rotate(90deg)" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      </span>
+    </div>`;
+  }).join('');
+  const hint=document.getElementById('exp-infos-hint');
+  if(hint)hint.textContent=(Array.isArray(expPrefs.infosOn)?'Personnalisé':'Synchronisé avec le catalogue')+` — ${st.on.length}/${st.order.length} infos`;
+  const sync=document.getElementById('exp-sync-btn');
+  if(sync)sync.style.display=Array.isArray(expPrefs.infosOn)?'':'none';
+}
 
 /* ---- Mode sélection dans le Catalogue ---- */
 function expBox(id){
@@ -3381,8 +3491,7 @@ function openExportModal(){
   document.getElementById('exp-bg').value=expPrefs.bg;
   document.getElementById('exp-txt').value=expPrefs.txt;
   document.getElementById('exp-logo').value=expPrefs.logoPos;
-  document.getElementById('exp-marge').checked=!!expPrefs.showMarge;
-  expRenderTpls();
+  expRenderTpls();expRenderInfos();
   openMod('export-modal');
   expPreview();
 }
@@ -3395,7 +3504,6 @@ function expPrefChange(){
   expPrefs.bg=document.getElementById('exp-bg').value;
   expPrefs.txt=document.getElementById('exp-txt').value;
   expPrefs.logoPos=document.getElementById('exp-logo').value;
-  expPrefs.showMarge=document.getElementById('exp-marge').checked;
   LS_SET(EXK,expPrefs);expPreview();
 }
 function expNav(d){const n=expSel.size;if(!n)return;expIdx=(expIdx+d+n)%n;expPreview();}
@@ -3474,88 +3582,123 @@ function expLogo(x,pos,color,shadow){
   x.fillStyle=color;x.fillText(t3,px+x.measureText(t1+t2).width,py);
   x.restore();
 }
-// Bloc prix HT / marge / TTC aligné sur deux colonnes
-function expPrices(x,c,o,y,color,accent,x0,x1){
-  const row=(lbl,val,big)=>{
-    x.font=(big?'600 33px':'500 29px')+' Poppins,sans-serif';
-    x.fillStyle=color;x.globalAlpha=.72;x.fillText(lbl,x0,y);x.globalAlpha=1;
-    x.textAlign='right';
-    x.font=(big?'800 54px':'700 38px')+' Montserrat,sans-serif';
-    x.fillStyle=big?accent:color;x.fillText(val,x1,y);
+/* Lignes d'infos génériques (libellé à gauche, valeur à droite), ancrées au bas
+   du bloc [x0…x1, yBot] ; la hauteur de ligne s'adapte au nombre d'infos. */
+function expInfoRows(p,c){
+  const st=expInfoState();
+  return st.order.filter(k=>st.on.includes(k)).map(k=>{
+    const d=EXP_INFOS.find(i=>i.k===k);
+    return{k,lbl:d.lbl,val:String(d.v(p,c)||'').trim(),big:!!d.big};
+  }).filter(r=>r.val&&r.val!=='—');
+}
+function expFitText(x,text,maxW){
+  let t=String(text);
+  if(x.measureText(t).width<=maxW)return t;
+  while(t.length>1&&x.measureText(t+'…').width>maxW)t=t.slice(0,-1);
+  return t+'…';
+}
+function expRowsH(rows,maxH){
+  if(!rows.length)return 0;
+  const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
+  return Math.round(u*Math.max(32,Math.min(62,Math.floor(maxH/u))));
+}
+function expRowsBlock(x,rows,o){
+  if(!rows.length)return;
+  const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
+  const rh=Math.max(32,Math.min(62,Math.floor(o.maxH/u)));
+  let y=o.yBot-Math.round(u*rh);
+  x.save();
+  rows.forEach(r=>{
+    const h=Math.round(rh*(r.big?1.35:1)),base=y+Math.round(h*.72);
     x.textAlign='left';
-    y+=big?0:62;
-  };
-  row('Prix de Vente HT',N(c.pvuHT));
-  if(o.showMarge)row(`Marge (${Nd(c.margePct,1)}%)`,N(c.margeU));
-  row('Prix de Vente TTC',N(c.pvuTTC),true);
+    x.font=`${r.big?600:500} ${Math.round(rh*(r.big?.52:.46))}px Poppins,sans-serif`;
+    x.fillStyle=o.color;x.globalAlpha=.72;
+    const lbl=expFitText(x,r.lbl,(o.x1-o.x0)*.52);
+    x.fillText(lbl,o.x0,base);
+    const lw=x.measureText(lbl).width;
+    x.globalAlpha=1;
+    expFitFont(x,r.val,o.x1-o.x0-lw-26,'Montserrat,sans-serif',r.big?800:700,Math.round(rh*(r.big?.92:.62)),15);
+    x.textAlign='right';x.fillStyle=r.big?o.accent:o.color;x.fillText(r.val,o.x1,base);
+    x.textAlign='left';
+    y+=h;
+  });
+  x.restore();
 }
 function expDraw(cv,p,img){
   const x=cv.getContext('2d');
   const W=1080,H=1080;
   cv.width=W;cv.height=H;
   const c=calc(p),o=expPrefs;
+  const rows=expInfoRows(p,c);
   x.textAlign='left';x.textBaseline='alphabetic';
-  const yP=o.showMarge?832:894; // départ du bloc prix
   switch(o.tpl){
     case'gradient':{
       x.fillStyle=expGrad(x,0,0,W,H);x.fillRect(0,0,W,H);
       x.fillStyle='#fff';expRRect(x,50,50,980,980,32);x.fill();
-      expCover(x,img,90,90,900,500,20);
+      const yBot=988,ih=expRowsH(rows,400);
+      const imgH=Math.max(260,Math.min(500,yBot-ih-90-176));
+      expCover(x,img,90,90,900,imgH,20);
       x.fillStyle=o.txt;x.font='800 52px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,90,682,900,60,2);
-      x.font='500 27px Poppins,sans-serif';x.globalAlpha=.6;x.fillText(p.cat||'',90,682+n*60+2);x.globalAlpha=1;
-      expPrices(x,c,o,o.showMarge?848:900,o.txt,'#0066CC',90,990);
+      const ny=90+imgH+64;
+      const n=expWrap(x,p.nom,90,ny,900,60,2);
+      x.font='500 27px Poppins,sans-serif';x.globalAlpha=.6;x.fillText(p.ref||'',90,ny+n*60+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:90,x1:990,yBot,maxH:Math.max(40,yBot-(ny+n*60+30)),color:o.txt,accent:'#0066CC'});
       break;
     }
     case'nuit':{
       x.fillStyle='#1A1A2E';x.fillRect(0,0,W,H);
       x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,10);
-      expCover(x,img,60,64,960,530,24);
+      const yBot=1006,ih=expRowsH(rows,430);
+      const imgH=Math.max(280,Math.min(530,yBot-ih-64-186));
+      expCover(x,img,60,64,960,imgH,24);
       x.fillStyle='#fff';x.font='800 54px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,688,960,64,2);
-      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.55;x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,688+n*64+2);x.globalAlpha=1;
-      expPrices(x,c,o,yP,'#fff','#FFD700',60,1020);
+      const ny=64+imgH+70;
+      const n=expWrap(x,p.nom,60,ny,960,64,2);
+      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.ref||'',60,ny+n*64+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:60,x1:1020,yBot,maxH:Math.max(40,yBot-(ny+n*64+30)),color:'#fff',accent:'#FFD700'});
       expLogo(x,o.logoPos,'#fff');
       break;
     }
     case'minimal':{
       x.fillStyle=o.bg;x.fillRect(0,0,W,H);
-      expCover(x,img,250,84,580,580,18);
+      const ih=expRowsH(rows,360);
+      const s=Math.max(330,Math.min(580,H-84-176-ih-56));
+      expCover(x,img,(W-s)/2,84,s,s,18);
       x.textAlign='center';
       x.fillStyle=o.txt;x.font='700 48px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,W/2,750,900,58,2);
-      x.font='400 26px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.cat||'',W/2,750+n*58+2);x.globalAlpha=1;
+      const ny=84+s+64;
+      const n=expWrap(x,p.nom,W/2,ny,900,58,2);
+      x.font='400 26px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.ref||'',W/2,ny+n*58);x.globalAlpha=1;
+      const top=ny+n*58+26;
       x.globalAlpha=.16;x.strokeStyle=o.txt;x.lineWidth=2;
-      x.beginPath();x.moveTo(240,878);x.lineTo(840,878);x.stroke();x.globalAlpha=1;
-      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.7;
-      x.fillStyle=o.txt;
-      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),W/2,930);
-      x.globalAlpha=1;
-      x.font='800 58px Montserrat,sans-serif';
-      x.fillText(N(c.pvuTTC)+'  TTC',W/2,1006);
+      x.beginPath();x.moveTo(240,top);x.lineTo(840,top);x.stroke();x.globalAlpha=1;
       x.textAlign='left';
+      expRowsBlock(x,rows,{x0:200,x1:880,yBot:1014,maxH:Math.max(40,1014-top-14),color:o.txt,accent:o.txt});
       expLogo(x,o.logoPos==='bl'||o.logoPos==='br'?(o.logoPos==='bl'?'tl':'tr'):o.logoPos,o.txt);
       break;
     }
     case'badge':{
       expCover(x,img,0,0,W,H,0);
-      const g=x.createLinearGradient(0,H-460,0,H);
-      g.addColorStop(0,'rgba(10,12,30,0)');g.addColorStop(1,'rgba(10,12,30,.9)');
-      x.fillStyle=g;x.fillRect(0,H-460,W,460);
-      x.fillStyle='#FFD700';x.beginPath();x.arc(880,190,148,0,7);x.fill();
-      x.fillStyle=expGrad(x,732,42,1028,338);x.lineWidth=8;x.strokeStyle=x.fillStyle;
-      x.beginPath();x.arc(880,190,158,0,7);x.stroke();
-      x.fillStyle='#1A1A2E';x.textAlign='center';
-      x.font='700 30px Poppins,sans-serif';x.fillText('Prix TTC',880,150);
-      const num=Math.round(c.pvuTTC).toLocaleString('fr-FR');
-      expFitFont(x,num,240,'Montserrat,sans-serif',800,54,26);x.fillText(num,880,212);
-      x.font='700 28px Poppins,sans-serif';x.fillText('XOF',880,252);
-      x.textAlign='left';
+      const ttc=rows.find(r=>r.k==='ttc'),others=rows.filter(r=>r.k!=='ttc');
+      const ih=expRowsH(others,330);
+      const gh=Math.max(430,ih+250);
+      const g=x.createLinearGradient(0,H-gh,0,H);
+      g.addColorStop(0,'rgba(10,12,30,0)');g.addColorStop(1,'rgba(10,12,30,.92)');
+      x.fillStyle=g;x.fillRect(0,H-gh,W,gh);
+      if(ttc){
+        x.fillStyle='#FFD700';x.beginPath();x.arc(880,190,148,0,7);x.fill();
+        x.fillStyle=expGrad(x,732,42,1028,338);x.lineWidth=8;x.strokeStyle=x.fillStyle;
+        x.beginPath();x.arc(880,190,158,0,7);x.stroke();
+        x.fillStyle='#1A1A2E';x.textAlign='center';
+        x.font='700 30px Poppins,sans-serif';x.fillText('Prix TTC',880,150);
+        const num=Math.round(c.pvuTTC).toLocaleString('fr-FR');
+        expFitFont(x,num,240,'Montserrat,sans-serif',800,54,26);x.fillText(num,880,212);
+        x.font='700 28px Poppins,sans-serif';x.fillText('XOF',880,252);
+        x.textAlign='left';
+      }
       x.fillStyle='#fff';x.font='800 56px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,H-230,960,64,2);
-      x.font='500 30px Poppins,sans-serif';x.globalAlpha=.8;
-      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),60,H-230+n*64+4);
-      x.globalAlpha=1;
+      expWrap(x,p.nom,60,H-160-ih,960,64,2);
+      expRowsBlock(x,others,{x0:60,x1:1020,yBot:H-56,maxH:330,color:'#fff',accent:'#FFD700'});
       expLogo(x,o.logoPos==='br'?'tl':o.logoPos,'#fff',true);
       break;
     }
@@ -3565,33 +3708,28 @@ function expDraw(cv,p,img){
       x.fillStyle=expGrad(x,0,0,0,H);x.fillRect(528,0,12,H);
       const x0=600,x1=1020;
       x.fillStyle=o.txt;x.globalAlpha=.55;
-      x.font='600 26px Poppins,sans-serif';x.fillText((p.cat||'').toUpperCase(),x0,160);
+      x.font='600 26px Poppins,sans-serif';x.fillText((p.ref||'').toUpperCase(),x0,160);
       x.globalAlpha=1;
       x.font='800 50px Montserrat,sans-serif';
       const n=expWrap(x,p.nom,x0,230,x1-x0,60,3);
-      if(p.specs){x.font='400 24px Poppins,sans-serif';x.globalAlpha=.6;expWrap(x,p.specs,x0,230+n*60+16,x1-x0,34,2);x.globalAlpha=1;}
-      let y=640;
-      const line=(lbl,val,big,accent)=>{
-        x.font='500 26px Poppins,sans-serif';x.fillStyle=o.txt;x.globalAlpha=.6;x.fillText(lbl,x0,y);x.globalAlpha=1;
-        x.font=(big?'800 60px':'700 42px')+' Montserrat,sans-serif';
-        x.fillStyle=accent||o.txt;x.fillText(val,x0,y+(big?66:48));
-        y+=big?150:112;
-      };
-      line('Prix de Vente HT',N(c.pvuHT));
-      if(o.showMarge)line('Marge ('+Nd(c.margePct,1)+'%)',N(c.margeU));
-      line('Prix de Vente TTC',N(c.pvuTTC),true,'#0066CC');
+      let top=230+n*60+10;
+      if(p.specs){x.font='400 24px Poppins,sans-serif';x.globalAlpha=.6;top+=expWrap(x,p.specs,x0,top+24,x1-x0,34,2)*34+14;x.globalAlpha=1;}
+      expRowsBlock(x,rows,{x0,x1,yBot:1002,maxH:Math.max(40,1002-top-30),color:o.txt,accent:'#0066CC'});
       expLogo(x,o.logoPos==='tl'||o.logoPos==='bl'?'tr':o.logoPos,o.txt);
       break;
     }
     default:{ // classique
       x.fillStyle=o.bg;x.fillRect(0,0,W,H);
       x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,14);
-      expCover(x,img,60,74,960,540,24);
+      const yBot=1012,ih=expRowsH(rows,430);
+      const imgH=Math.max(280,Math.min(540,yBot-ih-74-186));
+      expCover(x,img,60,74,960,imgH,24);
       x.fillStyle=o.txt;x.font='800 54px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,700,960,64,2);
+      const ny=74+imgH+70;
+      const n=expWrap(x,p.nom,60,ny,960,64,2);
       x.font='500 28px Poppins,sans-serif';x.globalAlpha=.6;
-      x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,700+n*64+2);x.globalAlpha=1;
-      expPrices(x,c,o,yP,o.txt,'#0066CC',60,1020);
+      x.fillText(p.ref||'',60,ny+n*64+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:60,x1:1020,yBot,maxH:Math.max(40,yBot-(ny+n*64+30)),color:o.txt,accent:'#0066CC'});
       expLogo(x,o.logoPos,o.txt);
     }
   }
@@ -3633,7 +3771,7 @@ async function expDownload(zip){
       expSaveBlob(await zipStore(files),'GoFlow_Images_'+new Date().toISOString().slice(0,10)+'.zip');
     }
     lbl.textContent='Terminé ✓';
-    auditLog('export_images',{template:expPrefs.tpl,nb:files.length||ids.length,zip:!!zip});
+    auditLog('export_images',{template:expPrefs.tpl,nb:files.length||ids.length,zip:!!zip,infos:expInfoState().on.join(',')});
     toast(`${ids.length} image${ids.length>1?'s':''} ${zip?'dans le ZIP ':''}téléchargée${ids.length>1?'s':''} ✓`);
   }catch(e){
     console.error('Export images:',e);
