@@ -334,6 +334,18 @@ textarea.fc{resize:vertical;min-height:70px}
 .imp-prev-wrap table{font-size:11.5px}
 .imp-prev-wrap input{width:100%;min-width:70px;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:'Poppins',sans-serif;font-size:11.5px;outline:none;color:var(--text)}
 .imp-prev-wrap input:focus{border-color:var(--bleu);background:#fff}
+.rich-sect{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface)}
+.rich-sect summary{cursor:pointer;padding:9px 12px;font-size:12px;font-weight:600;color:var(--text);user-select:none}
+.rich-sect[open] summary{border-bottom:1px solid var(--border)}
+.rich-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.rich-row{display:flex;align-items:center;gap:6px}
+.rich-row .fc{flex:1;padding:6px 9px;font-size:12px;min-width:0}
+.rich-hr{border:none;border-top:1px dashed var(--border);margin:4px 0;width:100%}
+.rich-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.rich-img{border:1px solid var(--border);border-radius:9px;padding:6px;display:flex;flex-direction:column;gap:6px;background:var(--gris)}
+.rich-img img{width:100%;height:72px;object-fit:cover;border-radius:6px;background:#fff}
+.rich-img.bad{opacity:.35}
+.rich-img .fc{font-size:10.5px;padding:4px 22px 4px 6px;width:100%}
 .imp-thumb{width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--border);background:var(--gris);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);vertical-align:middle}
 .imp-thumb.bad{opacity:.3}
 .imp-thumb.none .ic{width:15px;height:15px}
@@ -1020,6 +1032,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         </div>
         <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
         <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="width:100%"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+        <div id="imp-last-html" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
       <div id="imp-step2" style="display:none">
         <div class="imp-file-line" id="imp-file-line"></div>
@@ -1036,6 +1049,8 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         </div>
         <div class="flbl" style="margin-bottom:8px" id="imp-prev-lbl">Aperçu</div>
         <div class="imp-prev-wrap" id="imp-prev"></div>
+        <div id="imp-fiche-sec" style="display:none"></div>
+        <div id="imp-rich-sec" style="display:none"></div>
         <div id="imp-errs" aria-live="polite"></div>
         <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
         <div class="fact" style="margin-top:0">
@@ -3066,6 +3081,7 @@ function impBack(){
   document.getElementById('imp-errs').innerHTML='';
   document.getElementById('imp-prog').style.display='none';
   document.getElementById('imp-go').disabled=false;
+  impRenderLastHtml();
 }
 function impTypeChange(){if(impState){impRenderMap();impRenderPrev();impUpdTools();}}
 // Bouton « Uploader des images en masse » : visible uniquement pour un import produits
@@ -3174,8 +3190,65 @@ function impExtractRows(lines){
   });
   return out;
 }
+/* ---- Analyse riche d'un document HTML : titres, textes, images, contacts, listes ---- */
+function impAbsUrl(src,base){
+  const s=impT(src);
+  if(!s)return'';
+  if(/^data:image\//i.test(s))return s;
+  if(/^\/\//.test(s))return'https:'+s;
+  if(/^https?:/i.test(s))return s;
+  if(base){try{return new URL(s,base).href;}catch(_){}}
+  return'';
+}
+function impRichParse(doc){
+  const txt=el=>el?el.textContent.replace(/\s+/g,' ').trim():'';
+  const meta=n=>{const m=doc.querySelector(`meta[name="${n}"],meta[property="${n}"]`);return m?impT(m.getAttribute('content')):'';};
+  const r={
+    title:txt(doc.querySelector('title'))||meta('og:title'),
+    metaDesc:meta('description')||meta('og:description'),
+    headings:[...doc.querySelectorAll('h1,h2,h3')].map(h=>({tag:h.tagName.toLowerCase(),txt:txt(h)})).filter(h=>h.txt).slice(0,30),
+    paragraphs:[...doc.querySelectorAll('p')].map(p=>txt(p)).filter(t=>t.length>40).slice(0,20),
+    lists:[...doc.querySelectorAll('ul,ol')].map(l=>[...l.querySelectorAll(':scope>li')].map(li=>txt(li)).filter(Boolean).slice(0,30)).filter(l=>l.length).slice(0,10),
+    images:[...doc.querySelectorAll('img')].map(im=>({src:impT(im.getAttribute('src')),alt:impT(im.getAttribute('alt')),hint:((im.getAttribute('class')||'')+' '+(im.getAttribute('id')||'')).trim()})).filter(i=>i.src).slice(0,40),
+    links:[...doc.querySelectorAll('a[href]')].map(a=>({href:impT(a.getAttribute('href')),txt:txt(a)})).filter(l=>l.href).slice(0,120),
+    custom:[],
+  };
+  const cano=doc.querySelector('link[rel="canonical"]');
+  r.site=impUrl(cano&&cano.getAttribute('href'))||impUrl(meta('og:url'))||impUrl((r.links.find(l=>/^https?:/i.test(l.href))||{}).href);
+  const body=doc.body?doc.body.textContent:'';
+  r.textLow=body.slice(0,30000).toLowerCase();
+  r.emails=[...new Set([
+    ...r.links.filter(l=>/^mailto:/i.test(l.href)).map(l=>l.href.slice(7).split('?')[0].trim()),
+    ...(body.match(/[\w.+-]+@[\w-]+\.[\w.-]{2,}/g)||[])
+  ])].filter(e=>/^\S+@\S+\.\S+$/.test(e)).slice(0,6);
+  r.phones=[...new Set([
+    ...r.links.filter(l=>/^tel:/i.test(l.href)).map(l=>l.href.slice(4)),
+    ...(body.match(/(?:\+|00)\d[\d\s().\/-]{7,17}\d/g)||[])
+  ].map(t=>t.replace(/\s+/g,' ').trim()))].slice(0,6);
+  r.address=txt(doc.querySelector('address'));
+  r.images.forEach(im=>{im.abs=impAbsUrl(im.src,r.site);});
+  return r;
+}
+// Associe les images du HTML aux lignes extraites via l'attribut alt ou le nom de fichier
+function impAutoImgs(rows,rich,nomIx,imgIx){
+  if(!rich||!rich.images.length)return 0;
+  let n=0;
+  rows.forEach(r=>{
+    if(impT(r[imgIx]))return;
+    const pn=impNorm(r[nomIx]);if(!pn)return;
+    const hit=rich.images.find(im=>{
+      if(!im.abs)return false;
+      const k1=impNorm(im.alt),k2=impNorm((im.src.split(/[\\/]/).pop()||'').replace(/\.[^.]+$/,''));
+      return(k1.length>=4&&(pn.includes(k1)||k1.includes(pn)))||(k2.length>=4&&(pn.includes(k2)||k2.includes(pn)));
+    });
+    if(hit){r[imgIx]=hit.abs;n++;}
+  });
+  return n;
+}
 function impFromHTML(file,txt){
   const doc=new DOMParser().parseFromString(txt,'text/html');
+  const rich=impRichParse(doc);
+  impSaveLastHtml(file.name,txt);
   let best=null;
   doc.querySelectorAll('table').forEach(t=>{
     const n=t.querySelectorAll('tr').length;
@@ -3183,18 +3256,44 @@ function impFromHTML(file,txt){
   });
   if(best){
     const grid=[...best.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('th,td')].map(td=>td.textContent.replace(/\s+/g,' ').trim()));
-    impSetTabular(file,grid.filter(r=>r.some(c=>c!=='')));
+    impSetTabular(file,grid.filter(r=>r.some(c=>c!=='')),{rich,rawHtml:txt});
   }else{
-    // innerText d'un document non rendu ne sépare pas les blocs : on force des \n aux frontières
+    // pas de table : lignes candidates depuis titres, listes et paragraphes, puis texte aplati
+    // (innerText d'un document non rendu ne sépare pas les blocs : on force des \n aux frontières)
+    const lines=[...rich.headings.map(h=>h.txt),...rich.lists.flat(),...rich.paragraphs];
     const flat=(doc.body?doc.body.innerHTML:txt).replace(/<(br|\/p|\/div|\/li|\/tr|\/h[1-6]|\/section|\/article)[^>]*>/gi,'\n');
     const text=new DOMParser().parseFromString(flat,'text/html').body.textContent||'';
-    const lines=text.split('\n').map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
-    impSetExtracted(file,impExtractRows(lines),'HTML');
+    text.split('\n').forEach(l=>{l=l.replace(/\s+/g,' ').trim();if(l)lines.push(l);});
+    const seen=new Set();
+    const rows=impExtractRows(lines.filter(l=>{const k=impNorm(l);if(seen.has(k))return false;seen.add(k);return true;}));
+    const nImg=impAutoImgs(rows,rich,0,3);
+    impSetExtracted(file,rows,'HTML',{rich,rawHtml:txt});
+    if(nImg)toast(`${nImg} image${nImg>1?'s':''} associée${nImg>1?'s':''} automatiquement aux produits`);
   }
 }
-function impSetTabular(file,grid){
+/* Le HTML original est mémorisé (gf_imp.lastHtml) pour pouvoir re-parser sans re-téléverser */
+function impSaveLastHtml(name,txt){
+  if(txt.length>400000)return; // trop volumineux pour localStorage
+  const prefs=LS_GET(IMPK,{});
+  prefs.lastHtml={name,txt,ts:new Date().toISOString()};
+  LS_SET(IMPK,prefs);
+}
+function impRenderLastHtml(){
+  const el=document.getElementById('imp-last-html');
+  if(!el)return;
+  const lh=LS_GET(IMPK,{}).lastHtml;
+  if(!lh){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  el.innerHTML=`<button class="btn btn-ghost btn-sm" onclick="impReparseLast()">${ICO('file')} Re-analyser le dernier HTML importé — ${String(lh.name).replace(/</g,'&lt;')} (${new Date(lh.ts).toLocaleDateString('fr-FR')})</button>`;
+}
+function impReparseLast(){
+  const lh=LS_GET(IMPK,{}).lastHtml;
+  if(!lh){toast('Aucun HTML mémorisé',true);return;}
+  try{impFromHTML({name:lh.name},lh.txt);}catch(e){toast('Re-analyse impossible — '+(e.message||e),true);}
+}
+function impSetTabular(file,grid,extra){
   if(!grid||grid.length<2)throw new Error('aucune donnée exploitable (ligne d\'en-tête + lignes de données attendues)');
-  impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1)};
+  impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1),...(extra||{})};
   impShowStep2();
 }
 function impSetExtracted(file,rows,srcLbl,extra){
@@ -3211,7 +3310,7 @@ function impShowStep2(){
   document.getElementById('imp-go').disabled=false;
   const n=impState.rows.length;
   document.getElementById('imp-file-line').innerHTML=`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
-  impRenderMap();impRenderPrev();impUpdTools();
+  impRenderMap();impRenderPrev();impUpdTools();impRenderRich();
 }
 
 /* ---- Mapping colonnes → champs (auto-détection + mémorisation) ---- */
@@ -3389,6 +3488,115 @@ function impFinish(type,added,errs,warns=[]){
   toast(added.length?`${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓`:'Aucune ligne importée — voir le détail dans la fenêtre',!added.length);
 }
 
+/* ---- Panneau « contenu extrait » du HTML : sections éditables (étape 3) ---- */
+const impEsc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function impRichRef(path){
+  const parts=String(path).split('.');
+  let obj=impState.rich;
+  for(let i=0;i<parts.length-1&&obj;i++)obj=obj[parts[i]];
+  return{obj,key:parts[parts.length-1]};
+}
+function impRichSet(path,val){
+  const{obj,key}=impRichRef(path);
+  if(obj)obj[key]=val;
+}
+function impRichDel(path){
+  const{obj,key}=impRichRef(path);
+  if(Array.isArray(obj))obj.splice(parseInt(key),1);
+  else if(obj)obj[key]='';
+  impRenderRich();
+}
+function impRichAdd(){
+  if(!impState.rich)return;
+  impState.rich.custom.push({k:'',v:''});
+  impRenderRich();
+}
+function impRenderRich(){
+  const sec=document.getElementById('imp-rich-sec');
+  if(!sec)return;
+  const r=impState&&impState.rich;
+  if(!r||impState.mode==='fiche'){sec.style.display='none';sec.innerHTML='';return;}
+  sec.style.display='block';
+  const inp=(path,val,ph)=>`<div class="rich-row"><input class="fc" value="${impEsc(val)}" placeholder="${ph||''}" oninput="impRichSet('${path}',this.value)" aria-label="${ph||'Information extraite'}"><button class="expand-cell" onclick="impRichDel('${path}')" title="Supprimer" aria-label="Supprimer cette information">${ICO('trash')}</button></div>`;
+  const sect=(title,inner,open)=>inner?`<details class="rich-sect"${open?' open':''}><summary>${title}</summary><div class="rich-body">${inner}</div></details>`:'';
+  const gen=[
+    r.title?inp('title',r.title,'Titre de la page'):'',
+    r.metaDesc?inp('metaDesc',r.metaDesc,'Meta description'):'',
+    ...r.headings.map((h,i)=>inp(`headings.${i}.txt`,h.txt,'Titre '+h.tag)),
+  ].join('');
+  const desc=r.paragraphs.map((t,i)=>inp(`paragraphs.${i}`,t,'Paragraphe')).join('');
+  const contact=[
+    ...r.emails.map((e,i)=>inp(`emails.${i}`,e,'Email')),
+    ...r.phones.map((t,i)=>inp(`phones.${i}`,t,'Téléphone')),
+    r.address?inp('address',r.address,'Adresse'):'',
+    r.site?inp('site',r.site,'Site web'):'',
+  ].join('');
+  const lists=r.lists.map((l,i)=>l.map((it,j)=>inp(`lists.${i}.${j}`,it,'Élément de liste')).join('')).join('<hr class="rich-hr">');
+  const okImgs=r.images.filter(im=>im.abs);
+  const nRel=r.images.length-okImgs.length;
+  const imgs=okImgs.length?`<div class="rich-imgs">${okImgs.map((im,i)=>`
+    <div class="rich-img">
+      <img src="${impEsc(im.abs)}" alt="${impEsc(im.alt)}" loading="lazy" onerror="this.closest('.rich-img').classList.add('bad')">
+      <select class="fc" onchange="impRichUseImg(${i},this)" aria-label="Associer cette image à une ligne du tableau">
+        <option value="">Associer à…</option>
+        ${impState.rows.slice(0,80).map((row,ri)=>`<option value="${ri}">L${ri+1} — ${impEsc(String(row[0]||'').slice(0,26))}</option>`).join('')}
+      </select>
+    </div>`).join('')}</div>
+    ${nRel?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${nRel} image(s) au chemin relatif non résolu (site source inconnu) ignorée(s)</div>`:''}
+    <div style="margin-top:10px"><button class="btn btn-sec btn-sm" onclick="impImgsZip('produits')">${ICO('download')} Télécharger les images (ZIP → assets/Products images/)</button></div>`:'';
+  const custom=r.custom.map((cst,i)=>`<div class="rich-row"><input class="fc" style="max-width:150px;flex:0 1 auto" value="${impEsc(cst.k)}" placeholder="Nom du champ" oninput="impRichSet('custom.${i}.k',this.value)" aria-label="Nom du champ ajouté"><input class="fc" value="${impEsc(cst.v)}" placeholder="Valeur" oninput="impRichSet('custom.${i}.v',this.value)" aria-label="Valeur du champ ajouté"><button class="expand-cell" onclick="impRichDel('custom.${i}')" title="Supprimer" aria-label="Supprimer ce champ">${ICO('trash')}</button></div>`).join('');
+  sec.innerHTML=`
+    <div class="flbl" style="margin:2px 0 8px">Contenu extrait du HTML <span style="text-transform:none;letter-spacing:0;font-weight:400">(vérifiez, corrigez ou supprimez — les tarifs restent dans le tableau ci-dessus)</span></div>
+    ${sect('Infos générales',gen,true)}
+    ${sect('Description',desc)}
+    ${sect('Contact',contact)}
+    ${sect(`Images (${okImgs.length})`,imgs)}
+    ${sect('Listes à puces',lists)}
+    ${custom?sect('Champs ajoutés',custom,true):''}
+    <div style="margin:8px 0 14px"><button class="btn btn-ghost btn-sm" onclick="impRichAdd()">${ICO('plus')} Ajouter un champ</button></div>`;
+}
+function impRichUseImg(i,sel){
+  const ri=parseInt(sel.value);sel.value='';
+  if(isNaN(ri))return;
+  const im=impState.rich.images.filter(x=>x.abs)[i];
+  if(!im)return;
+  const col=impEnsureImgCol();
+  impState.rows[ri][col]=im.abs;
+  impRenderPrev();
+  toast(`Image associée à la ligne ${ri+1} ✓`);
+}
+/* Télécharge les images extraites en ZIP, nommées avec le dossier assets cible */
+async function impImgsZip(kind){
+  const r=impState&&impState.rich;
+  if(!r)return;
+  const imgs=(kind==='supplier'&&impState.fiche?[{abs:impState.fiche.logo,alt:'logo'}].filter(x=>x.abs):[]).concat(r.images.filter(im=>im.abs));
+  const seen=new Set(),list=imgs.filter(im=>{if(seen.has(im.abs))return false;seen.add(im.abs);return true;});
+  if(!list.length){toast('Aucune image téléchargeable',true);return;}
+  const dir=kind==='supplier'?'assets/supplier/':'assets/Products images/';
+  const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
+  prog.style.display='block';fill.style.width='0%';
+  const files=[];let fail=0;const used=new Set();
+  const uniq=n=>{let b=n,i=2;while(used.has(b)){b=n.replace(/(\.[^.]+)$/,`-${i}$1`);i++;}used.add(b);return b;};
+  for(let i=0;i<list.length;i++){
+    lbl.textContent=`Téléchargement ${i+1}/${list.length}…`;
+    try{
+      const res=await fetch(list[i].abs);
+      if(!res.ok)throw new Error(res.status);
+      const blob=await res.blob();
+      let name=decodeURIComponent((list[i].abs.split('/').pop()||'').split('?')[0]).trim()||'image-'+(i+1)+'.jpg';
+      if(/^data:/.test(list[i].abs))name=(impNorm(list[i].alt)||'image-'+(i+1))+'.jpg';
+      if(!impImgExt.test(name))name+='.jpg';
+      files.push({name:dir+uniq(name.replace(/[^\w .()À-ſ-]/g,'_')),blob});
+    }catch(_){fail++;}
+    fill.style.width=Math.round((i+1)/list.length*100)+'%';
+  }
+  prog.style.display='none';
+  if(!files.length){toast('Téléchargement impossible — le site source bloque l\'accès (CORS)',true);return;}
+  expSaveBlob(await zipStore(files),'GoFlow_ImagesHTML_'+new Date().toISOString().slice(0,10)+'.zip');
+  auditLog('html_images_zip',{fichier:impState.fileName,images:files.length,echecs:fail,dossier:dir});
+  toast(`${files.length} image${files.length>1?'s':''} dans le ZIP ✓ — à déposer dans ${dir.replace(/\/$/,'')}${fail?` (${fail} échec${fail>1?'s':''} CORS)`:''}`);
+}
+
 /* ---- Upload d'images en masse : dossier (ou fichiers) → association par nom ----
    Les images sont réduites (700 px max, JPEG) et stockées en data-URL dans la
    colonne « Image URL » de la ligne dont le nom de produit correspond au nom
@@ -3409,6 +3617,23 @@ function impFileToDataURL(f,max=700){
     im.src=url;
   });
 }
+/* Garantit une colonne « Image URL » dans les données en cours (la crée au besoin,
+   en préservant le mapping déjà choisi par l'utilisateur). Retourne son index. */
+function impEnsureImgCol(){
+  let col=impMapping('produits').photo;
+  if(col!=null)return col;
+  const saveSel={};
+  if(impState.mode==='map')IMP_FIELDS.produits.forEach(f=>{const el=document.getElementById('imap-'+f.k);if(el)saveSel[f.k]=el.value;});
+  impState.headers.push('Image URL');
+  impState.rows.forEach(r=>r.push(''));
+  col=impState.headers.length-1;
+  if(impState.mode==='map'){
+    impRenderMap();
+    Object.keys(saveSel).forEach(k=>{const el=document.getElementById('imap-'+k);if(el&&saveSel[k]!=null)el.value=saveSel[k];});
+    const ph=document.getElementById('imap-photo');if(ph)ph.value=String(col);
+  }
+  return col;
+}
 async function impBulkImgs(inp){
   const files=[...inp.files].filter(f=>/^image\//.test(f.type)||impImgExt.test(f.name));
   inp.value='';
@@ -3416,15 +3641,7 @@ async function impBulkImgs(inp){
   if(!files.length){toast('Aucune image dans la sélection',true);return;}
   const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
   prog.style.display='block';fill.style.width='0%';lbl.textContent='Lecture des images…';
-  // Mémorise le mapping en cours avant d'ajouter la colonne (le re-rendu le perdrait)
-  const saveSel={};
-  if(impState.mode==='map')IMP_FIELDS.produits.forEach(f=>{const el=document.getElementById('imap-'+f.k);if(el)saveSel[f.k]=el.value;});
-  let col=impMapping('produits').photo;
-  if(col==null){
-    impState.headers.push('Image URL');
-    impState.rows.forEach(r=>r.push(''));
-    col=impState.headers.length-1;
-  }
+  const col=impEnsureImgCol();
   const nomCol=impMapping('produits').nom??0;
   const keyOf=n=>impNorm(String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/,''));
   const items=[];
@@ -3449,11 +3666,6 @@ async function impBulkImgs(inp){
     });
     if(best){r[col]=best.data;hits++;}
   });
-  if(impState.mode==='map'){
-    impRenderMap();
-    Object.keys(saveSel).forEach(k=>{const el=document.getElementById('imap-'+k);if(el&&saveSel[k]!=null)el.value=saveSel[k];});
-    const ph=document.getElementById('imap-photo');if(ph)ph.value=String(col);
-  }
   impRenderPrev();
   prog.style.display='none';
   toast(hits?`${hits} produit${hits>1?'s':''} associé${hits>1?'s':''} à une image ✓`:'Aucune correspondance entre noms de fichiers et noms de produits',!hits);
