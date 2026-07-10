@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Agent Sourcing — Paine Chine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.min.css" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #0f2439 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+        .section-divider { border-left: 3px solid #3b82f6; }
+        .tag { display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; margin: 3px; }
+        .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; position: absolute; left: -6px; top: 6px; }
+        .timeline-line { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: #e5e7eb; }
+        .progress-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeInUp 0.6s ease forwards; }
+        .stat-card { background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); }
+        .profile-photo { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 5px solid rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="max-w-6xl mx-auto px-6 py-12">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <img src="https://i.imgur.com/placeholder.jpg" alt="Paine Chine - Photo de profil" class="profile-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-28 h-28 rounded-full bg-white/10 border-4 border-white/30 flex items-center justify-center text-4xl font-bold backdrop-blur-sm" style="display:none;">
+                    PC
+                </div>
+                <div class="text-center md:text-left flex-1">
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2">Paine Chine</h1>
+                    <p class="text-blue-200 text-lg mb-4">Agent Sourcing & Intermédiaire Commercial — Chine</p>
+                    <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+                        <span class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm">🇨 Basé en Chine</span>
+                        <span class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm">🌍 Clients en Afrique de l'Ouest</span>
+                        <span class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm">💬 WhatsApp Business</span>
+                        <span class="bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm">📅 Actif depuis Mai 2024</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats rapides -->
+    <div class="max-w-6xl mx-auto px-6 -mt-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stat-card rounded-xl p-5 shadow-md card-hover text-center">
+                <div class="text-3xl font-bold text-blue-700">~26 mois</div>
+                <div class="text-gray-500 text-sm mt-1">Durée de relation</div>
+            </div>
+            <div class="stat-card rounded-xl p-5 shadow-md card-hover text-center">
+                <div class="text-3xl font-bold text-green-700">50+</div>
+                <div class="text-gray-500 text-sm mt-1">Catégories de produits</div>
+            </div>
+            <div class="stat-card rounded-xl p-5 shadow-md card-hover text-center">
+                <div class="text-3xl font-bold text-purple-700">15+</div>
+                <div class="text-gray-500 text-sm mt-1">Commandes traitées</div>
+            </div>
+            <div class="stat-card rounded-xl p-5 shadow-md card-hover text-center">
+                <div class="text-3xl font-bold text-orange-700">EN / FR</div>
+                <div class="text-gray-500 text-sm mt-1">Langues de communication</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <main class="max-w-6xl mx-auto px-6 py-12 space-y-12">
+
+        <!-- 1. Identité & Positionnement -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center text-lg">1</span>
+                Identité & Positionnement
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3">Qui est Paine Chine ?</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-1">●</span> <span>Agent sourcing chinois confirmé, basé en Chine</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-1">●</span> <span>Intermédiaire entre les fournisseurs chinois et les acheteurs (principalement africains)</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-1">●</span> <span>Ne possède pas d'usine propre — travaille avec un réseau de fournisseurs et usines</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-1">●</span> <span>Collabore avec un intermédiaire nommé <strong>Eugène</strong> (basé au Togo) pour les paiements et la logistique</span></li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-1">●</span> <span>Expérience de plusieurs années avec des clients africains</span></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-3">Modèle économique</h3>
+                        <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 space-y-3">
+                            <p><strong>Type :</strong> Agent de sourcing / Commissionnaire</p>
+                            <p><strong>Rôle :</strong> Recherche produits → Négocie prix → Achète → Contrôle qualité → Expédie via cargo</p>
+                            <p><strong>Zone client :</strong> Togo (Lomé), Afrique de l'Ouest</p>
+                            <p><strong>Cargo utilisé :</strong> TAKLEE CARGO (principal), YongHai</p>
+                            <p><strong>Paiement :</strong> Via Eugene (Togo) — WeChat / Alipay / Virement</p>
+                            <p><strong>WeChat/Alipay :</strong> 18537195235</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Domaines d'expertise -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-green-100 text-green-700 rounded-lg flex items-center justify-center text-lg">2</span>
+                Domaines d'Expertise Produits
+            </h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-blue-500">
+                    <h4 class="font-bold text-gray-800 mb-3">💆 Beauté & Bien-être</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-blue-50 text-blue-700">Kits blanchiment dents</span>
+                        <span class="tag bg-blue-50 text-blue-700">Machines spa</span>
+                        <span class="tag bg-blue-50 text-blue-700">Capsule régénération</span>
+                        <span class="tag bg-blue-50 text-blue-700">Bains de pieds</span>
+                        <span class="tag bg-blue-50 text-blue-700">Fauteuils massage</span>
+                        <span class="tag bg-blue-50 text-blue-700">Lumières thérapeutiques</span>
+                        <span class="tag bg-blue-50 text-blue-700">Ventouses</span>
+                        <span class="tag bg-blue-50 text-blue-700">Chauffe-cire</span>
+                        <span class="tag bg-blue-50 text-blue-700">Appareil détartrage dents</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-green-500">
+                    <h4 class="font-bold text-gray-800 mb-3">🏠 Équipement Maison</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-green-50 text-green-700">Fours électriques</span>
+                        <span class="tag bg-green-50 text-green-700">Micro-ondes</span>
+                        <span class="tag bg-green-50 text-green-700">Blenders</span>
+                        <span class="tag bg-green-50 text-green-700">Jacuzzi / Baignoires</span>
+                        <span class="tag bg-green-50 text-green-700">Distributeurs d'eau</span>
+                        <span class="tag bg-green-50 text-green-700">Purificateurs</span>
+                        <span class="tag bg-green-50 text-green-700">Canapés compressés</span>
+                        <span class="tag bg-green-50 text-green-700">Tables/chaises pliantes</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-purple-500">
+                    <h4 class="font-bold text-gray-800 mb-3">👗 Textile & Mode</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-purple-50 text-purple-700">Vêtements enfants</span>
+                        <span class="tag bg-purple-50 text-purple-700">T-shirts adultes</span>
+                        <span class="tag bg-purple-50 text-purple-700">Ensembles sport</span>
+                        <span class="tag bg-purple-50 text-purple-700">Sacs</span>
+                        <span class="tag bg-purple-50 text-purple-700">Sacs plastiques custom</span>
+                        <span class="tag bg-purple-50 text-purple-700">Fil à coudre</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-orange-500">
+                    <h4 class="font-bold text-gray-800 mb-3"> Électronique</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-orange-50 text-orange-700">iPhones</span>
+                        <span class="tag bg-orange-50 text-orange-700">Appareils photo</span>
+                        <span class="tag bg-orange-50 text-orange-700">Écrans LCD</span>
+                        <span class="tag bg-orange-50 text-orange-700">Protections écran</span>
+                        <span class="tag bg-orange-50 text-orange-700">Smart TV</span>
+                        <span class="tag bg-orange-50 text-orange-700">Écouteurs (Bose)</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-red-500">
+                    <h4 class="font-bold text-gray-800 mb-3">🏋️ Sport & Fitness</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-red-50 text-red-700">Tapis de marche</span>
+                        <span class="tag bg-red-50 text-red-700">Haltères</span>
+                        <span class="tag bg-red-50 text-red-700">Bancs de musculation</span>
+                        <span class="tag bg-red-50 text-red-700">Barres de traction</span>
+                        <span class="tag bg-red-50 text-red-700">Gants sport</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-5 card-hover border-t-4 border-yellow-500">
+                    <h4 class="font-bold text-gray-800 mb-3"> Divers & Mercerie</h4>
+                    <div class="flex flex-wrap">
+                        <span class="tag bg-yellow-50 text-yellow-700">Gants jetables</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Aiguilles machine</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Interrupteurs</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">LED / Éclairage</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Bijoux acier inox</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Snacks (crevettes)</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Tentes aluminium</span>
+                        <span class="tag bg-yellow-50 text-yellow-700">Casseroles / Ustensiles</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Méthodologie de travail -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center text-lg">3</span>
+                Méthodologie de Travail
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="relative pl-8 space-y-8">
+                    <div class="timeline-line"></div>
+                    
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 1 — Réception de la demande</h4>
+                        <p class="text-gray-600 text-sm mt-1">Le client envoie des photos des produits souhaités via WhatsApp. Paine demande les spécifications : prix, poids, CBM, MOQ, taille d'emballage.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 2 — Recherche fournisseurs</h4>
+                        <p class="text-gray-600 text-sm mt-1">Paine consulte son réseau de fournisseurs/usines. Compare les prix et qualités entre plusieurs sources. Peut proposer des alternatives moins chères.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 3 — Devis & Négociation</h4>
+                        <p class="text-gray-600 text-sm mt-1">Envoie les prix en RMB (parfois aussi en USD). Négocie les quantités minimales (MOQ). Peut obtenir des réductions pour grandes quantités ou échantillons.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 4 — Facture & Paiement</h4>
+                        <p class="text-gray-600 text-sm mt-1">Émet une facture (ex: A-240511, Alex-241104, A-251018). Le client paie via Eugene au Togo (Tmoney, virement bancaire, ou cash) ou directement via WeChat/Alipay (18537195235).</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 5 — Achat & Contrôle</h4>
+                        <p class="text-gray-600 text-sm mt-1">Réception des produits de différents fournisseurs. Contrôle qualité. Prend des photos et vidéos pour le client. Regroupe les petits articles dans de grands cartons pour économiser l'espace.</p>
+                    </div>
+
+                    <div class="relative">
+                        <div class="timeline-dot"></div>
+                        <h4 class="font-bold text-gray-800">Étape 6 — Expédition</h4>
+                        <p class="text-gray-600 text-sm mt-1">Envoie au cargo (TAKLEE, YongHai). Fournit les numéros de suivi logistique chinois. Le client paie le fret à l'arrivée à Lomé.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Logistique & Expédition -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-orange-100 text-orange-700 rounded-lg flex items-center justify-center text-lg">4</span>
+                Logistique & Expédition
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2"> Transport Maritime</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li>• Délai : <strong>~2 mois</strong></li>
+                        <li>• Coût calculé au <strong>CBM (volume)</strong></li>
+                        <li>• Paiement du fret à l'arrivée à Lomé</li>
+                        <li>• Cargo principal : <strong>TAKLEE CARGO</strong></li>
+                        <li>• Pas de suivi en mer (sauf tracking interne)</li>
+                        <li>• Adapté aux gros volumes et produits lourds</li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">️ Transport Aérien</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li>• Délai : <strong>~2 semaines</strong></li>
+                        <li>• Coût calculé au <strong>poids (kg)</strong></li>
+                        <li>• Plus cher mais plus rapide</li>
+                        <li>• Adapté aux petits envois urgents</li>
+                        <li>• Meilleur suivi</li>
+                        <li>• Déconseillé pour produits à faible valeur</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mt-4">
+                <h4 class="font-semibold text-blue-800 mb-2">📦 Optimisation de l'emballage</h4>
+                <p class="text-blue-700 text-sm">Paine regroupe systématiquement les petits articles dans les grands cartons pour réduire le CBM total. Cependant, les machines nécessitant un cadre en bois (wood frame) ne peuvent pas être ouvertes pour insérer d'autres produits. Il communique les dimensions et poids de chaque carton.</p>
+            </div>
+        </section>
+
+        <!-- 5. Communication & Langues -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-teal-100 text-teal-700 rounded-lg flex items-center justify-center text-lg">5</span>
+                Communication & Langues
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-3xl mb-2">🇬🇧</div>
+                        <h4 class="font-bold text-gray-800">Anglais</h4>
+                        <p class="text-sm text-gray-600 mt-1">Langue principale de communication. Niveau fonctionnel, quelques fautes de grammaire mais très compréhensible.</p>
+                        <div class="progress-bar mt-3"><div class="progress-fill bg-blue-500" style="width: 75%"></div></div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-3xl mb-2">🇫</div>
+                        <h4 class="font-bold text-gray-800">Français</h4>
+                        <p class="text-sm text-gray-600 mt-1">Comprend le français via traduction. Répond principalement en anglais. Utilise un traducteur pour certains messages.</p>
+                        <div class="progress-bar mt-3"><div class="progress-fill bg-green-500" style="width: 35%"></div></div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-3xl mb-2">🇨🇳</div>
+                        <h4 class="font-bold text-gray-800">Chinois (Mandarin)</h4>
+                        <p class="text-sm text-gray-600 mt-1">Langue maternelle. Communication avec les fournisseurs et usines en chinois.</p>
+                        <div class="progress-bar mt-3"><div class="progress-fill bg-red-500" style="width: 100%"></div></div>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-yellow-800 text-sm"><strong>⚠️ Canal principal :</strong> WhatsApp. Répond généralement sous 2 à 24h. Parfois plus lent le week-end ou pendant les fêtes chinoises. Envoie beaucoup de photos et vidéos des produits. Utilise aussi WeChat et Alipay pour les paiements.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Forces & Faiblesses -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-lg">6</span>
+                Forces & Points d'Amélioration
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-green-500">
+                    <h4 class="font-bold text-green-700 mb-4 text-lg">✅ Forces</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Large réseau de fournisseurs</strong> — Capable de sourcer des produits très variés (beauté, électronique, textile, équipement, alimentaire)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Transparence sur les prix</strong> — Donne les prix en RMB, explique les différences de qualité, propose des alternatives</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Réactivité</strong> — Répond rapidement aux demandes, envoie photos/vidéos après réception des produits</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Honnêteté commerciale</strong> — Admet quand un produit est cher, quand il ne peut pas trouver, ou quand la qualité est incertaine</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Flexibilité</strong> — Accepte les petites quantités (échantillons), négocie les MOQ, regroupe les envois</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Relation de confiance</strong> — Relation amicale et professionnelle sur le long terme avec la cliente</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Connaissance du marché africain</strong> — A de nombreux clients en Afrique, comprend les contraintes locales</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-500 font-bold">+</span>
+                            <span><strong>Conseils techniques</strong> — Explique les spécifications techniques (fil 10s/4, matériaux, etc.)</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover border-l-4 border-red-400">
+                    <h4 class="font-bold text-red-600 mb-4 text-lg">⚠️ Points d'Amélioration</h4>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Pas toujours le meilleur prix</strong> — Certains produits sont au même prix qu'au Togo, voire plus chers après frais de port</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Informations incomplètes</strong> — Oublie parfois de donner le poids, le CBM ou les dimensions d'emballage</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Délais variables</strong> — Parfois plusieurs jours avant de répondre à certaines demandes complexes</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Pas de contrôle qualité indépendant</strong> — Ne peut pas toujours garantir la qualité avant achat (surtout vêtements)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Limites sur le suivi maritime</strong> — Pas de tracking en mer, risque de perte pour petits colis</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Barrière linguistique</strong> — Communication en anglais uniquement, certaines nuances peuvent se perdre</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Dépendance à Eugene</strong> — Le paiement passe par un intermédiaire, ce qui ajoute une étape et des frais potentiels</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-400 font-bold">−</span>
+                            <span><strong>Refus de catalogues généraux</strong> — Ne peut pas fournir de catalogue complet sans demande spécifique</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Historique des commandes -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-pink-100 text-pink-700 rounded-lg flex items-center justify-center text-lg">7</span>
+                Chronologie des Commandes Principales
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-left">
+                            <th class="p-3 rounded-l-lg">Date</th>
+                            <th class="p-3">Produits</th>
+                            <th class="p-3">Montant</th>
+                            <th class="p-3">Transport</th>
+                            <th class="p-3 rounded-r-lg">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium">Mai 2024</td>
+                            <td class="p-3">100 seringues 1.5ml + 30 kits blanchiment dents</td>
+                            <td class="p-3">~107 USD</td>
+                            <td class="p-3">✈️ Air</td>
+                            <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Livré</span></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium">Juil 2024</td>
+                            <td class="p-3">6000 gants + divers articles mercerie</td>
+                            <td class="p-3">3960 RMB</td>
+                            <td class="p-3">🚢 Mer</td>
+                            <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Livré</span></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium">Nov 2024</td>
+                            <td class="p-3">Machines spa + divers équipements (7 cartons)</td>
+                            <td class="p-3">8961 RMB</td>
+                            <td class="p-3"> Mer</td>
+                            <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Livré</span></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium">Déc 2024</td>
+                            <td class="p-3">Divers articles (3 cartons)</td>
+                            <td class="p-3">3066 RMB</td>
+                            <td class="p-3">🚢 Mer</td>
+                            <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Livré</span></td>
+                        </tr>
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 font-medium">Oct-Nov 2025</td>
+                            <td class="p-3">Vêtements enfants + divers (1 carton)</td>
+                            <td class="p-3">2795 RMB</td>
+                            <td class="p-3">🚢 Mer</td>
+                            <td class="p-3"><span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">✅ Livré</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 bg-green-50 border border-green-200 rounded-xl p-4">
+                <p class="text-green-800 text-sm font-medium">✅ Toutes les commandes principales ont été livrées avec succès.</p>
+            </div>
+        </section>
+
+        <!-- 8. Conditions & Modalités -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-cyan-100 text-cyan-700 rounded-lg flex items-center justify-center text-lg">8</span>
+                Conditions & Modalités
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h4 class="font-bold text-gray-800 mb-4">💰 Paiement</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li>• Prix communiqués en <strong>RMB</strong> (parfois USD)</li>
+                        <li>• Paiement via <strong>Eugène</strong> (intermédiaire au Togo)</li>
+                        <li>• Méthodes : Tmoney, virement bancaire, cash, Western Union</li>
+                        <li>• WeChat / Alipay de Paine : <strong>18537195235</strong></li>
+                        <li>• Frais de logistique locale : ~10 RMB si montant trop faible</li>
+                        <li>• Fret payé à l'arrivée à Lomé</li>
+                        <li>• Surcoût de ~1-1.5$/produit pour logistique locale si petite quantité</li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h4 class="font-bold text-gray-800 mb-4">📋 MOQ & Échantillons</h4>
+                    <ul class="space-y-2 text-gray-600 text-sm">
+                        <li>• MOQ variable selon produits (de 1 à 200+ pièces)</li>
+                        <li>• Accepte les commandes en dessous du MOQ comme "échantillons"</li>
+                        <li>• Surcoût de ~1-1.5$/produit pour logistique locale si petite quantité</li>
+                        <li>• Négocie les prix pour grandes quantités</li>
+                        <li>• Produits personnalisés (logos, tailles) = MOQ plus élevé</li>
+                        <li>• Peut demander des échantillons avant achat en grande quantité</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. Évaluation globale -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center text-lg">9</span>
+                Évaluation Globale
+            </h2>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Fiabilité</span>
+                            <span class="text-sm font-medium text-gray-500">8.5/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-green-500" style="width: 85%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Diversité produits</span>
+                            <span class="text-sm font-medium text-gray-500">9/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-blue-500" style="width: 90%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Compétitivité des prix</span>
+                            <span class="text-sm font-medium text-gray-500">6/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-yellow-500" style="width: 60%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Communication</span>
+                            <span class="text-sm font-medium text-gray-500">7.5/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-purple-500" style="width: 75%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Suivi & Transparence</span>
+                            <span class="text-sm font-medium text-gray-500">8/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-teal-500" style="width: 80%"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-700">Relation client</span>
+                            <span class="text-sm font-medium text-gray-500">9/10</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill bg-pink-500" style="width: 90%"></div></div>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <p class="text-gray-700 text-sm"><strong>📊 Note globale : 7.6/10</strong> — Paine Chine est un agent sourcing fiable et polyvalent, idéal pour les acheteurs en Afrique de l'Ouest qui cherchent un intermédiaire de confiance en Chine. Ses prix ne sont pas toujours les plus bas du marché, mais sa transparence, sa flexibilité et sa relation de long terme avec ses clients en font un partenaire commercial solide. Toutes les commandes principales ont été livrées avec succès, confirmant sa fiabilité. Recommandé pour les commandes variées et les relations durables.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10. Recommandations -->
+        <section class="animate-in">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <span class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-lg">10</span>
+                Recommandations d'Utilisation
+            </h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                    <h4 class="font-bold text-green-800 mb-3">✅ Idéal pour :</h4>
+                    <ul class="space-y-2 text-green-700 text-sm">
+                        <li>• Sourcer des produits variés en une seule commande</li>
+                        <li>• Petites et moyennes quantités (échantillons, tests marché)</li>
+                        <li>• Clients débutants dans l'import depuis la Chine</li>
+                        <li>• Produits d'équipement (spa, beauté, maison)</li>
+                        <li>• Relations commerciales de long terme</li>
+                        <li>• Besoin d'un intermédiaire qui parle anglais</li>
+                        <li>• Commandes personnalisées (logos, tailles spécifiques)</li>
+                    </ul>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <h4 class="font-bold text-red-800 mb-3">❌ Moins adapté pour :</h4>
+                    <ul class="space-y-2 text-red-700 text-sm">
+                        <li>• Produits alimentaires en grande quantité (riz, huile, pâtes)</li>
+                        <li>• Rechercher les prix les plus bas absolus</li>
+                        <li>• Produits nécessitant un contrôle qualité certifié</li>
+                        <li>• Envois urgents en grande quantité</li>
+                        <li>• Produits très techniques/spécifiques non disponibles en Chine grand public</li>
+                        <li>• Clients ne parlant pas anglais (barrière linguistique)</li>
+                        <li>• Catalogues généraux sans demande spécifique</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-400 text-sm">Document généré à partir de l'analyse de la conversation WhatsApp entre Lou (Alex) et Paine Chine</p>
+            <p class="text-gray-500 text-xs mt-2">Période analysée : Mai 2024 — Juillet 2026 | Source : Export WhatsApp</p>
+            <p class="text-green-400 text-xs mt-2 font-semibold">✅ Toutes les commandes principales ont été livrées avec succès</p>
+        </div>
+    </footer>
+
+    <script>
+        // Animation au scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
