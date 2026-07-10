@@ -52,7 +52,9 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~2450 lines)
 | `gf_t` | Freight forwarders array |
 | `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis|pdf: {visible: [key…], touched: bool, known: [key…]}}`. Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
 | `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
-| `gf_audit` | Calculation audit trail (last 100 entries: settings changes + generated devis PDFs), exportable as JSON from the settings panel |
+| `gf_audit` | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel |
+| `gf_imp` | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}}` |
+| `gf_exp` | Image-export prefs: `{tpl, bg, txt, logoPos, showMarge}` |
 
 `DATA_VER` constant controls localStorage migrations — bump it to force a reset of `gf_p` and `gf_f` when the data schema changes.
 
@@ -112,6 +114,22 @@ Column visibility for **Catalogue / Simulation / Devis / PDF export** flows thro
 - Stale-key safety: saved keys no longer in `CM_DEFS` are dropped; columns added to the code after a save (tracked via `known`) pick up their `def` value.
 - PDF columns are a **separate** preference (`pdf` view), configured in the `pdf-modal` opened by `openPdfConfig()` before `generateDevisPDF()`. The PDF price block (Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC) is always included; internal columns (coût de revient, marge, EXW) are never exportable to the client PDF.
 - Table rows get a "Voir détails" (eye) button → `showProdDetails` / `showDevisDetails` open `detail-modal` with every field, including hidden columns (mobile fallback).
+
+### Bulk import (module between `MODULE IMPORT EN MASSE` / `FIN MODULE IMPORT` markers)
+
+"Importer" buttons in Catalogue / Fournisseurs / Transitaires open `import-modal` (`openImportModal(type)`):
+
+- **CSV**: native parser `parseCSVText` (auto delimiter `;`/`,`/tab, quoted fields, BOM strip). **Excel**: SheetJS lazy-loaded from CDN (`ensureLib`). **PDF**: pdf.js lazy-loaded, text grouped into visual lines (`pdfToLines`) then name+price heuristic (`impExtractRows`, currency-first pattern wins). **HTML**: DOMParser — biggest `<table>`, else block-aware text extraction.
+- Tabular sources → column-mapping UI (`IMP_FIELDS` per type with accent-insensitive synonym auto-guess via `impNorm`; last mapping remembered in `gf_imp`) + read-only 6-row preview. Extracted sources (PDF/HTML) → fully editable preview (inputs bound to `impState.rows`, row delete).
+- `impRun` processes rows in chunks of 25 (progress bar), validates (required nom, readable prix, email format, duplicate detection vs existing data), builds entities via `impBuild` (fuzzy supplier match, category match, ref generation consistent with `genRef`), then `impFinish` saves + re-renders + logs to `gf_audit` + shows ok/warn summary.
+
+### Image export (module between `MODULE EXPORT IMAGES DESIGN` / `FIN MODULE EXPORT IMAGES` markers)
+
+"Export image" button in Catalogue toggles selection mode (`expToggleMode` → checkboxes `expBox()` on cards/table rows + fixed bottom `#exp-bar`). `openExportModal()` opens the customization modal:
+
+- 6 canvas templates (`EXP_TPLS`: classique, gradient, nuit, minimal, badge, catalogue) rendered by `expDraw` at 1080×1080; bg/text color pickers, Go.Group wordmark position (`expLogo`), optional margin line; live preview with per-product navigation; prefs persisted in `gf_exp`.
+- Images loaded with `crossOrigin='anonymous'` (raw GitHub sends CORS headers) with placeholder fallback — the canvas is never tainted. Prices come from `calc(p)` (PV HT / PV TTC / marge).
+- Download: individual PNGs (`canvas.toBlob`) or a single ZIP built by the dependency-free store-only writer `zipStore` (CRC32, no compression — PNGs are already compressed). Progress bar during batch generation.
 
 ### Grouped view
 
