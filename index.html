@@ -334,6 +334,33 @@ textarea.fc{resize:vertical;min-height:70px}
 .imp-prev-wrap table{font-size:11.5px}
 .imp-prev-wrap input{width:100%;min-width:70px;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:'Poppins',sans-serif;font-size:11.5px;outline:none;color:var(--text)}
 .imp-prev-wrap input:focus{border-color:var(--bleu);background:#fff}
+.fiche-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:12px}
+@media(max-width:640px){.fiche-grid{grid-template-columns:1fr}}
+.fiche-imgbtn{cursor:pointer}
+.fiche-imgbtn.sel{border-color:var(--bleu);box-shadow:0 0 0 2px rgba(0,153,255,.25)}
+.fiche-card{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--gris);position:sticky;top:0}
+.fiche-head{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.fiche-head img{width:52px;height:52px;object-fit:contain;border-radius:9px;background:#fff;border:1px solid var(--border)}
+.fiche-nom{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;line-height:1.3}
+.fiche-sub{font-size:11px;color:var(--muted)}
+.fiche-desc{font-size:11.5px;opacity:.85;line-height:1.6;margin-bottom:8px;max-height:90px;overflow:auto}
+.fiche-line{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;margin-bottom:5px;word-break:break-word}
+.fiche-line .ic{width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--muted)}
+.rich-sect{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--surface)}
+.rich-sect summary{cursor:pointer;padding:9px 12px;font-size:12px;font-weight:600;color:var(--text);user-select:none}
+.rich-sect[open] summary{border-bottom:1px solid var(--border)}
+.rich-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.rich-row{display:flex;align-items:center;gap:6px}
+.rich-row .fc{flex:1;padding:6px 9px;font-size:12px;min-width:0}
+.rich-hr{border:none;border-top:1px dashed var(--border);margin:4px 0;width:100%}
+.rich-imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.rich-img{border:1px solid var(--border);border-radius:9px;padding:6px;display:flex;flex-direction:column;gap:6px;background:var(--gris)}
+.rich-img img{width:100%;height:72px;object-fit:cover;border-radius:6px;background:#fff}
+.rich-img.bad{opacity:.35}
+.rich-img .fc{font-size:10.5px;padding:4px 22px 4px 6px;width:100%}
+.imp-thumb{width:36px;height:36px;object-fit:cover;border-radius:7px;border:1px solid var(--border);background:var(--gris);display:inline-flex;align-items:center;justify-content:center;color:var(--muted);vertical-align:middle}
+.imp-thumb.bad{opacity:.3}
+.imp-thumb.none .ic{width:15px;height:15px}
 .imp-summary{border-radius:10px;padding:11px 14px;font-size:12px;line-height:1.7;margin-bottom:12px}
 .imp-summary.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-brd)}
 .imp-summary.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd)}
@@ -359,6 +386,20 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 .exp-nav{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .exp-grid2{display:grid;grid-template-columns:300px 1fr;gap:18px}
 @media(max-width:760px){.exp-grid2{grid-template-columns:1fr}}
+.exp-info-list{border:1px solid var(--border);border-radius:10px;background:var(--surface);max-height:236px;overflow:auto;margin-bottom:7px}
+.exp-info-row{display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid var(--border);border-top:2px solid transparent;font-size:12px;background:var(--surface)}
+.exp-info-row:last-child{border-bottom:none}
+.exp-info-row.off label{color:var(--muted)}
+.exp-info-row.drag-over{border-top-color:var(--bleu)}
+.exp-info-row label{display:flex;align-items:center;gap:7px;flex:1;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-info-row input{width:14px;height:14px;accent-color:var(--bleu-t);flex-shrink:0}
+.exp-drag{cursor:grab;color:var(--muted);user-select:none;flex-shrink:0;display:inline-flex;flex-direction:column;gap:2px}
+.exp-drag i{display:block;width:12px;height:2px;border-radius:2px;background:currentColor}
+.exp-updown{display:flex;gap:1px;flex-shrink:0}
+.exp-updown button{border:none;background:none;cursor:pointer;color:var(--muted);padding:2px;border-radius:5px;display:inline-flex}
+.exp-updown button:hover{background:var(--gris);color:var(--text)}
+.exp-updown button:disabled{opacity:.25;cursor:default}
+.exp-updown .ic{width:13px;height:13px}
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar{width:8px;height:8px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -1003,20 +1044,30 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         </div>
         <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
         <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="width:100%"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+        <div id="imp-last-html" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
       <div id="imp-step2" style="display:none">
         <div class="imp-file-line" id="imp-file-line"></div>
+        <div id="imp-img-tools" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn-sec btn-sm" onclick="document.getElementById('imp-img-dir').click()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Uploader des images en masse (dossier)</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('imp-img-files').click()">ou sélectionner des fichiers…</button>
+          <span style="font-size:11px;color:var(--muted)">Association automatique par nom de fichier (ex. hydrafacial.jpg → produit « Hydrafacial »).</span>
+          <input type="file" id="imp-img-dir" webkitdirectory multiple style="display:none" onchange="impBulkImgs(this)">
+          <input type="file" id="imp-img-files" accept="image/*" multiple style="display:none" onchange="impBulkImgs(this)">
+        </div>
         <div id="imp-map-sec">
           <div class="flbl" style="margin-bottom:8px">Correspondance des colonnes <span style="text-transform:none;letter-spacing:0;font-weight:400">(colonne du fichier → champ de l'application)</span></div>
           <div class="imp-map" id="imp-map"></div>
         </div>
         <div class="flbl" style="margin-bottom:8px" id="imp-prev-lbl">Aperçu</div>
         <div class="imp-prev-wrap" id="imp-prev"></div>
+        <div id="imp-fiche-sec" style="display:none"></div>
+        <div id="imp-rich-sec" style="display:none"></div>
         <div id="imp-errs" aria-live="polite"></div>
         <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
         <div class="fact" style="margin-top:0">
           <button class="btn btn-sec" onclick="impBack()">← Autre fichier</button>
-          <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Valider l'import</button>
+          <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> <span id="imp-go-lbl">Valider l'import</span></button>
         </div>
       </div>
     </div>
@@ -1046,9 +1097,12 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
               <option value="none">Masqué</option>
             </select>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;margin-bottom:8px">
-            <input type="checkbox" id="exp-marge" onchange="expPrefChange()" style="width:15px;height:15px;accent-color:var(--bleu-t)"> Afficher la marge <span style="color:var(--muted)">(usage interne)</span>
-          </label>
+          <div class="flbl" style="margin-bottom:6px">Informations à afficher</div>
+          <div class="exp-info-list" id="exp-infos" role="group" aria-label="Informations affichées sur l'image — cochez pour afficher, glissez pour réordonner"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+            <span id="exp-infos-hint" style="font-size:10.5px;color:var(--muted)"></span>
+            <button class="btn btn-sec btn-sm" id="exp-sync-btn" onclick="expSyncCat()" title="Reprendre les colonnes actuellement visibles dans le catalogue">Colonnes du catalogue</button>
+          </div>
           <div style="font-size:11px;color:var(--muted);line-height:1.6">PNG 1080×1080 px — prêt pour les réseaux sociaux. Vos réglages sont mémorisés.</div>
         </div>
         <div class="exp-canvas-wrap">
@@ -2933,15 +2987,34 @@ function generateDevisPDF(){
    MODULE IMPORT EN MASSE — CSV / Excel / PDF / HTML
    CSV : parseur natif (guillemets, délimiteur auto ; , tab)
    Excel : SheetJS chargé à la demande · PDF : pdf.js à la demande
-   HTML : DOMParser (plus grande table, sinon extraction texte)
-   Le dernier mapping de colonnes est mémorisé par type (gf_imp).
+   HTML : analyse riche (titres, textes, images, contacts, listes) —
+   produits : table ou heuristique nom+prix + panneau « contenu extrait » ;
+   fournisseurs/transitaires : fiche pré-remplie à valider manuellement.
+   Colonne « Image URL » : URL web, chemin local ou nom de fichier
+   (résolu vers assets/Products images/), aperçu avant import,
+   avertissement non bloquant si absente + upload d'images en masse.
+   Dernier mapping mémorisé par type + dernier HTML re-parsable (gf_imp).
    ============================================================ */
 const IMPK='gf_imp';
 const impNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
 const impT=v=>String(v==null?'':v).trim();
 const impNum=v=>{if(v==null||v==='')return 0;const n=parseFloat(String(v).replace(/\s/g,'').replace(/,/g,'.').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;};
 const impUrl=v=>/^https?:\/\//.test(impT(v))?impT(v):'';
+const impLogoUrl=v=>{const s=impT(v);return/^(https?:|data:image\/)/i.test(s)?s:'';};
 const impId=(pfx,ix)=>pfx+String(Date.now()).slice(-5)+String(ix%1000).padStart(3,'0');
+const IMP_IMG_DIR='assets/Products%20images/';
+const impImgExt=/\.(jpe?g|png|gif|webp|avif|bmp|svg)$/i;
+/* Résout la colonne « Image URL » : URL web ou data: conservée telle quelle ;
+   chemin local (C:\Images\… ou /Images/…) ou simple nom de fichier → le fichier
+   est supposé présent dans assets/Products images/ (nom de base conservé). */
+function impResolveImg(v){
+  const s=impT(v);
+  if(!s)return'';
+  if(/^(https?:|data:image\/)/i.test(s))return s;
+  const base=s.split(/[\\/]/).pop();
+  if(!base||!impImgExt.test(base))return'';
+  return IMP_IMG_DIR+encodeURIComponent(base);
+}
 const IMP_LBL={produits:'produits',fournisseurs:'fournisseurs',transitaires:'transitaires'};
 const IMP_FIELDS={
   produits:[
@@ -2960,7 +3033,7 @@ const IMP_FIELDS={
     {k:'moq',lbl:'MOQ',num:true,syn:['moq','minorder','quantitemini']},
     {k:'desc',lbl:'Description',syn:['description','desc','details']},
     {k:'specs',lbl:'Spécifications',syn:['specifications','specs','specificites','caracteristiques']},
-    {k:'photo',lbl:'Photo (URL)',syn:['photo','image','img','imageurl','photourl','picture']},
+    {k:'photo',lbl:'Image URL',req:true,syn:['photo','image','img','imageurl','imgurl','urlimage','photourl','picture','lienimage','cheminimage']},
   ],
   fournisseurs:[
     {k:'nom',lbl:'Nom entreprise',req:true,syn:['nom','entreprise','company','societe','supplier','fournisseur','name']},
@@ -3025,8 +3098,20 @@ function impBack(){
   document.getElementById('imp-errs').innerHTML='';
   document.getElementById('imp-prog').style.display='none';
   document.getElementById('imp-go').disabled=false;
+  impRenderLastHtml();
 }
-function impTypeChange(){if(impState){impRenderMap();impRenderPrev();}}
+function impTypeChange(){
+  if(!impState)return;
+  // Source HTML : on re-analyse selon le nouveau type (tableau produits ↔ fiche)
+  if(impState.rawHtml){try{impFromHTML({name:impState.fileName},impState.rawHtml);}catch(e){toast('Re-analyse impossible — '+(e.message||e),true);}return;}
+  if(impState.mode==='fiche')return;
+  impRenderMap();impRenderPrev();impUpdTools();
+}
+// Bouton « Uploader des images en masse » : visible uniquement pour un import produits
+function impUpdTools(){
+  const el=document.getElementById('imp-img-tools');
+  if(el)el.style.display=(impState&&impState.mode!=='fiche'&&document.getElementById('imp-type').value==='produits')?'flex':'none';
+}
 function impLoading(on,msg){
   document.getElementById('imp-load').style.display=on?'block':'none';
   if(msg)document.getElementById('imp-load-lbl').textContent=msg;
@@ -3124,12 +3209,72 @@ function impExtractRows(lines){
     let nom=l.slice(0,m.index).replace(/[\s·:|,;–-]+$/,'').trim();
     if(!nom)nom=l.slice(m.index+m[0].length).replace(/^[\s·:|,;–-]+/,'').trim();
     if(nom.length<3||/^(total|soustotal|tva|prix|montant|quantite|qty|subtotal|page)/.test(impNorm(nom)))return;
-    out.push([nom.slice(0,120),String(prix),'']);
+    out.push([nom.slice(0,120),String(prix),'','']);
   });
   return out;
 }
+/* ---- Analyse riche d'un document HTML : titres, textes, images, contacts, listes ---- */
+function impAbsUrl(src,base){
+  const s=impT(src);
+  if(!s)return'';
+  if(/^data:image\//i.test(s))return s;
+  if(/^\/\//.test(s))return'https:'+s;
+  if(/^https?:/i.test(s))return s;
+  if(base){try{return new URL(s,base).href;}catch(_){}}
+  return'';
+}
+function impRichParse(doc){
+  const txt=el=>el?el.textContent.replace(/\s+/g,' ').trim():'';
+  const meta=n=>{const m=doc.querySelector(`meta[name="${n}"],meta[property="${n}"]`);return m?impT(m.getAttribute('content')):'';};
+  const r={
+    title:txt(doc.querySelector('title'))||meta('og:title'),
+    metaDesc:meta('description')||meta('og:description'),
+    headings:[...doc.querySelectorAll('h1,h2,h3')].map(h=>({tag:h.tagName.toLowerCase(),txt:txt(h)})).filter(h=>h.txt).slice(0,30),
+    paragraphs:[...doc.querySelectorAll('p')].map(p=>txt(p)).filter(t=>t.length>40).slice(0,20),
+    lists:[...doc.querySelectorAll('ul,ol')].map(l=>[...l.querySelectorAll(':scope>li')].map(li=>txt(li)).filter(Boolean).slice(0,30)).filter(l=>l.length).slice(0,10),
+    images:[...doc.querySelectorAll('img')].map(im=>({src:impT(im.getAttribute('src')),alt:impT(im.getAttribute('alt')),hint:((im.getAttribute('class')||'')+' '+(im.getAttribute('id')||'')).trim()})).filter(i=>i.src).slice(0,40),
+    links:[...doc.querySelectorAll('a[href]')].map(a=>({href:impT(a.getAttribute('href')),txt:txt(a)})).filter(l=>l.href).slice(0,120),
+    custom:[],
+  };
+  const cano=doc.querySelector('link[rel="canonical"]');
+  r.site=impUrl(cano&&cano.getAttribute('href'))||impUrl(meta('og:url'))||impUrl((r.links.find(l=>/^https?:/i.test(l.href))||{}).href);
+  const body=doc.body?doc.body.textContent:'';
+  r.textLow=body.slice(0,30000).toLowerCase();
+  r.emails=[...new Set([
+    ...r.links.filter(l=>/^mailto:/i.test(l.href)).map(l=>l.href.slice(7).split('?')[0].trim()),
+    ...(body.match(/[\w.+-]+@[\w-]+\.[\w.-]{2,}/g)||[])
+  ])].filter(e=>/^\S+@\S+\.\S+$/.test(e)).slice(0,6);
+  r.phones=[...new Set([
+    ...r.links.filter(l=>/^tel:/i.test(l.href)).map(l=>l.href.slice(4)),
+    ...(body.match(/(?:\+|00)\d[\d\s().\/-]{7,17}\d/g)||[])
+  ].map(t=>t.replace(/\s+/g,' ').trim()))].slice(0,6);
+  r.address=txt(doc.querySelector('address'));
+  r.images.forEach(im=>{im.abs=impAbsUrl(im.src,r.site);});
+  return r;
+}
+// Associe les images du HTML aux lignes extraites via l'attribut alt ou le nom de fichier
+function impAutoImgs(rows,rich,nomIx,imgIx){
+  if(!rich||!rich.images.length)return 0;
+  let n=0;
+  rows.forEach(r=>{
+    if(impT(r[imgIx]))return;
+    const pn=impNorm(r[nomIx]);if(!pn)return;
+    const hit=rich.images.find(im=>{
+      if(!im.abs)return false;
+      const k1=impNorm(im.alt),k2=impNorm((im.src.split(/[\\/]/).pop()||'').replace(/\.[^.]+$/,''));
+      return(k1.length>=4&&(pn.includes(k1)||k1.includes(pn)))||(k2.length>=4&&(pn.includes(k2)||k2.includes(pn)));
+    });
+    if(hit){r[imgIx]=hit.abs;n++;}
+  });
+  return n;
+}
 function impFromHTML(file,txt){
   const doc=new DOMParser().parseFromString(txt,'text/html');
+  const rich=impRichParse(doc);
+  impSaveLastHtml(file.name,txt);
+  // Fournisseur / transitaire : le HTML (site web) devient une fiche à valider (étape 4)
+  const type=document.getElementById('imp-type').value;
+  if(type==='fournisseurs'||type==='transitaires'){impSetFiche(file,type,rich,txt);return;}
   let best=null;
   doc.querySelectorAll('table').forEach(t=>{
     const n=t.querySelectorAll('tr').length;
@@ -3137,23 +3282,50 @@ function impFromHTML(file,txt){
   });
   if(best){
     const grid=[...best.querySelectorAll('tr')].map(tr=>[...tr.querySelectorAll('th,td')].map(td=>td.textContent.replace(/\s+/g,' ').trim()));
-    impSetTabular(file,grid.filter(r=>r.some(c=>c!=='')));
+    impSetTabular(file,grid.filter(r=>r.some(c=>c!=='')),{rich,rawHtml:txt});
   }else{
-    // innerText d'un document non rendu ne sépare pas les blocs : on force des \n aux frontières
+    // pas de table : lignes candidates depuis titres, listes et paragraphes, puis texte aplati
+    // (innerText d'un document non rendu ne sépare pas les blocs : on force des \n aux frontières)
+    const lines=[...rich.headings.map(h=>h.txt),...rich.lists.flat(),...rich.paragraphs];
     const flat=(doc.body?doc.body.innerHTML:txt).replace(/<(br|\/p|\/div|\/li|\/tr|\/h[1-6]|\/section|\/article)[^>]*>/gi,'\n');
     const text=new DOMParser().parseFromString(flat,'text/html').body.textContent||'';
-    const lines=text.split('\n').map(l=>l.replace(/\s+/g,' ').trim()).filter(Boolean);
-    impSetExtracted(file,impExtractRows(lines),'HTML');
+    text.split('\n').forEach(l=>{l=l.replace(/\s+/g,' ').trim();if(l)lines.push(l);});
+    const seen=new Set();
+    const rows=impExtractRows(lines.filter(l=>{const k=impNorm(l);if(seen.has(k))return false;seen.add(k);return true;}));
+    const nImg=impAutoImgs(rows,rich,0,3);
+    impSetExtracted(file,rows,'HTML',{rich,rawHtml:txt});
+    if(nImg)toast(`${nImg} image${nImg>1?'s':''} associée${nImg>1?'s':''} automatiquement aux produits`);
   }
 }
-function impSetTabular(file,grid){
+/* Le HTML original est mémorisé (gf_imp.lastHtml) pour pouvoir re-parser sans re-téléverser */
+function impSaveLastHtml(name,txt){
+  if(txt.length>400000)return; // trop volumineux pour localStorage
+  const prefs=LS_GET(IMPK,{});
+  prefs.lastHtml={name,txt,ts:new Date().toISOString()};
+  LS_SET(IMPK,prefs);
+}
+function impRenderLastHtml(){
+  const el=document.getElementById('imp-last-html');
+  if(!el)return;
+  const lh=LS_GET(IMPK,{}).lastHtml;
+  if(!lh){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  el.innerHTML=`<button class="btn btn-ghost btn-sm" onclick="impReparseLast()">${ICO('file')} Re-analyser le dernier HTML importé — ${String(lh.name).replace(/</g,'&lt;')} (${new Date(lh.ts).toLocaleDateString('fr-FR')})</button>`;
+}
+function impReparseLast(){
+  const lh=LS_GET(IMPK,{}).lastHtml;
+  if(!lh){toast('Aucun HTML mémorisé',true);return;}
+  try{impFromHTML({name:lh.name},lh.txt);}catch(e){toast('Re-analyse impossible — '+(e.message||e),true);}
+}
+function impSetTabular(file,grid,extra){
   if(!grid||grid.length<2)throw new Error('aucune donnée exploitable (ligne d\'en-tête + lignes de données attendues)');
-  impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1)};
+  impState={mode:'map',fileName:file.name,headers:grid[0].map(h=>String(h).trim()||'(colonne sans nom)'),rows:grid.slice(1),...(extra||{})};
   impShowStep2();
 }
-function impSetExtracted(file,rows,srcLbl){
+function impSetExtracted(file,rows,srcLbl,extra){
   if(!rows.length)throw new Error('aucun produit détecté dans ce '+srcLbl+' — essayez le format CSV ou Excel');
-  impState={mode:'edit',fileName:file.name,headers:['Nom','Prix','Description'],rows};
+  rows.forEach(r=>{while(r.length<4)r.push('');});
+  impState={mode:'edit',fileName:file.name,headers:['Nom','Prix','Description','Image URL'],rows,...(extra||{})};
   impShowStep2();
 }
 function impShowStep2(){
@@ -3162,9 +3334,18 @@ function impShowStep2(){
   document.getElementById('imp-errs').innerHTML='';
   document.getElementById('imp-prog').style.display='none';
   document.getElementById('imp-go').disabled=false;
+  const fiche=impState.mode==='fiche';
   const n=impState.rows.length;
-  document.getElementById('imp-file-line').innerHTML=`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
-  impRenderMap();impRenderPrev();
+  document.getElementById('imp-file-line').innerHTML=fiche
+    ?`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — <span style="color:var(--warn)">fiche extraite automatiquement : vérification manuelle obligatoire avant création</span>`
+    :`${ICO('file')} <b>${impState.fileName.replace(/</g,'&lt;')}</b> — ${n} ligne${n>1?'s':''} détectée${n>1?'s':''}${impState.mode==='edit'?' <span style="color:var(--warn)">· extraction automatique — corrigez ci-dessous si besoin</span>':''}`;
+  document.getElementById('imp-map-sec').style.display=fiche?'none':'';
+  document.getElementById('imp-prev-lbl').style.display=fiche?'none':'';
+  document.getElementById('imp-prev').style.display=fiche?'none':'';
+  const go=document.getElementById('imp-go-lbl');
+  if(go)go.textContent=fiche?(impState.type==='fournisseurs'?'Créer la fiche fournisseur':'Créer la fiche transitaire'):'Valider l\'import';
+  if(!fiche){impRenderMap();impRenderPrev();}
+  impUpdTools();impRenderRich();impRenderFiche();
 }
 
 /* ---- Mapping colonnes → champs (auto-détection + mémorisation) ---- */
@@ -3197,18 +3378,28 @@ function impRenderMap(){
 }
 function impMapping(type){
   const m={};
-  if(impState.mode==='edit'){m.nom=0;if(IMP_FIELDS[type].some(f=>f.k==='prix'))m.prix=1;m.desc=2;return m;}
+  if(impState.mode==='edit'){m.nom=0;if(IMP_FIELDS[type].some(f=>f.k==='prix'))m.prix=1;m.desc=2;if(IMP_FIELDS[type].some(f=>f.k==='photo'))m.photo=3;return m;}
   IMP_FIELDS[type].forEach(f=>{const el=document.getElementById('imap-'+f.k);const i=el?parseInt(el.value):-1;if(i>-1)m[f.k]=i;});
   return m;
 }
 function impRenderPrev(){
   const editable=impState.mode==='edit';
+  const type=document.getElementById('imp-type').value;
+  const imgCol=type==='produits'?impMapping(type).photo:null;
+  const showImg=imgCol!=null&&imgCol>-1;
   const rows=editable?impState.rows:impState.rows.slice(0,6);
   document.getElementById('imp-prev-lbl').textContent=editable?'Données extraites — modifiables avant validation':`Aperçu des ${Math.min(6,impState.rows.length)} premières lignes`;
-  document.getElementById('imp-prev').innerHTML=`<table><thead><tr>${editable?'<th></th>':''}${impState.headers.map(h=>`<th>${String(h).replace(/</g,'&lt;')}</th>`).join('')}</tr></thead><tbody>${
-    rows.map((r,ri)=>`<tr>${editable?`<td><button class="expand-cell" onclick="impDelRow(${ri})" title="Retirer cette ligne" aria-label="Retirer la ligne ${ri+1}">${ICO('trash')}</button></td>`:''}${impState.headers.map((h,ci)=>`<td>${
+  // Aperçu de l'image résolue (URL web / chemin local / nom de fichier → assets)
+  const thumb=r=>{
+    const raw=impT(r[imgCol]),u=impResolveImg(raw);
+    return`<td>${u
+      ?`<img class="imp-thumb" src="${u.replace(/"/g,'&quot;')}" alt="" loading="lazy" onerror="this.classList.add('bad');this.title='Image introuvable — le produit sera importé sans image'">`
+      :`<span class="imp-thumb none" title="${raw?'Lien image illisible — le produit sera importé sans image':'Aucune image'}">${ICO('image')}</span>`}</td>`;
+  };
+  document.getElementById('imp-prev').innerHTML=`<table><thead><tr>${editable?'<th></th>':''}${showImg?'<th>Aperçu</th>':''}${impState.headers.map(h=>`<th>${String(h).replace(/</g,'&lt;')}</th>`).join('')}</tr></thead><tbody>${
+    rows.map((r,ri)=>`<tr>${editable?`<td><button class="expand-cell" onclick="impDelRow(${ri})" title="Retirer cette ligne" aria-label="Retirer la ligne ${ri+1}">${ICO('trash')}</button></td>`:''}${showImg?thumb(r):''}${impState.headers.map((h,ci)=>`<td>${
       editable
-        ?`<input value="${String(r[ci]??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" oninput="impState.rows[${ri}][${ci}]=this.value" aria-label="${h} — ligne ${ri+1}">`
+        ?`<input value="${String(r[ci]??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" oninput="impState.rows[${ri}][${ci}]=this.value" onchange="if(${showImg?'true':'false'})impRenderPrev()" aria-label="${h} — ligne ${ri+1}">`
         :String(r[ci]??'').replace(/</g,'&lt;').slice(0,60)
     }</td>`).join('')}</tr>`).join('')
   }</tbody></table>`;
@@ -3241,9 +3432,12 @@ function impBuild(type,o,ix,existing){
     if(existing.has(key))return{err:'doublon — déjà au catalogue'};
     existing.add(key);
     const cat=impCat(o.cat);
+    // Image : jamais bloquante — le produit est importé sans image, avec avertissement
+    const rawImg=impT(o.photo),img=impResolveImg(rawImg);
+    const warn=img||impCtx.noImgCol?'':(rawImg?`image illisible « ${rawImg.slice(0,40)} » — importé sans image`:'image manquante — importé sans image');
     impCtx.tot++;
     const cn=prods.filter(p=>p.cat===cat).length+(impCtx.cc[cat]=(impCtx.cc[cat]||0)+1);
-    return{ent:{
+    return{warn,ent:{
       id:impId('P',ix),
       ref:`${CATS[cat]||'PRD'}-${String(cn).padStart(3,'0')}-${String(impCtx.tot).padStart(3,'0')}`,
       nom,cat,grp:'',fid:f?f.id:'',fn:f?f.nom:fn,
@@ -3254,7 +3448,7 @@ function impBuild(type,o,ix,existing){
       marge:impT(o.marge)?String(impNum(o.marge)):'',rem:0,conc:'',
       moq:Math.max(1,Math.round(impNum(o.moq))||1),
       desc:impT(o.desc),specs:impT(o.specs),
-      photos:impUrl(o.photo)?[impUrl(o.photo)]:[]
+      photos:img?[img]:[]
     }};
   }
   if(type==='fournisseurs'){
@@ -3267,7 +3461,7 @@ function impBuild(type,o,ix,existing){
     return{ent:{id:impId('F',ix),nom,contact:impT(o.contact),pays:impT(o.pays),email,
       wa:impT(o.wa),wc:impT(o.wc),dom:impT(o.dom),an:'',eval:ev,
       ali:impUrl(o.ali_url)?'Non vérifié':'Non disponible',ali_url:impUrl(o.ali_url),devis:'',
-      lang:impT(o.lang),mkt:impT(o.mkt),desc:impT(o.desc),com:'',logo:impUrl(o.logo)}};
+      lang:impT(o.lang),mkt:impT(o.mkt),desc:impT(o.desc),com:'',logo:impLogoUrl(o.logo)}};
   }
   // transitaires
   const key=impNorm(nom);
@@ -3276,10 +3470,11 @@ function impBuild(type,o,ix,existing){
   return{ent:{id:impId('T',ix),nom,dep:impT(o.dep),arr:impT(o.arr),contact:impT(o.contact),
     wa:impT(o.wa),tel:impT(o.tel),type:impT(o.type)||'Multimodale',ent:0,
     mar:impNum(o.mar)||'',mard:impNum(o.mard)||'',aer:impNum(o.aer)||'',aerd:impNum(o.aerd)||'',
-    ass:'0',logo:impUrl(o.logo)}};
+    ass:'0',logo:impLogoUrl(o.logo)}};
 }
 function impRun(){
   const type=document.getElementById('imp-type').value;
+  if(impState&&impState.mode==='fiche'){impRunFiche(type);return;}
   const map=impMapping(type);
   if(map.nom==null){toast('Associez la colonne « Nom » — champ obligatoire',true);return;}
   if(impState.mode==='map'){
@@ -3288,9 +3483,10 @@ function impRun(){
     prefs.map[type]=m;LS_SET(IMPK,prefs);
   }
   const rows=impState.rows;
-  const added=[],errs=[];
+  const added=[],errs=[],warns=[];
   const existing=impExistingKeys(type);
-  impCtx={cc:{},tot:prods.length};
+  impCtx={cc:{},tot:prods.length,noImgCol:type==='produits'&&map.photo==null};
+  if(impCtx.noImgCol)warns.push({n:'—',msg:'colonne « Image URL » non associée — tous les produits seront importés sans image'});
   document.getElementById('imp-go').disabled=true;
   document.getElementById('imp-errs').innerHTML='';
   const prog=document.getElementById('imp-prog');prog.style.display='block';
@@ -3304,15 +3500,15 @@ function impRun(){
       const o={};Object.keys(map).forEach(k=>{o[k]=rows[i][map[k]];});
       const r=impBuild(type,o,i,existing);
       if(r.err)errs.push({n:i+hdrOff,msg:r.err});
-      else added.push(r.ent);
+      else{added.push(r.ent);if(r.warn)warns.push({n:i+hdrOff,msg:r.warn});}
     }
     fill.style.width=Math.round(i/rows.length*100)+'%';
     lbl.textContent=`${i}/${rows.length} lignes traitées…`;
     if(i<rows.length){setTimeout(step,0);return;}
-    impFinish(type,added,errs);
+    impFinish(type,added,errs,warns);
   })();
 }
-function impFinish(type,added,errs){
+function impFinish(type,added,errs,warns=[]){
   if(added.length){
     if(type==='produits'){prods=prods.concat(added);save('p');renderCat();popSim();}
     if(type==='fournisseurs'){fours=fours.concat(added);save('f');renderFour();renderCat();popSim();}
@@ -3321,10 +3517,336 @@ function impFinish(type,added,errs){
   document.getElementById('imp-prog-fill').style.width='100%';
   document.getElementById('imp-prog-lbl').textContent='Terminé';
   const errHtml=errs.length?`<div class="imp-summary warn"><b>${errs.length} ligne${errs.length>1?'s':''} ignorée${errs.length>1?'s':''} :</b><br>${errs.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${errs.length>8?'<br>… et '+(errs.length-8)+' autres':''}</div>`:'';
+  const warnHtml=warns.length?`<div class="imp-summary warn"><b>${warns.length} avertissement${warns.length>1?'s':''} (lignes importées) :</b><br>${warns.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${warns.length>8?'<br>… et '+(warns.length-8)+' autres':''}</div>`:'';
   document.getElementById('imp-errs').innerHTML=
-    `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+errHtml;
-  auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length});
+    `<div class="imp-summary ok"><b>${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓</b>${added.length?' — visibles immédiatement dans l\'application.':''}</div>`+warnHtml+errHtml;
+  auditLog('import',{type,fichier:impState.fileName,importes:added.length,ignores:errs.length,avertissements:warns.length});
   toast(added.length?`${added.length} ${IMP_LBL[type]} importé${added.length>1?'s':''} ✓`:'Aucune ligne importée — voir le détail dans la fenêtre',!added.length);
+}
+
+/* ---- Fiche fournisseur / transitaire depuis un site HTML (étape 4) ----
+   Extraction heuristique (nom, logo, description, contacts, routes) puis
+   validation manuelle obligatoire dans un éditeur avec aperçu de la fiche. */
+const IMP_FICHE_FIELDS={
+  fournisseurs:[
+    {k:'nom',lbl:'Nom entreprise *'},
+    {k:'contact',lbl:'Personne de contact'},
+    {k:'pays',lbl:'Pays'},
+    {k:'email',lbl:'Email'},
+    {k:'wa',lbl:'WhatsApp / Téléphone'},
+    {k:'wc',lbl:'WeChat'},
+    {k:'dom',lbl:'Domaine d\'activité'},
+    {k:'ali_url',lbl:'Site web / Alibaba'},
+    {k:'lang',lbl:'Langues'},
+    {k:'mkt',lbl:'Marchés'},
+    {k:'adresse',lbl:'Adresse'},
+  ],
+  transitaires:[
+    {k:'nom',lbl:'Nom entreprise *'},
+    {k:'contact',lbl:'Contact (email)'},
+    {k:'tel',lbl:'Téléphone'},
+    {k:'wa',lbl:'WhatsApp'},
+    {k:'dep',lbl:'Pays de départ'},
+    {k:'arr',lbl:'Pays d\'arrivée'},
+    {k:'type',lbl:'Type logistique'},
+    {k:'mar',lbl:'Tarif maritime (XOF/CBM)'},
+    {k:'mard',lbl:'Délai maritime (j)'},
+    {k:'aer',lbl:'Tarif aérien (XOF/kg)'},
+    {k:'aerd',lbl:'Délai aérien (j)'},
+    {k:'site',lbl:'Site web'},
+    {k:'adresse',lbl:'Adresse'},
+  ],
+};
+function impExtractFiche(type,rich){
+  const h1=(rich.headings.find(h=>h.tag==='h1')||{}).txt||'';
+  const nom=((h1||rich.title||'').split(/\s*[|–—•·]\s*/)[0]||'').trim().slice(0,80);
+  const logo=(rich.images.find(im=>im.abs&&/logo/i.test(im.src+' '+im.alt+' '+im.hint))||{}).abs||'';
+  const desc=(rich.metaDesc||[...rich.paragraphs.slice(0,4)].sort((a,b)=>b.length-a.length)[0]||'').slice(0,500);
+  const t=rich.textLow||'';
+  const base={nom,logo,desc,adresse:rich.address||''};
+  if(type==='fournisseurs')return{...base,
+    contact:'',pays:/chin|shenzhen|guangzhou|ningbo|yiwu|shanghai|shaanxi/.test(t)?'Chine':'',
+    email:rich.emails[0]||'',wa:rich.phones[0]||'',wc:'',dom:'',
+    ali_url:rich.site||'',lang:'',mkt:''};
+  const modes=(/a[ée]rien|air freight|air cargo|avion/.test(t)?1:0)+(/maritime|sea freight|ocean|bateau|conteneur|container/.test(t)?2:0);
+  return{...base,
+    contact:rich.emails[0]||'',tel:rich.phones[0]||'',wa:rich.phones[1]||rich.phones[0]||'',
+    dep:/chin|china|guangzhou|shenzhen/.test(t)?'Chine':'',
+    arr:/togo|lom[eé]|afrique|africa|west africa|abidjan|cotonou|dakar/.test(t)?'Afrique de l\'Ouest':'',
+    type:modes===3?'Multimodale':modes===1?'Aérienne':modes===2?'Maritime':'Multimodale',
+    mar:'',mard:'',aer:'',aerd:'',site:rich.site||''};
+}
+function impSetFiche(file,type,rich,rawHtml){
+  impState={mode:'fiche',fileName:file.name,type,fiche:impExtractFiche(type,rich),rich,rawHtml,headers:[],rows:[]};
+  impShowStep2();
+}
+function impRenderFiche(){
+  const sec=document.getElementById('imp-fiche-sec');
+  if(!sec)return;
+  if(!impState||impState.mode!=='fiche'){sec.style.display='none';sec.innerHTML='';return;}
+  sec.style.display='block';
+  const f=impState.fiche,type=impState.type;
+  const okImgs=impState.rich?impState.rich.images.filter(im=>im.abs):[];
+  sec.innerHTML=`
+    <div class="fiche-grid">
+      <div>
+        <div class="fg" style="grid-template-columns:1fr 1fr">
+          ${IMP_FICHE_FIELDS[type].map(fd=>`<div class="fgrp"><label class="flbl" for="fic-${fd.k}">${fd.lbl}</label><input class="fc" id="fic-${fd.k}" value="${impEsc(f[fd.k])}" oninput="impState.fiche.${fd.k}=this.value;impFichePrev()"></div>`).join('')}
+        </div>
+        <div class="fgrp" style="margin-top:8px"><label class="flbl" for="fic-desc">Description</label><textarea class="fc" id="fic-desc" rows="3" oninput="impState.fiche.desc=this.value;impFichePrev()">${impEsc(f.desc)}</textarea></div>
+        <div class="fgrp" style="margin-top:8px"><label class="flbl" for="fic-logo">Logo (URL)</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <img id="fic-logo-prev" class="imp-thumb" src="${impEsc(f.logo)}" alt="" style="${f.logo?'':'display:none'}" onerror="this.style.display='none'">
+            <input class="fc" id="fic-logo" value="${impEsc(f.logo)}" style="flex:1" oninput="impState.fiche.logo=this.value;impFicheLogoPrev()">
+          </div>
+        </div>
+        ${okImgs.length?`
+        <div class="flbl" style="margin:12px 0 6px">Images du site (${okImgs.length}) — cliquez pour définir le logo</div>
+        <div class="rich-imgs">${okImgs.slice(0,12).map((im,i)=>`<button class="rich-img fiche-imgbtn${f.logo===im.abs?' sel':''}" onclick="impFicheSetLogo(${i})" title="Utiliser comme logo" aria-label="Utiliser cette image comme logo"><img src="${impEsc(im.abs)}" alt="${impEsc(im.alt)}" loading="lazy" onerror="this.closest('.rich-img').classList.add('bad')"></button>`).join('')}</div>
+        <div style="margin-top:10px"><button class="btn btn-sec btn-sm" onclick="impImgsZip('supplier')">${ICO('download')} Télécharger logo + images (ZIP → assets/supplier/)</button></div>`:''}
+      </div>
+      <div>
+        <div class="flbl" style="margin-bottom:6px">Aperçu de la fiche</div>
+        <div class="fiche-card" id="fiche-card"></div>
+      </div>
+    </div>`;
+  impFichePrev();
+}
+function impFicheSetLogo(i){
+  const im=impState.rich.images.filter(x=>x.abs)[i];
+  if(!im)return;
+  impState.fiche.logo=impState.fiche.logo===im.abs?'':im.abs;
+  impRenderFiche();
+}
+function impFicheLogoPrev(){
+  const im=document.getElementById('fic-logo-prev');
+  if(!im)return;
+  const u=impT(impState.fiche.logo);
+  im.src=u;im.style.display=u?'':'none';
+  impFichePrev();
+}
+function impFichePrev(){
+  const el=document.getElementById('fiche-card');
+  if(!el||!impState||impState.mode!=='fiche')return;
+  const f=impState.fiche,type=impState.type;
+  const line=(ico,val)=>impT(val)?`<div class="fiche-line">${ICO(ico)}<span>${impEsc(val)}</span></div>`:'';
+  el.innerHTML=`
+    <div class="fiche-head">
+      ${impT(f.logo)?`<img src="${impEsc(f.logo)}" alt="" onerror="this.style.display='none'">`:''}
+      <div><div class="fiche-nom">${impEsc(f.nom)||'<span style="color:var(--muted)">Nom manquant</span>'}</div>
+      <div class="fiche-sub">${impEsc(type==='fournisseurs'?[f.pays,f.dom].filter(Boolean).join(' · '):[f.dep&&'De '+f.dep,f.arr&&'vers '+f.arr,f.type].filter(Boolean).join(' · '))}</div></div>
+    </div>
+    ${impT(f.desc)?`<div class="fiche-desc">${impEsc(f.desc)}</div>`:''}
+    ${line('mail',type==='fournisseurs'?f.email:f.contact)}
+    ${line('phone',type==='fournisseurs'?f.wa:(f.tel||f.wa))}
+    ${line('globe',type==='fournisseurs'?f.ali_url:f.site)}
+    ${type==='fournisseurs'?line('user',f.contact):''}
+    ${line('target',f.adresse)}
+    ${type==='transitaires'?line('ship',impT(f.mar)?f.mar+' XOF/CBM · '+(f.mard||'—')+' j':''):''}
+    ${type==='transitaires'?line('plane',impT(f.aer)?f.aer+' XOF/kg · '+(f.aerd||'—')+' j':''):''}`;
+}
+/* Création de la fiche — réutilise impBuild (validation email, doublons, format
+   d'entité) pour rester cohérent avec l'import tabulaire. */
+function impRunFiche(type){
+  const f=impState.fiche;
+  if(!impT(f.nom)){toast('Le nom de l\'entreprise est obligatoire',true);return;}
+  const o=type==='fournisseurs'
+    ?{nom:f.nom,contact:f.contact,pays:f.pays,email:f.email,wa:f.wa,wc:f.wc,dom:f.dom,
+      ali_url:f.ali_url,lang:f.lang,mkt:f.mkt,logo:f.logo,
+      desc:[impT(f.desc),impT(f.adresse)?'Adresse : '+impT(f.adresse):''].filter(Boolean).join('\n')}
+    :{nom:f.nom,dep:f.dep,arr:f.arr,contact:f.contact,wa:f.wa,tel:f.tel,type:f.type,
+      mar:f.mar,mard:f.mard,aer:f.aer,aerd:f.aerd,logo:f.logo};
+  const r=impBuild(type,o,0,impExistingKeys(type));
+  if(r.err){
+    document.getElementById('imp-errs').innerHTML=`<div class="imp-summary warn"><b>Création impossible :</b> ${r.err}</div>`;
+    toast('Création impossible — '+r.err,true);return;
+  }
+  if(type==='transitaires')r.ent.desc=[impT(f.desc),impT(f.site)?'Site : '+impT(f.site):'',impT(f.adresse)?'Adresse : '+impT(f.adresse):''].filter(Boolean).join('\n');
+  impFinish(type,[r.ent],[],[]);
+  document.getElementById('imp-go').disabled=true; // évite une double création au re-clic
+}
+
+/* ---- Panneau « contenu extrait » du HTML : sections éditables (étape 3) ---- */
+const impEsc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function impRichRef(path){
+  const parts=String(path).split('.');
+  let obj=impState.rich;
+  for(let i=0;i<parts.length-1&&obj;i++)obj=obj[parts[i]];
+  return{obj,key:parts[parts.length-1]};
+}
+function impRichSet(path,val){
+  const{obj,key}=impRichRef(path);
+  if(obj)obj[key]=val;
+}
+function impRichDel(path){
+  const{obj,key}=impRichRef(path);
+  if(Array.isArray(obj))obj.splice(parseInt(key),1);
+  else if(obj)obj[key]='';
+  impRenderRich();
+}
+function impRichAdd(){
+  if(!impState.rich)return;
+  impState.rich.custom.push({k:'',v:''});
+  impRenderRich();
+}
+function impRenderRich(){
+  const sec=document.getElementById('imp-rich-sec');
+  if(!sec)return;
+  const r=impState&&impState.rich;
+  if(!r||impState.mode==='fiche'){sec.style.display='none';sec.innerHTML='';return;}
+  sec.style.display='block';
+  const inp=(path,val,ph)=>`<div class="rich-row"><input class="fc" value="${impEsc(val)}" placeholder="${ph||''}" oninput="impRichSet('${path}',this.value)" aria-label="${ph||'Information extraite'}"><button class="expand-cell" onclick="impRichDel('${path}')" title="Supprimer" aria-label="Supprimer cette information">${ICO('trash')}</button></div>`;
+  const sect=(title,inner,open)=>inner?`<details class="rich-sect"${open?' open':''}><summary>${title}</summary><div class="rich-body">${inner}</div></details>`:'';
+  const gen=[
+    r.title?inp('title',r.title,'Titre de la page'):'',
+    r.metaDesc?inp('metaDesc',r.metaDesc,'Meta description'):'',
+    ...r.headings.map((h,i)=>inp(`headings.${i}.txt`,h.txt,'Titre '+h.tag)),
+  ].join('');
+  const desc=r.paragraphs.map((t,i)=>inp(`paragraphs.${i}`,t,'Paragraphe')).join('');
+  const contact=[
+    ...r.emails.map((e,i)=>inp(`emails.${i}`,e,'Email')),
+    ...r.phones.map((t,i)=>inp(`phones.${i}`,t,'Téléphone')),
+    r.address?inp('address',r.address,'Adresse'):'',
+    r.site?inp('site',r.site,'Site web'):'',
+  ].join('');
+  const lists=r.lists.map((l,i)=>l.map((it,j)=>inp(`lists.${i}.${j}`,it,'Élément de liste')).join('')).join('<hr class="rich-hr">');
+  const okImgs=r.images.filter(im=>im.abs);
+  const nRel=r.images.length-okImgs.length;
+  const imgs=okImgs.length?`<div class="rich-imgs">${okImgs.map((im,i)=>`
+    <div class="rich-img">
+      <img src="${impEsc(im.abs)}" alt="${impEsc(im.alt)}" loading="lazy" onerror="this.closest('.rich-img').classList.add('bad')">
+      <select class="fc" onchange="impRichUseImg(${i},this)" aria-label="Associer cette image à une ligne du tableau">
+        <option value="">Associer à…</option>
+        ${impState.rows.slice(0,80).map((row,ri)=>`<option value="${ri}">L${ri+1} — ${impEsc(String(row[0]||'').slice(0,26))}</option>`).join('')}
+      </select>
+    </div>`).join('')}</div>
+    ${nRel?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${nRel} image(s) au chemin relatif non résolu (site source inconnu) ignorée(s)</div>`:''}
+    <div style="margin-top:10px"><button class="btn btn-sec btn-sm" onclick="impImgsZip('produits')">${ICO('download')} Télécharger les images (ZIP → assets/Products images/)</button></div>`:'';
+  const custom=r.custom.map((cst,i)=>`<div class="rich-row"><input class="fc" style="max-width:150px;flex:0 1 auto" value="${impEsc(cst.k)}" placeholder="Nom du champ" oninput="impRichSet('custom.${i}.k',this.value)" aria-label="Nom du champ ajouté"><input class="fc" value="${impEsc(cst.v)}" placeholder="Valeur" oninput="impRichSet('custom.${i}.v',this.value)" aria-label="Valeur du champ ajouté"><button class="expand-cell" onclick="impRichDel('custom.${i}')" title="Supprimer" aria-label="Supprimer ce champ">${ICO('trash')}</button></div>`).join('');
+  sec.innerHTML=`
+    <div class="flbl" style="margin:2px 0 8px">Contenu extrait du HTML <span style="text-transform:none;letter-spacing:0;font-weight:400">(vérifiez, corrigez ou supprimez — les tarifs restent dans le tableau ci-dessus)</span></div>
+    ${sect('Infos générales',gen,true)}
+    ${sect('Description',desc)}
+    ${sect('Contact',contact)}
+    ${sect(`Images (${okImgs.length})`,imgs)}
+    ${sect('Listes à puces',lists)}
+    ${custom?sect('Champs ajoutés',custom,true):''}
+    <div style="margin:8px 0 14px"><button class="btn btn-ghost btn-sm" onclick="impRichAdd()">${ICO('plus')} Ajouter un champ</button></div>`;
+}
+function impRichUseImg(i,sel){
+  const ri=parseInt(sel.value);sel.value='';
+  if(isNaN(ri))return;
+  const im=impState.rich.images.filter(x=>x.abs)[i];
+  if(!im)return;
+  const col=impEnsureImgCol();
+  impState.rows[ri][col]=im.abs;
+  impRenderPrev();
+  toast(`Image associée à la ligne ${ri+1} ✓`);
+}
+/* Télécharge les images extraites en ZIP, nommées avec le dossier assets cible */
+async function impImgsZip(kind){
+  const r=impState&&impState.rich;
+  if(!r)return;
+  const imgs=(kind==='supplier'&&impState.fiche?[{abs:impState.fiche.logo,alt:'logo'}].filter(x=>x.abs):[]).concat(r.images.filter(im=>im.abs));
+  const seen=new Set(),list=imgs.filter(im=>{if(seen.has(im.abs))return false;seen.add(im.abs);return true;});
+  if(!list.length){toast('Aucune image téléchargeable',true);return;}
+  const dir=kind==='supplier'?'assets/supplier/':'assets/Products images/';
+  const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
+  prog.style.display='block';fill.style.width='0%';
+  const files=[];let fail=0;const used=new Set();
+  const uniq=n=>{let b=n,i=2;while(used.has(b)){b=n.replace(/(\.[^.]+)$/,`-${i}$1`);i++;}used.add(b);return b;};
+  for(let i=0;i<list.length;i++){
+    lbl.textContent=`Téléchargement ${i+1}/${list.length}…`;
+    try{
+      const res=await fetch(list[i].abs);
+      if(!res.ok)throw new Error(res.status);
+      const blob=await res.blob();
+      let name=decodeURIComponent((list[i].abs.split('/').pop()||'').split('?')[0]).trim()||'image-'+(i+1)+'.jpg';
+      if(/^data:/.test(list[i].abs))name=(impNorm(list[i].alt)||'image-'+(i+1))+'.jpg';
+      if(!impImgExt.test(name))name+='.jpg';
+      files.push({name:dir+uniq(name.replace(/[^\w .()À-ſ-]/g,'_')),blob});
+    }catch(_){fail++;}
+    fill.style.width=Math.round((i+1)/list.length*100)+'%';
+  }
+  prog.style.display='none';
+  if(!files.length){toast('Téléchargement impossible — le site source bloque l\'accès (CORS)',true);return;}
+  expSaveBlob(await zipStore(files),'GoFlow_ImagesHTML_'+new Date().toISOString().slice(0,10)+'.zip');
+  auditLog('html_images_zip',{fichier:impState.fileName,images:files.length,echecs:fail,dossier:dir});
+  toast(`${files.length} image${files.length>1?'s':''} dans le ZIP ✓ — à déposer dans ${dir.replace(/\/$/,'')}${fail?` (${fail} échec${fail>1?'s':''} CORS)`:''}`);
+}
+
+/* ---- Upload d'images en masse : dossier (ou fichiers) → association par nom ----
+   Les images sont réduites (700 px max, JPEG) et stockées en data-URL dans la
+   colonne « Image URL » de la ligne dont le nom de produit correspond au nom
+   de fichier (ex. hydrafacial.jpg → « Hydrafacial 17-en-1 »). */
+function impFileToDataURL(f,max=700){
+  return new Promise(res=>{
+    const url=URL.createObjectURL(f);
+    const im=new Image();
+    im.onload=()=>{
+      const s=Math.min(1,max/Math.max(im.width,im.height));
+      const cv=document.createElement('canvas');
+      cv.width=Math.max(1,Math.round(im.width*s));cv.height=Math.max(1,Math.round(im.height*s));
+      cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+      URL.revokeObjectURL(url);
+      res(cv.toDataURL('image/jpeg',.82));
+    };
+    im.onerror=()=>{URL.revokeObjectURL(url);res('');};
+    im.src=url;
+  });
+}
+/* Garantit une colonne « Image URL » dans les données en cours (la crée au besoin,
+   en préservant le mapping déjà choisi par l'utilisateur). Retourne son index. */
+function impEnsureImgCol(){
+  let col=impMapping('produits').photo;
+  if(col!=null)return col;
+  const saveSel={};
+  if(impState.mode==='map')IMP_FIELDS.produits.forEach(f=>{const el=document.getElementById('imap-'+f.k);if(el)saveSel[f.k]=el.value;});
+  impState.headers.push('Image URL');
+  impState.rows.forEach(r=>r.push(''));
+  col=impState.headers.length-1;
+  if(impState.mode==='map'){
+    impRenderMap();
+    Object.keys(saveSel).forEach(k=>{const el=document.getElementById('imap-'+k);if(el&&saveSel[k]!=null)el.value=saveSel[k];});
+    const ph=document.getElementById('imap-photo');if(ph)ph.value=String(col);
+  }
+  return col;
+}
+async function impBulkImgs(inp){
+  const files=[...inp.files].filter(f=>/^image\//.test(f.type)||impImgExt.test(f.name));
+  inp.value='';
+  if(!impState||document.getElementById('imp-type').value!=='produits')return;
+  if(!files.length){toast('Aucune image dans la sélection',true);return;}
+  const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
+  prog.style.display='block';fill.style.width='0%';lbl.textContent='Lecture des images…';
+  const col=impEnsureImgCol();
+  const nomCol=impMapping('produits').nom??0;
+  const keyOf=n=>impNorm(String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/,''));
+  const items=[];
+  for(let i=0;i<files.length;i++){
+    const d=await impFileToDataURL(files[i]);
+    if(d)items.push({key:keyOf(files[i].name),data:d});
+    fill.style.width=Math.round((i+1)/files.length*100)+'%';
+    lbl.textContent=`Lecture des images… ${i+1}/${files.length}`;
+  }
+  let hits=0;
+  impState.rows.forEach(r=>{
+    const pn=impNorm(r[nomCol]);
+    if(!pn)return;
+    let best=null,bs=0;
+    items.forEach(it=>{
+      if(!it.key)return;
+      let s=0;
+      if(it.key===pn)s=3;
+      else if(pn.includes(it.key)&&it.key.length>=4)s=2;
+      else if(it.key.includes(pn)&&pn.length>=4)s=1;
+      if(s>bs){bs=s;best=it;}
+    });
+    if(best){r[col]=best.data;hits++;}
+  });
+  impRenderPrev();
+  prog.style.display='none';
+  toast(hits?`${hits} produit${hits>1?'s':''} associé${hits>1?'s':''} à une image ✓`:'Aucune correspondance entre noms de fichiers et noms de produits',!hits);
 }
 /* ===== FIN MODULE IMPORT ===== */
 
@@ -3333,6 +3855,8 @@ function impFinish(type,added,errs){
    Sélection par cases à cocher dans le Catalogue, 6 templates,
    couleurs personnalisables, logo positionnable, aperçu live,
    téléchargement PNG unitaires ou ZIP (writer natif sans lib).
+   Infos affichées : mêmes clés que les colonnes du catalogue —
+   synchro par défaut, personnalisables + réordonnables (drag & drop).
    Préférences mémorisées dans gf_exp.
    ============================================================ */
 const EXK='gf_exp';
@@ -3344,8 +3868,99 @@ const EXP_TPLS=[
   {k:'badge',lbl:'Badge prix',sw:'radial-gradient(circle at 72% 28%,#FFD700 20%,#E9EDF6 21%)'},
   {k:'catalogue',lbl:'Fiche catalogue',sw:'linear-gradient(90deg,#E9EDF6 50%,#fff 50%)'},
 ];
-let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0;
-let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,...LS_GET(EXK,{})};
+let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0,expDragKey=null;
+let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,infosOn:null,infosOrder:null,...LS_GET(EXK,{})};
+
+/* ---- Informations affichées sur l'image ----
+   Mêmes clés que les colonnes du catalogue (CM_DEFS.catalogue) : tant que
+   l'utilisateur n'a pas personnalisé (infosOn===null), l'export reprend
+   les colonnes visibles du catalogue ; ses choix et leur ordre sont ensuite
+   mémorisés dans gf_exp (infosOn / infosOrder). */
+const EXP_INFOS=[
+  {k:'cat',    lbl:'Catégorie',          v:p=>p.cat||''},
+  {k:'four',   lbl:'Fournisseur',        v:p=>{const f=fours.find(x=>x.id===p.fid);return f?f.nom:(p.fn||'');}},
+  {k:'cbm',    lbl:'CBM',                v:(p,c)=>c.cbm?Nd(c.cbm,4)+' m³':''},
+  {k:'poids',  lbl:'Poids',              v:p=>p.kg?p.kg+' kg':''},
+  {k:'achat',  lbl:'Achat EXW',          v:(p,c)=>N(c.exwUX)},
+  {k:'prach',  lbl:'Fret local',         v:(p,c)=>c.fretLocalX?N(c.fretLocalX):''},
+  {k:'revient',lbl:'Coût de Revient HT', v:(p,c)=>N(c.coutRevientUX)},
+  {k:'fret',   lbl:'Frais logistiques',  v:(p,c)=>N(c.fraisLogU)},
+  {k:'marge',  lbl:'Marge',              v:(p,c)=>N(c.margeU)+' ('+Nd(c.margePct,1)+'%)'},
+  {k:'vente',  lbl:'Prix de Vente HT',   v:(p,c)=>N(c.pvuHT)},
+  {k:'ttc',    lbl:'Prix de Vente TTC',  v:(p,c)=>N(c.pvuTTC),big:true},
+  {k:'delai',  lbl:'Délai livraison',    v:p=>prodDelai(p)},
+  {k:'marche', lbl:'Prix marché',        v:p=>p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':''},
+];
+// État effectif {order:[clé…], on:[clé…]} — infosOn null en prefs = synchro catalogue
+function expInfoState(){
+  const all=EXP_INFOS.map(i=>i.k);
+  const so=Array.isArray(expPrefs.infosOrder)?expPrefs.infosOrder.filter(k=>all.includes(k)):[];
+  const order=so.concat(all.filter(k=>!so.includes(k)));
+  let on;
+  if(Array.isArray(expPrefs.infosOn))on=expPrefs.infosOn.filter(k=>all.includes(k));
+  else{
+    const vis=cmVisible('catalogue');
+    on=all.filter(k=>vis[k]);
+    if(expPrefs.showMarge&&!on.includes('marge'))on.push('marge'); // reprise de l'ancienne préférence
+  }
+  return{order,on};
+}
+function expInfoSave(st){
+  expPrefs.infosOrder=st.order;expPrefs.infosOn=st.on;
+  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+}
+function expInfoToggle(k,on){
+  const st=expInfoState();
+  st.on=st.order.filter(x=>x===k?on:st.on.includes(x));
+  expInfoSave(st);
+}
+function expInfoMove(k,d){
+  const st=expInfoState();
+  const i=st.order.indexOf(k),j=i+d;
+  if(i<0||j<0||j>=st.order.length)return;
+  st.order.splice(j,0,st.order.splice(i,1)[0]);
+  st.on=st.order.filter(x=>st.on.includes(x));
+  expInfoSave(st);
+}
+function expInfoMoveTo(k,before){
+  const st=expInfoState();
+  const from=st.order.indexOf(k),to=st.order.indexOf(before);
+  if(from<0||to<0||from===to)return;
+  st.order.splice(to,0,st.order.splice(from,1)[0]);
+  st.on=st.order.filter(x=>st.on.includes(x));
+  expInfoSave(st);
+}
+function expSyncCat(){
+  expPrefs.infosOn=null;expPrefs.infosOrder=null;
+  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+  toast('Informations synchronisées avec les colonnes du catalogue ✓');
+}
+function expInfoDragStart(e,k){expDragKey=k;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',k);}catch(_){}}
+function expInfoDragOver(e,k){if(!expDragKey||expDragKey===k)return;e.preventDefault();e.dataTransfer.dropEffect='move';e.currentTarget.classList.add('drag-over');}
+function expInfoDrop(e,k){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  if(expDragKey&&expDragKey!==k)expInfoMoveTo(expDragKey,k);
+  expDragKey=null;
+}
+function expRenderInfos(){
+  const host=document.getElementById('exp-infos');if(!host)return;
+  const st=expInfoState();
+  host.innerHTML=st.order.map((k,i)=>{
+    const d=EXP_INFOS.find(x=>x.k===k),on=st.on.includes(k);
+    return`<div class="exp-info-row${on?'':' off'}" draggable="true" ondragstart="expInfoDragStart(event,'${k}')" ondragover="expInfoDragOver(event,'${k}')" ondragleave="this.classList.remove('drag-over')" ondrop="expInfoDrop(event,'${k}')" ondragend="expDragKey=null">
+      <span class="exp-drag" title="Glisser pour réordonner" aria-hidden="true"><i></i><i></i><i></i></span>
+      <label><input type="checkbox" ${on?'checked':''} onchange="expInfoToggle('${k}',this.checked)" aria-label="Afficher ${d.lbl} sur l'image">${d.lbl}</label>
+      <span class="exp-updown">
+        <button onclick="expInfoMove('${k}',-1)" ${i===0?'disabled':''} aria-label="Monter ${d.lbl}"><svg class="ic" style="transform:rotate(-90deg)" aria-hidden="true"><use href="#i-chev"/></svg></button>
+        <button onclick="expInfoMove('${k}',1)" ${i===st.order.length-1?'disabled':''} aria-label="Descendre ${d.lbl}"><svg class="ic" style="transform:rotate(90deg)" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      </span>
+    </div>`;
+  }).join('');
+  const hint=document.getElementById('exp-infos-hint');
+  if(hint)hint.textContent=(Array.isArray(expPrefs.infosOn)?'Personnalisé':'Synchronisé avec le catalogue')+` — ${st.on.length}/${st.order.length} infos`;
+  const sync=document.getElementById('exp-sync-btn');
+  if(sync)sync.style.display=Array.isArray(expPrefs.infosOn)?'':'none';
+}
 
 /* ---- Mode sélection dans le Catalogue ---- */
 function expBox(id){
@@ -3381,8 +3996,7 @@ function openExportModal(){
   document.getElementById('exp-bg').value=expPrefs.bg;
   document.getElementById('exp-txt').value=expPrefs.txt;
   document.getElementById('exp-logo').value=expPrefs.logoPos;
-  document.getElementById('exp-marge').checked=!!expPrefs.showMarge;
-  expRenderTpls();
+  expRenderTpls();expRenderInfos();
   openMod('export-modal');
   expPreview();
 }
@@ -3395,7 +4009,6 @@ function expPrefChange(){
   expPrefs.bg=document.getElementById('exp-bg').value;
   expPrefs.txt=document.getElementById('exp-txt').value;
   expPrefs.logoPos=document.getElementById('exp-logo').value;
-  expPrefs.showMarge=document.getElementById('exp-marge').checked;
   LS_SET(EXK,expPrefs);expPreview();
 }
 function expNav(d){const n=expSel.size;if(!n)return;expIdx=(expIdx+d+n)%n;expPreview();}
@@ -3474,88 +4087,123 @@ function expLogo(x,pos,color,shadow){
   x.fillStyle=color;x.fillText(t3,px+x.measureText(t1+t2).width,py);
   x.restore();
 }
-// Bloc prix HT / marge / TTC aligné sur deux colonnes
-function expPrices(x,c,o,y,color,accent,x0,x1){
-  const row=(lbl,val,big)=>{
-    x.font=(big?'600 33px':'500 29px')+' Poppins,sans-serif';
-    x.fillStyle=color;x.globalAlpha=.72;x.fillText(lbl,x0,y);x.globalAlpha=1;
-    x.textAlign='right';
-    x.font=(big?'800 54px':'700 38px')+' Montserrat,sans-serif';
-    x.fillStyle=big?accent:color;x.fillText(val,x1,y);
+/* Lignes d'infos génériques (libellé à gauche, valeur à droite), ancrées au bas
+   du bloc [x0…x1, yBot] ; la hauteur de ligne s'adapte au nombre d'infos. */
+function expInfoRows(p,c){
+  const st=expInfoState();
+  return st.order.filter(k=>st.on.includes(k)).map(k=>{
+    const d=EXP_INFOS.find(i=>i.k===k);
+    return{k,lbl:d.lbl,val:String(d.v(p,c)||'').trim(),big:!!d.big};
+  }).filter(r=>r.val&&r.val!=='—');
+}
+function expFitText(x,text,maxW){
+  let t=String(text);
+  if(x.measureText(t).width<=maxW)return t;
+  while(t.length>1&&x.measureText(t+'…').width>maxW)t=t.slice(0,-1);
+  return t+'…';
+}
+function expRowsH(rows,maxH){
+  if(!rows.length)return 0;
+  const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
+  return Math.round(u*Math.max(24,Math.min(62,Math.floor(maxH/u))));
+}
+function expRowsBlock(x,rows,o){
+  if(!rows.length)return;
+  const u=rows.reduce((s,r)=>s+(r.big?1.35:1),0);
+  const rh=Math.max(24,Math.min(62,Math.floor(o.maxH/u)));
+  let y=o.yBot-Math.round(u*rh);
+  x.save();
+  rows.forEach(r=>{
+    const h=Math.round(rh*(r.big?1.35:1)),base=y+Math.round(h*.72);
     x.textAlign='left';
-    y+=big?0:62;
-  };
-  row('Prix de Vente HT',N(c.pvuHT));
-  if(o.showMarge)row(`Marge (${Nd(c.margePct,1)}%)`,N(c.margeU));
-  row('Prix de Vente TTC',N(c.pvuTTC),true);
+    x.font=`${r.big?600:500} ${Math.round(rh*(r.big?.52:.46))}px Poppins,sans-serif`;
+    x.fillStyle=o.color;x.globalAlpha=.72;
+    const lbl=expFitText(x,r.lbl,(o.x1-o.x0)*.52);
+    x.fillText(lbl,o.x0,base);
+    const lw=x.measureText(lbl).width;
+    x.globalAlpha=1;
+    expFitFont(x,r.val,o.x1-o.x0-lw-26,'Montserrat,sans-serif',r.big?800:700,Math.round(rh*(r.big?.92:.62)),15);
+    x.textAlign='right';x.fillStyle=r.big?o.accent:o.color;x.fillText(r.val,o.x1,base);
+    x.textAlign='left';
+    y+=h;
+  });
+  x.restore();
 }
 function expDraw(cv,p,img){
   const x=cv.getContext('2d');
   const W=1080,H=1080;
   cv.width=W;cv.height=H;
   const c=calc(p),o=expPrefs;
+  const rows=expInfoRows(p,c);
   x.textAlign='left';x.textBaseline='alphabetic';
-  const yP=o.showMarge?832:894; // départ du bloc prix
   switch(o.tpl){
     case'gradient':{
       x.fillStyle=expGrad(x,0,0,W,H);x.fillRect(0,0,W,H);
       x.fillStyle='#fff';expRRect(x,50,50,980,980,32);x.fill();
-      expCover(x,img,90,90,900,500,20);
+      const yBot=988,ih=expRowsH(rows,400);
+      const imgH=Math.max(260,Math.min(500,yBot-ih-90-176));
+      expCover(x,img,90,90,900,imgH,20);
       x.fillStyle=o.txt;x.font='800 52px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,90,682,900,60,2);
-      x.font='500 27px Poppins,sans-serif';x.globalAlpha=.6;x.fillText(p.cat||'',90,682+n*60+2);x.globalAlpha=1;
-      expPrices(x,c,o,o.showMarge?848:900,o.txt,'#0066CC',90,990);
+      const ny=90+imgH+64;
+      const n=expWrap(x,p.nom,90,ny,900,60,2);
+      x.font='500 27px Poppins,sans-serif';x.globalAlpha=.6;x.fillText(p.ref||'',90,ny+n*60+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:90,x1:990,yBot,maxH:Math.max(40,yBot-(ny+n*60+30)),color:o.txt,accent:'#0066CC'});
       break;
     }
     case'nuit':{
       x.fillStyle='#1A1A2E';x.fillRect(0,0,W,H);
       x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,10);
-      expCover(x,img,60,64,960,530,24);
+      const yBot=1006,ih=expRowsH(rows,430);
+      const imgH=Math.max(280,Math.min(530,yBot-ih-64-186));
+      expCover(x,img,60,64,960,imgH,24);
       x.fillStyle='#fff';x.font='800 54px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,688,960,64,2);
-      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.55;x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,688+n*64+2);x.globalAlpha=1;
-      expPrices(x,c,o,yP,'#fff','#FFD700',60,1020);
+      const ny=64+imgH+70;
+      const n=expWrap(x,p.nom,60,ny,960,64,2);
+      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.ref||'',60,ny+n*64+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:60,x1:1020,yBot,maxH:Math.max(40,yBot-(ny+n*64+30)),color:'#fff',accent:'#FFD700'});
       expLogo(x,o.logoPos,'#fff');
       break;
     }
     case'minimal':{
       x.fillStyle=o.bg;x.fillRect(0,0,W,H);
-      expCover(x,img,250,84,580,580,18);
+      const ih=expRowsH(rows,360);
+      const s=Math.max(330,Math.min(580,H-84-176-ih-56));
+      expCover(x,img,(W-s)/2,84,s,s,18);
       x.textAlign='center';
       x.fillStyle=o.txt;x.font='700 48px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,W/2,750,900,58,2);
-      x.font='400 26px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.cat||'',W/2,750+n*58+2);x.globalAlpha=1;
+      const ny=84+s+64;
+      const n=expWrap(x,p.nom,W/2,ny,900,58,2);
+      x.font='400 26px Poppins,sans-serif';x.globalAlpha=.55;x.fillText(p.ref||'',W/2,ny+n*58);x.globalAlpha=1;
+      const top=ny+n*58+26;
       x.globalAlpha=.16;x.strokeStyle=o.txt;x.lineWidth=2;
-      x.beginPath();x.moveTo(240,878);x.lineTo(840,878);x.stroke();x.globalAlpha=1;
-      x.font='500 28px Poppins,sans-serif';x.globalAlpha=.7;
-      x.fillStyle=o.txt;
-      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),W/2,930);
-      x.globalAlpha=1;
-      x.font='800 58px Montserrat,sans-serif';
-      x.fillText(N(c.pvuTTC)+'  TTC',W/2,1006);
+      x.beginPath();x.moveTo(240,top);x.lineTo(840,top);x.stroke();x.globalAlpha=1;
       x.textAlign='left';
+      expRowsBlock(x,rows,{x0:200,x1:880,yBot:1014,maxH:Math.max(40,1014-top-14),color:o.txt,accent:o.txt});
       expLogo(x,o.logoPos==='bl'||o.logoPos==='br'?(o.logoPos==='bl'?'tl':'tr'):o.logoPos,o.txt);
       break;
     }
     case'badge':{
       expCover(x,img,0,0,W,H,0);
-      const g=x.createLinearGradient(0,H-460,0,H);
-      g.addColorStop(0,'rgba(10,12,30,0)');g.addColorStop(1,'rgba(10,12,30,.9)');
-      x.fillStyle=g;x.fillRect(0,H-460,W,460);
-      x.fillStyle='#FFD700';x.beginPath();x.arc(880,190,148,0,7);x.fill();
-      x.fillStyle=expGrad(x,732,42,1028,338);x.lineWidth=8;x.strokeStyle=x.fillStyle;
-      x.beginPath();x.arc(880,190,158,0,7);x.stroke();
-      x.fillStyle='#1A1A2E';x.textAlign='center';
-      x.font='700 30px Poppins,sans-serif';x.fillText('Prix TTC',880,150);
-      const num=Math.round(c.pvuTTC).toLocaleString('fr-FR');
-      expFitFont(x,num,240,'Montserrat,sans-serif',800,54,26);x.fillText(num,880,212);
-      x.font='700 28px Poppins,sans-serif';x.fillText('XOF',880,252);
-      x.textAlign='left';
+      const ttc=rows.find(r=>r.k==='ttc'),others=rows.filter(r=>r.k!=='ttc');
+      const ih=expRowsH(others,330);
+      const gh=Math.max(430,ih+250);
+      const g=x.createLinearGradient(0,H-gh,0,H);
+      g.addColorStop(0,'rgba(10,12,30,0)');g.addColorStop(1,'rgba(10,12,30,.92)');
+      x.fillStyle=g;x.fillRect(0,H-gh,W,gh);
+      if(ttc){
+        x.fillStyle='#FFD700';x.beginPath();x.arc(880,190,148,0,7);x.fill();
+        x.fillStyle=expGrad(x,732,42,1028,338);x.lineWidth=8;x.strokeStyle=x.fillStyle;
+        x.beginPath();x.arc(880,190,158,0,7);x.stroke();
+        x.fillStyle='#1A1A2E';x.textAlign='center';
+        x.font='700 30px Poppins,sans-serif';x.fillText('Prix TTC',880,150);
+        const num=Math.round(c.pvuTTC).toLocaleString('fr-FR');
+        expFitFont(x,num,240,'Montserrat,sans-serif',800,54,26);x.fillText(num,880,212);
+        x.font='700 28px Poppins,sans-serif';x.fillText('XOF',880,252);
+        x.textAlign='left';
+      }
       x.fillStyle='#fff';x.font='800 56px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,H-230,960,64,2);
-      x.font='500 30px Poppins,sans-serif';x.globalAlpha=.8;
-      x.fillText('Prix de Vente HT  '+N(c.pvuHT)+(o.showMarge?'   ·   Marge '+N(c.margeU):''),60,H-230+n*64+4);
-      x.globalAlpha=1;
+      expWrap(x,p.nom,60,H-160-ih,960,64,2);
+      expRowsBlock(x,others,{x0:60,x1:1020,yBot:H-56,maxH:330,color:'#fff',accent:'#FFD700'});
       expLogo(x,o.logoPos==='br'?'tl':o.logoPos,'#fff',true);
       break;
     }
@@ -3565,33 +4213,28 @@ function expDraw(cv,p,img){
       x.fillStyle=expGrad(x,0,0,0,H);x.fillRect(528,0,12,H);
       const x0=600,x1=1020;
       x.fillStyle=o.txt;x.globalAlpha=.55;
-      x.font='600 26px Poppins,sans-serif';x.fillText((p.cat||'').toUpperCase(),x0,160);
+      x.font='600 26px Poppins,sans-serif';x.fillText((p.ref||'').toUpperCase(),x0,160);
       x.globalAlpha=1;
       x.font='800 50px Montserrat,sans-serif';
       const n=expWrap(x,p.nom,x0,230,x1-x0,60,3);
-      if(p.specs){x.font='400 24px Poppins,sans-serif';x.globalAlpha=.6;expWrap(x,p.specs,x0,230+n*60+16,x1-x0,34,2);x.globalAlpha=1;}
-      let y=640;
-      const line=(lbl,val,big,accent)=>{
-        x.font='500 26px Poppins,sans-serif';x.fillStyle=o.txt;x.globalAlpha=.6;x.fillText(lbl,x0,y);x.globalAlpha=1;
-        x.font=(big?'800 60px':'700 42px')+' Montserrat,sans-serif';
-        x.fillStyle=accent||o.txt;x.fillText(val,x0,y+(big?66:48));
-        y+=big?150:112;
-      };
-      line('Prix de Vente HT',N(c.pvuHT));
-      if(o.showMarge)line('Marge ('+Nd(c.margePct,1)+'%)',N(c.margeU));
-      line('Prix de Vente TTC',N(c.pvuTTC),true,'#0066CC');
+      let top=230+n*60+10;
+      if(p.specs){x.font='400 24px Poppins,sans-serif';x.globalAlpha=.6;top+=expWrap(x,p.specs,x0,top+24,x1-x0,34,2)*34+14;x.globalAlpha=1;}
+      expRowsBlock(x,rows,{x0,x1,yBot:1002,maxH:Math.max(40,1002-top-30),color:o.txt,accent:'#0066CC'});
       expLogo(x,o.logoPos==='tl'||o.logoPos==='bl'?'tr':o.logoPos,o.txt);
       break;
     }
     default:{ // classique
       x.fillStyle=o.bg;x.fillRect(0,0,W,H);
       x.fillStyle=expGrad(x,0,0,W,0);x.fillRect(0,0,W,14);
-      expCover(x,img,60,74,960,540,24);
+      const yBot=1012,ih=expRowsH(rows,430);
+      const imgH=Math.max(280,Math.min(540,yBot-ih-74-186));
+      expCover(x,img,60,74,960,imgH,24);
       x.fillStyle=o.txt;x.font='800 54px Montserrat,sans-serif';
-      const n=expWrap(x,p.nom,60,700,960,64,2);
+      const ny=74+imgH+70;
+      const n=expWrap(x,p.nom,60,ny,960,64,2);
       x.font='500 28px Poppins,sans-serif';x.globalAlpha=.6;
-      x.fillText((p.cat||'')+(p.ref?' · '+p.ref:''),60,700+n*64+2);x.globalAlpha=1;
-      expPrices(x,c,o,yP,o.txt,'#0066CC',60,1020);
+      x.fillText(p.ref||'',60,ny+n*64+2);x.globalAlpha=1;
+      expRowsBlock(x,rows,{x0:60,x1:1020,yBot,maxH:Math.max(40,yBot-(ny+n*64+30)),color:o.txt,accent:'#0066CC'});
       expLogo(x,o.logoPos,o.txt);
     }
   }
@@ -3633,7 +4276,7 @@ async function expDownload(zip){
       expSaveBlob(await zipStore(files),'GoFlow_Images_'+new Date().toISOString().slice(0,10)+'.zip');
     }
     lbl.textContent='Terminé ✓';
-    auditLog('export_images',{template:expPrefs.tpl,nb:files.length||ids.length,zip:!!zip});
+    auditLog('export_images',{template:expPrefs.tpl,nb:files.length||ids.length,zip:!!zip,infos:expInfoState().on.join(',')});
     toast(`${ids.length} image${ids.length>1?'s':''} ${zip?'dans le ZIP ':''}téléchargée${ids.length>1?'s':''} ✓`);
   }catch(e){
     console.error('Export images:',e);
