@@ -1200,6 +1200,25 @@ const DF=[
     com:'',
     logo:RAWBASE+'assets/supplier/logo%20Oman%20Beauty.png',
     devis:RAWBASE+'assets/Quotes/Quotes7.7_Oman%20Medical%20Beauty%20Manufacture.pdf'
+  },
+  {
+    id:'F003',
+    nom:'Paine Agent Sourcing',
+    contact:'Paine',
+    email:'',
+    pays:'Chine',
+    wa:'+86 185 3719 5235',
+    wc:'+86 185 3719 5235',
+    dom:'Agent sourcing multi-catégories (beauté & bien-être, équipement maison, textile, électronique, sport)',
+    an:'2024',eval:4,
+    ali:'Non disponible',
+    ali_url:'',
+    lang:'Anglais, Français (traduction), Chinois',
+    mkt:'Togo (Lomé), Afrique de l\'Ouest',
+    desc:'Agent de sourcing basé en Chine, actif depuis mai 2024. Sans usine propre : recherche produits via son réseau de fournisseurs, négocie les prix et MOQ, contrôle la qualité (photos/vidéos) et expédie via cargo (TAKLEE CARGO, YongHai). Paiements via Eugène (Togo) ou WeChat/Alipay.',
+    com:'Regroupe les petits articles dans les grands cartons pour réduire le CBM. Maritime ~2 mois (CBM), aérien ~2 semaines (kg), fret payé à l\'arrivée à Lomé.',
+    logo:RAWBASE+'assets/supplier/Paine%20Agent/Image%20Paine%20Agent.png',
+    devis:RAWBASE+'assets/Quotes/Quotes%201.%20Paine%20Agent.xlsx'
   }
 ];
 
@@ -1471,6 +1490,8 @@ function init(){
   if(!fours||!fours.length)fours=DF.map(f=>({...f}));
   prods=LS_GET(PK,null);
   if(!prods||!prods.length){prods=buildProds();save('p');}
+  // Semis des fournisseurs par défaut ajoutés après coup (ex. Paine F003)
+  DF.forEach(d=>{if(!fours.some(f=>f.id===d.id||f.nom===d.nom))fours.push({...d});});
   // Mise à jour silencieuse des fournisseurs par défaut si données manquantes
   fours.forEach((f,i)=>{
     const df=DF.find(d=>d.id===f.id);

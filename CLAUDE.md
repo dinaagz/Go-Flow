@@ -60,7 +60,7 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~4400 lines)
 
 ### Default data
 
-- `DF` — 2 real suppliers (Shaanxi Yateli Technology Limited / Oman Medical Beauty Manufacture) with contacts, logos (raw GitHub CDN URLs), Alibaba links, and PDF quote links (latest: Quotes7.6 Yateli / Quotes7.7 Oman)
+- `DF` — 3 real suppliers: Shaanxi Yateli Technology Limited and Oman Medical Beauty Manufacture (manufacturers, contacts, logos on raw GitHub CDN, Alibaba links, PDF quotes 7.6 / 7.7) plus Paine Agent Sourcing (F003 — China-based sourcing agent without own factory, WhatsApp/WeChat +86 185 3719 5235, ships via TAKLEE/YongHai cargo, payments via Eugène in Togo; fiche in `assets/supplier/Paine Agent/`, quote `assets/Quotes/Quotes 1. Paine Agent.xlsx`). Suppliers added to `DF` after a user's first load are seeded into `gf_f` at init (matched by id or name, same pattern as `DT`)
 - `DP` — 37 default products across 8 categories (`grp` key groups identical products from different suppliers, e.g. `pdt-grand`, `pdt-dome`). Products from the 7.6/7.7 quotes carry an `imgs` gallery array (up to 3 photos, shown as clickable thumbnails on the product card via `cardGallery`/`swapCardImg`)
 - `DT` — 1 default freight forwarder (E & C Logistics, groupage.cn, China → West Africa) with all-inclusive rates (230 000 XOF/CBM maritime · 11 000 XOF/kg air), delays, and logo; seeded into `trans` at init if absent (matched by name)
 
