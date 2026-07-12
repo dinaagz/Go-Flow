@@ -50,7 +50,7 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~4400 lines)
 | `gf_p` | Products array |
 | `gf_f` | Suppliers array |
 | `gf_t` | Freight forwarders array |
-| `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis|pdf: {visible: [key…], touched: bool, known: [key…]}}`. Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
+| `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis: {visible: [key…], touched: bool, known: [key…]}}` (the `devis` selection also drives the PDF export; a legacy `pdf` key is ignored). Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
 | `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
 | `gf_audit` | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel |
 | `gf_imp` | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}, lastHtml: {name, txt, ts}}` (`lastHtml` = last imported HTML ≤400 KB, re-parsable from step 1) |
@@ -101,7 +101,7 @@ All prices flow through `calcEngine(inputs)` in `index.html` (between the `=====
   Prix de Vente TTC    = Prix de Vente HT + Frais logistiques
 ```
 
-**TVA rule**: no VAT is ever added on top of frais logistiques (already tax-inclusive). `S.tvaInterne` only appears as a separate line for VAT-registered clients (`devisClient.assujetti` checkbox / simulation select), computed on the merchandise HT amount. Internal columns (coût de revient, marge, EXW) never appear on the client PDF.
+**TVA rule**: no VAT is ever added on top of frais logistiques (already tax-inclusive). `S.tvaInterne` only appears as a separate line for VAT-registered clients (`devisClient.assujetti` checkbox / simulation select), computed on the merchandise HT amount. Internal columns (coût de revient, marge, EXW) are hidden by default on the devis but freely toggleable — the PDF modal warns that they become client-visible if checked.
 
 ### Universal column manager (ColumnManager)
 
@@ -112,7 +112,7 @@ Column visibility for **Catalogue / Simulation / Devis / PDF export** flows thro
 - `cmVisible(view)` — returns the effective `{key: bool}` set. On viewports <768px, non-essential columns (`mob:false`) are auto-hidden **until** the user customizes the view (`touched`).
 - `cmToggle/cmShowAll/cmReset` mutate + `cmSave()` to `gf_cols` + re-render via `CM_RENDER[view]`; changes are announced to screen readers through the `#cm-live` live region.
 - Stale-key safety: saved keys no longer in `CM_DEFS` are dropped; columns added to the code after a save (tracked via `known`) pick up their `def` value.
-- PDF columns are a **separate** preference (`pdf` view), configured in the `pdf-modal` opened by `openPdfConfig()` before `generateDevisPDF()`. The PDF price block (Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC) is always included; internal columns (coût de revient, marge, EXW) are never exportable to the client PDF.
+- The devis has **no fixed columns**: every column (including Désignation, Qté, Total HT) is a regular `CM_DEFS.devis` entry, freely toggleable. The PDF export shares the **same** `devis` selection (no separate `pdf` view — legacy `gf_cols.pdf` data is ignored on load): the `pdf-modal` opened by `openPdfConfig()` mounts the `devis` list inline, so cards/table preview and `generateDevisPDF()` always show exactly the checked columns (WYSIWYG). Internal columns (coût de revient, marge, EXW) are off by default; the modal warns they become client-visible if checked. The PDF tfoot colspans (`spanLbl`/`spanVal`) adapt to the number of visible columns.
 - Table rows get a "Voir détails" (eye) button → `showProdDetails` / `showDevisDetails` open `detail-modal` with every field, including hidden columns (mobile fallback).
 
 ### Bulk import (module between `MODULE IMPORT EN MASSE` / `FIN MODULE IMPORT` markers)
