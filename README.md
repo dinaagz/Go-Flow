@@ -73,9 +73,10 @@ Tous les prix passent par un moteur unique en 3 étapes :
 **Règle TVA** : la TVA n'est **jamais** ajoutée par-dessus les frais logistiques (déjà tout-compris). La TVA interne n'apparaît en ligne séparée que pour les clients professionnels assujettis, calculée sur la marchandise HT.
 
 ### 🏭 Fournisseurs
-- 2 fournisseurs par défaut avec données réelles :
+- 3 fournisseurs par défaut avec données réelles :
   - **Shaanxi Yateli Technology Limited** — Bailey · bailey@hkyateli.com · +86 187 9265 6926
   - **Oman Medical Beauty Manufacture** — Clara Xiang · clara@omancn.com · +86 173 9193 0659
+  - **Paine Agent Sourcing** — Paine (agent sourcing basé en Chine, clients Togo/Afrique de l'Ouest) · WhatsApp/WeChat +86 185 3719 5235 · expédition via cargo TAKLEE / YongHai, paiements via Eugène (Togo)
 - Logo, email cliquable, WhatsApp, WeChat, badge Alibaba vérifié, lien vers le store Alibaba
 - Bouton **Devis PDF** (devis fournisseurs dans `assets/Quotes/`)
 - Import d'une fiche fournisseur depuis une page HTML (voir Import en masse)
