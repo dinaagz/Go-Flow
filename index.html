@@ -994,7 +994,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
       <button class="modal-x" onclick="closeMod('pdf-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div class="modal-body">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Les colonnes essentielles (<b>Désignation, Prix unitaire HT, Qté, Prix total HT, Frais logistiques, Prix total TTC</b>) sont toujours incluses. Ajoutez ici des colonnes descriptives — ce choix est enregistré séparément des tableaux de l'application.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Le PDF contient <b>exactement les colonnes cochées ci-dessous</b> — la même sélection que l'aperçu du devis (choix enregistré automatiquement). <b>Attention :</b> les colonnes internes (Coût de Revient, Marge, EXW) seront visibles par le client si elles sont cochées.</div>
       <div class="col-picker-wrap" id="cm-pdf"></div>
       <div class="fact">
         <button class="btn btn-sec" onclick="closeMod('pdf-modal')">Annuler</button>
@@ -1297,6 +1297,7 @@ const CM_DEFS={
   ],
   devis:[
     {k:'photos',      g:'Produit',      lbl:'Photo',                    def:true, mob:false},
+    {k:'nom',         g:'Produit',      lbl:'Désignation',              def:true},
     {k:'ref',         g:'Produit',      lbl:'Référence',                def:true, mob:false},
     {k:'cat',         g:'Produit',      lbl:'Catégorie',                def:false,mob:false},
     {k:'specs',       g:'Produit',      lbl:'Spécifications',           def:false,mob:false},
@@ -1314,31 +1315,19 @@ const CM_DEFS={
     {k:'marge',       g:'Calcul',       lbl:'Marge % (interne)',        def:true, mob:false},
     {k:'prix_ht',     g:'Calcul',       lbl:'Prix Vente HT/u',          def:true},
     {k:'prix_ttc',    g:'Calcul',       lbl:'Prix Vente TTC/u',         def:true},
+    {k:'qte',         g:'Calcul',       lbl:'Quantité',                 def:true},
+    {k:'total_ht',    g:'Calcul',       lbl:'Total HT ligne',           def:true},
     {k:'total_ttc',   g:'Calcul',       lbl:'Total TTC ligne',          def:true, mob:false},
-  ],
-  // Colonnes descriptives du PDF — préférence séparée des tableaux UI ; le bloc prix est fixe
-  pdf:[
-    {k:'photos',     lbl:'Photo',             def:false},
-    {k:'ref',        lbl:'Référence',         def:false},
-    {k:'cat',        lbl:'Catégorie',         def:false},
-    {k:'specs',      lbl:'Spécifications',    def:false},
-    {k:'cbm',        lbl:'CBM (m³)',          def:false},
-    {k:'poids',      lbl:'Poids',             def:false},
-    {k:'moq',        lbl:'MOQ',               def:false},
-    {k:'transitaire',lbl:'Transitaire',       def:false},
-    {k:'type_fret',  lbl:'Mode de transport', def:false},
-    {k:'delai',      lbl:'Délai estimé',      def:false},
-    {k:'dev_source', lbl:'Prix devise source',def:false},
   ],
 };
 // Colonnes toujours présentes, listées à titre indicatif dans le gestionnaire
+// (le devis n'en a plus : toutes ses colonnes sont librement cochables,
+//  et l'export PDF partage exactement la même sélection que l'aperçu)
 const CM_FIXED={
   catalogue:['Photo','Réf','Désignation','Actions'],
   simulation:['Prix de Vente total TTC','TVA interne (si assujetti)'],
-  devis:['Désignation','Qté','Total HT','Actions'],
-  pdf:['Désignation','Prix unitaire HT','Qté','Prix total HT','Frais logistiques','Prix total TTC'],
 };
-const CM_TITLES={catalogue:'Colonnes',simulation:'Lignes',devis:'Colonnes devis',pdf:'Colonnes PDF'};
+const CM_TITLES={catalogue:'Colonnes',simulation:'Lignes',devis:'Colonnes devis'};
 let colStore={};
 const isMob=()=>window.matchMedia('(max-width:767px)').matches;
 
@@ -1378,7 +1367,7 @@ function cmVisible(view){
   const set={};defs.forEach(d=>{set[d.k]=vis.includes(d.k);});
   return set;
 }
-const CM_RENDER={catalogue:()=>renderCat(),simulation:()=>simCalc(),devis:()=>renderDevisCart(),pdf:()=>{}};
+const CM_RENDER={catalogue:()=>renderCat(),simulation:()=>simCalc(),devis:()=>renderDevisCart()};
 function cmAnnounce(msg){const el=document.getElementById('cm-live');if(el)el.textContent=msg;}
 function cmToggle(view,k,on){
   const st=colStore[view];
@@ -1504,7 +1493,7 @@ function init(){
   cmMount('catalogue','cm-catalogue');
   cmMount('simulation','cm-simulation');
   cmMount('devis','cm-devis');
-  cmMount('pdf','cm-pdf',{inline:true});
+  cmMount('devis','cm-pdf',{inline:true}); // le modal PDF partage la sélection du devis
   // Auto-masquage mobile : re-rendre quand on franchit le seuil 768px
   try{window.matchMedia('(max-width:767px)').addEventListener('change',()=>{renderCat();simCalc();renderDevisCart();});}catch(e){}
   renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
@@ -2494,7 +2483,7 @@ let devisFX={dev:'XOF',taux:1};
 let fxCache={rates:null,ts:0};
 let fxReqSeq=0;
 
-// Les colonnes du devis et du PDF sont gérées par le gestionnaire universel (CM_DEFS.devis / CM_DEFS.pdf)
+// Les colonnes du devis (aperçu ET export PDF) sont gérées par le gestionnaire universel (CM_DEFS.devis)
 const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35};
 
 /* ---- CHARGEMENT / PERSISTANCE ---- */
@@ -2724,29 +2713,47 @@ function renderDevisCart(){
 
 function buildDevisGrid(){
   const SH=cmVisible('devis');
+  // ligne d'info « label / valeur » — une par colonne cochée
+  const row=(lbl,val)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-top:2px"><span style="color:var(--muted)">${lbl}</span><span style="font-weight:600;text-align:right">${val}</span></div>`;
   return`<div class="grid">${devisCart.map(item=>{
     const c=calcDevis(item),p=item.snap;
+    const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     const imgHtml=p.photos&&p.photos[0]
       ?`<img src="${p.photos[0]}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">${PH_LG}</div>`
       :`<div class="card-img-placeholder">${PH_LG}</div>`;
+    const infos=[
+      SH.specs&&p.specs?row('Spécifications',`<span style="font-weight:400;color:var(--muted)">${String(p.specs).slice(0,80)}</span>`):'',
+      SH.cbm?row('CBM',Nd(c.cbm,4)+' m³'):'',
+      SH.poids?row('Poids',(p.poids||p.kg||'—')+' kg'):'',
+      SH.moq?row('MOQ',p.moq||1):'',
+      SH.fournisseur?row('Fournisseur',p.fn||'—'):'',
+      SH.transitaire?row('Transitaire',p.trans_nom||'—'):'',
+      SH.type_fret?row('Type de fret',`${TRI(p.tr)} ${p.tr||'—'}`):'',
+      SH.delai?row('Délai estimé',p.trans_delai?p.trans_delai+'j':'—'):'',
+      SH.dev_source?row('Prix devise',`${c.prix_src} ${devSymbol}`):'',
+      SH.prix_exw?row('Prix EXW (XOF)',N(c.exwUX)):'',
+      SH.cout_revient?row('Coût de Revient/u',Ndv(c.coutRevientUX)):'',
+      SH.frais_log?row('Frais Log./u',Ndv(c.fraisLogU)):'',
+      SH.marge?row('Marge %',`<span style="color:var(--vert-t)">${Nd(c.mgPct,1)}%</span>`):'',
+    ].filter(Boolean).join('');
     return`<div class="cart-item-grid">
-      <div class="card-img" style="height:130px">${imgHtml}</div>
+      ${SH.photos?`<div class="card-img" style="height:130px">${imgHtml}</div>`:''}
       <div class="card-body">
-        <div class="card-ref">${p.ref}</div>
-        <div class="card-title">${p.nom}</div>
-        <div class="card-cat">${p.cat} · ${TRI(p.tr)} ${p.tr||''}</div>
-        ${SH.fournisseur&&p.fn?`<div style="font-size:10px;color:var(--muted);margin-top:2px">${ICO('factory')} ${p.fn}</div>`:''}
-        ${SH.transitaire&&p.trans_nom?`<div style="font-size:10px;color:var(--muted)">${ICO('ship')} ${p.trans_nom}</div>`:''}
-        <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
-          <div class="cart-price-tag">${Ndv(c.pvuHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">Prix de Vente HT/u</small></div>
-          <div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.pvuTTC)} <small style="font-weight:400;color:var(--muted)">TTC</small></div>
-        </div>
-        <div class="cart-qty-ctrl">
+        ${SH.ref?`<div class="card-ref">${p.ref}</div>`:''}
+        ${SH.nom?`<div class="card-title">${p.nom}</div>`:''}
+        ${SH.cat?`<div class="card-cat">${p.cat}</div>`:''}
+        ${infos}
+        ${SH.prix_ht||SH.prix_ttc?`<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
+          ${SH.prix_ht?`<div class="cart-price-tag">${Ndv(c.pvuHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">Prix de Vente HT/u</small></div>`:''}
+          ${SH.prix_ttc?`<div style="font-size:11px;color:var(--bleu);font-weight:600">${Ndv(c.pvuTTC)} <small style="font-weight:400;color:var(--muted)">TTC/u</small></div>`:''}
+        </div>`:''}
+        ${SH.qte?`<div class="cart-qty-ctrl">
           <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
           <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
           <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-          <span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.pvtHT)}</span>
-        </div>
+          ${SH.total_ht?`<span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.pvtHT)}</span>`:''}
+        </div>`:SH.total_ht?row('Total HT ligne',Ndv(c.pvtHT)):''}
+        ${SH.total_ttc?row('Total TTC ligne',`<span style="color:var(--bleu-t)">${Ndv(c.pvtTTC)}</span>`):''}
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
       </div></div>`;
   }).join('')}</div>`;
@@ -2756,7 +2763,7 @@ function buildDevisTable(){
   const SH=cmVisible('devis');
   const ths=[
     SH.photos?'<th>Photo</th>':'',
-    '<th>Désignation</th>',
+    SH.nom?'<th>Désignation</th>':'',
     SH.ref?'<th>Réf</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
@@ -2774,7 +2781,8 @@ function buildDevisTable(){
     SH.marge?'<th>Marge %</th>':'',
     SH.prix_ht?`<th>Prix Vente HT/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     SH.prix_ttc?`<th>Prix Vente TTC/u${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
-    '<th>Qté</th>',`<th>Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`,
+    SH.qte?'<th>Qté</th>':'',
+    SH.total_ht?`<th>Total HT${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     SH.total_ttc?`<th>Total TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th class="no-print">Actions</th>',
   ].join('');
@@ -2784,7 +2792,7 @@ function buildDevisTable(){
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     return`<tr>
       ${SH.photos?`<td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" loading="lazy">`:PH_SM}</td>`:''}
-      <td style="font-weight:500;max-width:160px">${p.nom}</td>
+      ${SH.nom?`<td style="font-weight:500;max-width:160px">${p.nom}</td>`:''}
       ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
       ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
@@ -2802,12 +2810,12 @@ function buildDevisTable(){
       ${SH.marge?`<td style="font-size:11px;color:var(--vert-t);font-weight:600">${Nd(c.mgPct,1)}%</td>`:''}
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.pvuTTC)}</td>`:''}
-      <td><div class="cart-qty-ctrl" style="margin:0">
+      ${SH.qte?`<td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
         <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-      </div></td>
-      <td style="font-weight:700">${Ndv(c.pvtHT)}</td>
+      </div></td>`:''}
+      ${SH.total_ht?`<td style="font-weight:700">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.total_ttc?`<td style="font-weight:700;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
@@ -2848,7 +2856,7 @@ function renderDevisTotal(){
 /* ---- GÉNÉRATION PDF (impression navigateur via template HTML dédié) ---- */
 function openPdfConfig(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
-  cmRefresh('pdf');
+  cmRefresh('devis');
   openMod('pdf-modal');
 }
 function generateDevisPDF(){
@@ -2856,7 +2864,7 @@ function generateDevisPDF(){
   const now=new Date();
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
-  const SH=cmVisible('pdf'); // préférence PDF distincte des tableaux UI
+  const SH=cmVisible('devis'); // même sélection que l'aperçu du devis — le PDF reflète exactement les colonnes cochées
   // Bloc client
   const cl=devisClient;
   const clientHtml=[
@@ -2867,12 +2875,11 @@ function generateDevisPDF(){
     cl.ville||'',
     cl.assujetti?'<em>Client assujetti à la TVA</em>':''
   ].filter(Boolean).join('<br>')||'<span style="color:#999;font-style:italic">Aucune information client</span>';
-  // En-têtes : colonnes descriptives configurables + colonnes de prix fixes.
-  // Les colonnes internes (coût de revient, marge, EXW) n'apparaissent JAMAIS sur le PDF client.
+  // En-têtes : toutes les colonnes suivent la sélection de l'aperçu — aucune colonne forcée.
   const devL=devisFX.dev!=='XOF'?' ('+devisFX.dev+')':'';
   const colH=[
     SH.photos?'<th>Photo</th>':'',
-    '<th>Désignation</th>',
+    SH.nom?'<th>Désignation</th>':'',
     SH.ref?'<th>Réf.</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
     SH.specs?'<th>Spécifications</th>':'',
@@ -2883,13 +2890,18 @@ function generateDevisPDF(){
     SH.type_fret?'<th>Mode</th>':'',
     SH.delai?'<th>Délai</th>':'',
     SH.dev_source?'<th>Prix devise</th>':'',
-    `<th style="white-space:nowrap">Prix unitaire HT${devL}</th>`,
-    '<th>Qté</th>',
-    `<th style="white-space:nowrap">Prix total HT${devL}</th>`,
-    `<th style="white-space:nowrap">Frais logistiques*${devL}</th>`,
-    `<th style="white-space:nowrap">Prix total TTC${devL}</th>`,
+    SH.prix_exw?'<th style="white-space:nowrap">Prix EXW (XOF)</th>':'',
+    SH.cout_revient?`<th style="white-space:nowrap">Coût de revient/u${devL}</th>`:'',
+    SH.frais_log?`<th style="white-space:nowrap">Frais Log./u*${devL}</th>`:'',
+    SH.marge?'<th>Marge %</th>':'',
+    SH.prix_ht?`<th style="white-space:nowrap">Prix unitaire HT${devL}</th>`:'',
+    SH.prix_ttc?`<th style="white-space:nowrap">Prix unitaire TTC${devL}</th>`:'',
+    SH.qte?'<th>Qté</th>':'',
+    SH.total_ht?`<th style="white-space:nowrap">Prix total HT${devL}</th>`:'',
+    SH.total_ttc?`<th style="white-space:nowrap">Prix total TTC${devL}</th>`:'',
   ].join('');
-  const nbCols=colH.split('<th').length-1;
+  const nbCols=Math.max(1,colH.split('<th').length-1);
+  const spanVal=Math.min(2,Math.max(1,nbCols-1)),spanLbl=Math.max(1,nbCols-spanVal);
   // Lignes
   const rowsHtml=devisCart.map(item=>{
     const c=calcDevis(item),p=item.snap;
@@ -2897,7 +2909,7 @@ function generateDevisPDF(){
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     return`<tr>
       ${imgCell}
-      <td><strong>${p.nom}</strong>${SH.specs&&p.specs?`<div style="font-size:9px;color:#666;margin-top:2px">${p.specs.slice(0,80)}</div>`:''}</td>
+      ${SH.nom?`<td><strong>${p.nom}</strong></td>`:''}
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td>${p.cat}</td>`:''}
       ${SH.specs?`<td style="font-size:9px">${p.specs||'—'}</td>`:''}
@@ -2908,11 +2920,15 @@ function generateDevisPDF(){
       ${SH.type_fret?`<td>${p.tr==='Aérien'?'Aérien':'Maritime'}</td>`:''}
       ${SH.delai?`<td>${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
-      <td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>
-      <td style="text-align:center">${item.qty}</td>
-      <td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>
-      <td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>
-      <td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>
+      ${SH.prix_exw?`<td style="white-space:nowrap">${N(c.exwUX)}</td>`:''}
+      ${SH.cout_revient?`<td style="white-space:nowrap">${Ndv(c.coutRevientUX)}</td>`:''}
+      ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLogU)}</td>`:''}
+      ${SH.marge?`<td>${Nd(c.mgPct,1)}%</td>`:''}
+      ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
+      ${SH.prix_ttc?`<td style="white-space:nowrap">${Ndv(c.pvuTTC)}</td>`:''}
+      ${SH.qte?`<td style="text-align:center">${item.qty}</td>`:''}
+      ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
+      ${SH.total_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
   const cs=devisCart.map(calcDevis);
@@ -2944,22 +2960,22 @@ function generateDevisPDF(){
       <tbody>${rowsHtml}</tbody>
       <tfoot>
         <tr style="background:#f5f5f7">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devL}</td>
-          <td colspan="2" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devL}</td>
+          <td colspan="${spanVal}" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
         <tr>
-          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">Frais logistiques* — tout-compris${devL}</td>
-          <td colspan="2" style="font-size:12px;white-space:nowrap">${Ndv(totLog)}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">Frais logistiques* — tout-compris${devL}</td>
+          <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totLog)}</td>
         </tr>
         ${cl.assujetti?`
         <tr>
-          <td colspan="${nbCols-2}" style="text-align:right;font-size:11px;color:#555">TVA interne (${S.tvaInterne}%) — sur le montant HT</td>
-          <td colspan="2" style="font-size:12px;white-space:nowrap">${Ndv(totTVA)}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">TVA interne (${S.tvaInterne}%) — sur le montant HT</td>
+          <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totTVA)}</td>
         </tr>
         `:''}
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${nbCols-2}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devL}</td>
-          <td colspan="2" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC+totTVA)}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devL}</td>
+          <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC+totTVA)}</td>
         </tr>
       </tfoot>
     </table>
