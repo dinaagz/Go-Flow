@@ -52,6 +52,18 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .hdr-cart-btn{background:var(--nuit);border:1px solid var(--nuit);color:#fff;padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;transition:all .18s var(--ease);box-shadow:var(--sh-xs)}
 .hdr-cart-btn:hover{background:var(--nuit3);box-shadow:var(--sh-md)}
 .hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge-t);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none;box-shadow:0 0 0 2px #fff}
+.user-area{position:relative;margin-left:8px}
+.user-avatar-btn{width:38px;height:38px;border-radius:50%;border:2px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--grad) border-box;color:var(--nuit);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .18s var(--ease);box-shadow:var(--sh-xs)}
+.user-avatar-btn:hover,.user-avatar-btn[aria-expanded="true"]{box-shadow:var(--sh-md);transform:translateY(-1px)}
+.user-avatar-btn .ic{width:18px;height:18px}
+.user-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-xl);padding:6px;display:none;z-index:300}
+.user-menu.open{display:block;animation:modalIn .18s var(--ease)}
+.user-menu-hdr{padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.user-menu-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:var(--nuit)}
+.user-menu-mail{font-size:11px;color:var(--muted);margin-top:2px}
+.user-menu-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;border-radius:9px;padding:9px 12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);cursor:pointer;transition:background .15s}
+.user-menu-item:hover{background:rgba(0,153,255,.08)}
+.user-menu-item .ic{width:15px;height:15px;color:var(--muted)}
 /* ===== SIDEBAR ===== */
 .sidebar{width:228px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:68px;height:calc(100dvh - 68px);display:flex;flex-direction:column;z-index:100}
 .tabs{display:flex;flex-direction:column;gap:3px;padding:16px 12px}
@@ -169,8 +181,7 @@ td code{font-size:10px;background:#F1F3FA;padding:2px 6px;border-radius:6px;colo
 .tbl-alt-row{background:#F8F9FD}
 .tbl-alt-row td{font-size:11px;padding:7px 12px!important}
 /* ===== SETTINGS PANEL ===== */
-.settings-panel{background:var(--surface);border-radius:14px;padding:22px;margin-bottom:22px;border:1px solid var(--border);box-shadow:var(--sh-sm);display:none}
-.settings-panel.open{display:block;animation:panelIn .25s var(--ease)}
+/* (l'ancien panneau .settings-panel est devenu un modal — voir .overlay/.modal) */
 .s-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
 /* ===== MODALS ===== */
 .overlay{position:fixed;inset:0;background:rgba(15,17,34,.55);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
@@ -545,12 +556,21 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <div class="logo-sub">Go Group — Console Import</div>
   </div>
   <div class="hdr-right">
-    <button class="btn btn-ghost btn-sm" onclick="toggleSettings()" aria-label="Paramètres"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg> <span class="hdr-lbl">Paramètres</span></button>
     <button class="btn btn-ghost btn-sm" onclick="exportCSV()" aria-label="Exporter en CSV"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> <span class="hdr-lbl">CSV</span></button>
     <button class="btn btn-ghost btn-sm" onclick="window.print()" aria-label="Imprimer en PDF"><svg class="ic" aria-hidden="true"><use href="#i-printer"/></svg> <span class="hdr-lbl">PDF</span></button>
     <div class="hdr-cart">
       <button class="hdr-cart-btn" onclick="tab('devis')" aria-label="Devis"><svg class="ic" aria-hidden="true"><use href="#i-quote"/></svg> <span class="hdr-lbl">Devis</span></button>
       <span class="hdr-cart-count" id="cart-count" style="display:none">0</span>
+    </div>
+    <div class="user-area" id="user-area">
+      <button class="user-avatar-btn" id="user-avatar-btn" onclick="userMenuToggle()" aria-haspopup="true" aria-expanded="false" aria-label="Espace utilisateur"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></button>
+      <div class="user-menu" id="user-menu" role="menu" aria-label="Espace utilisateur">
+        <div class="user-menu-hdr">
+          <div class="user-menu-name">Go Group</div>
+          <div class="user-menu-mail">globalgo.tg@gmail.com</div>
+        </div>
+        <button class="user-menu-item" role="menuitem" onclick="userMenuClose();toggleSettings()"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg> Paramètres</button>
+      </div>
     </div>
   </div>
 </header>
@@ -579,9 +599,14 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <main class="main-area">
 <div class="wrap" id="main">
 
-<!-- SETTINGS -->
-<div class="settings-panel" id="spanel">
-  <h2 class="sec-hdr"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg>Paramètres globaux</h2>
+<!-- SETTINGS (modal — ouvert depuis l'Espace Utilisateur, sans défilement de page) -->
+<div class="overlay" id="spanel">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sp-title" style="max-width:760px">
+  <div class="modal-hdr">
+    <h2 class="modal-title" id="sp-title"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg> Paramètres globaux</h2>
+    <button class="modal-x" onclick="toggleSettings()" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="modal-body">
   <div class="s-grid">
     <div class="fgrp"><label class="flbl" for="s_tc">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
     <div class="fgrp"><label class="flbl" for="s_fa">Frais logistiques aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
@@ -612,6 +637,8 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <button class="btn btn-sec" onclick="toggleSettings()">Fermer</button>
   </div>
   <input type="file" id="bkp-file" accept=".json,application/json" style="display:none" onchange="handleBackupFile(this)">
+  </div>
+  </div>
 </div>
 
 <!-- CATALOGUE -->
@@ -1568,7 +1595,30 @@ function saveSettings(){
   renderCat();simCalc();toast('Paramètres enregistrés ✓');
 }
 
-function toggleSettings(){document.getElementById('spanel').classList.toggle('open');}
+function toggleSettings(){
+  const ov=document.getElementById('spanel');
+  if(ov.classList.contains('open'))closeMod('spanel');else openMod('spanel');
+}
+
+/* ---- ESPACE UTILISATEUR (avatar + menu déroulant) ---- */
+function userMenuToggle(){
+  const m=document.getElementById('user-menu'),b=document.getElementById('user-avatar-btn');
+  const open=!m.classList.contains('open');
+  m.classList.toggle('open',open);
+  b.setAttribute('aria-expanded',open);
+  if(open){
+    const close=e=>{
+      if(document.getElementById('user-area').contains(e.target))return;
+      userMenuClose();
+      document.removeEventListener('click',close);
+    };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+}
+function userMenuClose(){
+  document.getElementById('user-menu').classList.remove('open');
+  document.getElementById('user-avatar-btn').setAttribute('aria-expanded','false');
+}
 
 function xofRate(dev){
   if(dev==='RMB')return S.tauxChange;
@@ -2639,8 +2689,11 @@ function calcDevis(item){
 /* ---- ACTIONS PANIER ---- */
 function addToCart(pid){
   const p=prods.find(x=>x.id===pid);if(!p)return;
-  const existing=devisCart.find(x=>x.pid===pid);
-  if(existing){existing.qty++;saveDevisCartLS();renderCat();toast(p.nom+' : quantité +1 dans le devis ✓');return;}
+  // Toggle : un second clic retire le produit du devis (la quantité s'ajuste dans l'onglet Devis)
+  if(devisCart.some(x=>x.pid===pid)){
+    devisCart=devisCart.filter(x=>x.pid!==pid);
+    saveDevisCartLS();renderCat();toast(p.nom+' retiré du devis');return;
+  }
   const f=fours.find(x=>x.id===p.fid);
   const t0=trans.length?trans[0]:null;
   devisCart.push({
@@ -2890,7 +2943,9 @@ function generateDevisPDF(){
   const now=new Date();
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
-  const SH=cmVisible('devis'); // même sélection que l'aperçu du devis — le PDF reflète exactement les colonnes cochées
+  // Sélection brute du gestionnaire de colonnes (sans auto-masquage mobile) :
+  // le PDF reflète exactement les cases cochées dans le modal, sur tout écran
+  const SH={};CM_DEFS.devis.forEach(d=>{SH[d.k]=colStore.devis.visible.includes(d.k);});
   // Bloc client
   const cl=devisClient;
   const clientHtml=[
@@ -2908,6 +2963,7 @@ function generateDevisPDF(){
     SH.nom?'<th>Désignation</th>':'',
     SH.ref?'<th>Réf.</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
+    SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.specs?'<th>Spécifications</th>':'',
     SH.cbm?'<th>CBM (m³)</th>':'',
     SH.poids?'<th>Poids</th>':'',
@@ -2938,6 +2994,7 @@ function generateDevisPDF(){
       ${SH.nom?`<td><strong>${p.nom}</strong></td>`:''}
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td>${p.cat}</td>`:''}
+      ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
       ${SH.specs?`<td style="font-size:9px">${p.specs||'—'}</td>`:''}
       ${SH.cbm?`<td>${Nd(c.cbm,4)}</td>`:''}
       ${SH.poids?`<td>${p.poids||p.kg||'—'} kg</td>`:''}
@@ -2962,6 +3019,8 @@ function generateDevisPDF(){
   const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
   const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
   const totTTC=cs.reduce((s,c)=>s+c.pvtTTC,0);
+  // Le récapitulatif suit lui aussi la sélection : pas de ligne TTC si aucune colonne TTC n'est cochée
+  const anyHT=SH.prix_ht||SH.total_ht,anyTTC=SH.prix_ttc||SH.total_ttc;
   // Injecter dans la zone d'impression
   document.body.classList.add('printing-devis');
   document.getElementById('devis-print-area').innerHTML=`
@@ -2985,24 +3044,30 @@ function generateDevisPDF(){
       <thead><tr>${colH}</tr></thead>
       <tbody>${rowsHtml}</tbody>
       <tfoot>
+        ${anyHT||anyTTC?`
         <tr style="background:#f5f5f7">
           <td colspan="${spanLbl}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devL}</td>
           <td colspan="${spanVal}" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
+        `:''}
+        ${anyTTC||SH.frais_log?`
         <tr>
           <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">Frais logistiques* — tout-compris${devL}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totLog)}</td>
         </tr>
-        ${cl.assujetti?`
+        `:''}
+        ${cl.assujetti&&(anyHT||anyTTC)?`
         <tr>
           <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">TVA interne (${S.tvaInterne}%) — sur le montant HT</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totTVA)}</td>
         </tr>
         `:''}
+        ${anyTTC?`
         <tr style="background:#1A1A2E;color:#fff">
           <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devL}</td>
           <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC+totTVA)}</td>
         </tr>
+        `:''}
       </tfoot>
     </table>
     <div class="dv-cgs">
@@ -4382,6 +4447,7 @@ document.addEventListener('keydown',e=>{
       const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
       if(b)b.setAttribute('aria-expanded','false');
     });
+    userMenuClose();
     return;
   }
   if(e.key==='Tab'){
