@@ -643,7 +643,13 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
     <button class="btn btn-sec" onclick="exportBackup()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Exporter mes données</button>
     <button class="btn btn-sec" onclick="importBackup()"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer mes données</button>
-    <button class="btn btn-sec" onclick="exportAudit()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Historique audit</button>
+    <span style="display:inline-flex;gap:0;align-items:stretch">
+      <button class="btn btn-sec" onclick="exportAudit()" style="border-top-right-radius:0;border-bottom-right-radius:0"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Exporter l'historique</button>
+      <select id="audit-fmt" class="filt" aria-label="Format d'export de l'historique audit" style="border-top-left-radius:0;border-bottom-left-radius:0;border-left:0;min-width:0;padding:0 8px">
+        <option value="json" selected>JSON</option>
+        <option value="csv">CSV</option>
+      </select>
+    </span>
     <button class="btn btn-sec" onclick="toggleSettings()">Fermer</button>
   </div>
   <input type="file" id="bkp-file" accept=".json,application/json" style="display:none" onchange="handleBackupFile(this)">
@@ -1700,13 +1706,33 @@ function calc(p,o={}){
 /* ---- HISTORIQUE AUDIT ---- */
 const AK='gf_audit';
 function auditLog(type,data){const h=LS_GET(AK,[]);h.unshift({ts:new Date().toISOString(),type,data});LS_SET(AK,h.slice(0,100));}
-function exportAudit(){
+// CSV avec BOM UTF-8 et « ; » pour ouverture directe dans Excel FR
+function auditToCSV(h){
+  const esc=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const lines=['date;type;details'];
+  h.forEach(e=>lines.push([esc(e.ts),esc(e.type),esc(JSON.stringify(e.data))].join(';')));
+  return '\uFEFF'+lines.join('\r\n');
+}
+async function exportAudit(){
   const h=LS_GET(AK,[]);
   if(!h.length){toast('Aucun calcul dans l\'historique audit',true);return;}
+  const sel=document.getElementById('audit-fmt');
+  const fmt=(sel&&sel.value==='csv')?'csv':'json';
+  const d=new Date(),pad=x=>String(x).padStart(2,'0');
+  const fname=`goflow_audit_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.${fmt}`;
+  const content=fmt==='csv'?auditToCSV(h):JSON.stringify(h,null,2);
+
+  // 1) Écriture directe dans le dossier de sauvegarde préconfiguré (même logique que exportBackup)
+  const dirName=await bkpTrySaveToDir(fname,content);
+  if(dirName){toast(`✓ Historique exporté dans ${dirName} — ${fname}`);return;}
+
+  // 2) Fallback : téléchargement classique du navigateur
+  const blob=new Blob([content],{type:fmt==='csv'?'text/csv;charset=utf-8':'application/json'});
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(h,null,2)],{type:'application/json'}));
-  a.download=`GoFlow_Audit_${new Date().toISOString().slice(0,10)}.json`;a.click();
-  toast('Historique audit exporté ✓');
+  a.href=URL.createObjectURL(blob);a.download=fname;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  toast(`Historique audit exporté ✓ — ${fname}`);
 }
 
 function N(n){if(isNaN(n)||n==null)return'—';return Math.round(n).toLocaleString('fr-FR')+' XOF';}
@@ -4582,6 +4608,32 @@ async function bkpDirUI(){
   }
 }
 
+// Tente d'écrire un fichier dans le dossier de sauvegarde préconfiguré.
+// Retourne le nom du dossier si OK, null si fallback téléchargement requis (toast d'erreur déjà affiché).
+async function bkpTrySaveToDir(fname,content){
+  if(!BKP_FS_OK)return null;
+  let dir=await bkpDirGet();
+  // Aucun dossier défini → proposer d'en choisir un maintenant (annulable → téléchargement classique)
+  if(!dir)dir=await bkpChooseDir();
+  if(!dir)return null;
+  try{
+    if(!await bkpDirPerm(dir,true))throw Object.assign(new Error('perm'),{name:'NotAllowedError'});
+    const fh=await dir.getFileHandle(fname,{create:true});
+    const w=await fh.createWritable();
+    await w.write(content);await w.close();
+    return dir.name;
+  }catch(e){
+    // Dossier déplacé/supprimé, permission révoquée ou disque plein → fallback téléchargement
+    const msg=(e&&e.name==='NotFoundError')
+      ?'Le dossier de sauvegarde n\'est plus accessible. Veuillez le re-sélectionner (Paramètres).'
+      :(e&&e.name==='NotAllowedError')
+        ?'Permission d\'écriture refusée — re-sélectionnez le dossier dans Paramètres.'
+        :'Écriture impossible dans le dossier de sauvegarde.';
+    toast(`⚠️ ${msg} Téléchargement classique utilisé.`,true);
+    return null;
+  }
+}
+
 async function exportBackup(){
   const data={};
   BKP_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=v;});
@@ -4594,29 +4646,11 @@ async function exportBackup(){
   const okMsg=`${c.produits} produits, ${c.fournisseurs} fournisseurs, ${c.transitaires} transitaires, ${c.devis} articles devis`;
 
   // 1) Écriture directe dans le dossier choisi (Chrome/Edge desktop)
-  if(BKP_FS_OK){
-    let dir=await bkpDirGet();
-    // Aucun dossier défini → proposer d'en choisir un maintenant (annulable → téléchargement classique)
-    if(!dir)dir=await bkpChooseDir();
-    if(dir){
-      try{
-        if(!await bkpDirPerm(dir,true))throw Object.assign(new Error('perm'),{name:'NotAllowedError'});
-        const fh=await dir.getFileHandle(fname,{create:true});
-        const w=await fh.createWritable();
-        await w.write(json);await w.close();
-        auditLog('export_backup',c);
-        toast(`✓ Sauvegarde enregistrée dans ${dir.name} — ${okMsg}`);
-        return;
-      }catch(e){
-        // Dossier déplacé/supprimé, permission révoquée ou disque plein → fallback téléchargement
-        const msg=(e&&e.name==='NotFoundError')
-          ?'Le dossier de sauvegarde n\'est plus accessible. Veuillez le re-sélectionner (Paramètres).'
-          :(e&&e.name==='NotAllowedError')
-            ?'Permission d\'écriture refusée — re-sélectionnez le dossier dans Paramètres.'
-            :'Écriture impossible dans le dossier de sauvegarde.';
-        toast(`⚠️ ${msg} Téléchargement classique utilisé.`,true);
-      }
-    }
+  const dirName=await bkpTrySaveToDir(fname,json);
+  if(dirName){
+    auditLog('export_backup',c);
+    toast(`✓ Sauvegarde enregistrée dans ${dirName} — ${okMsg}`);
+    return;
   }
 
   // 2) Fallback : téléchargement classique du navigateur
