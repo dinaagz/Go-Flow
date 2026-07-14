@@ -629,6 +629,13 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
   </div>
   <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Les tarifs transitaire sont <b>tout-compris</b> (fret + douane + taxes) : la TVA n'est jamais ajoutée en plus des frais logistiques. La TVA interne n'apparaît séparément que pour les clients professionnels assujettis.</div>
   <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;padding:8px 10px;border:1px solid rgba(255,140,0,.35);border-radius:8px;background:rgba(255,140,0,.06)">⚠️ Vos données sont stockées localement dans votre navigateur. Pensez à exporter régulièrement vos données pour éviter toute perte en cas de vidage du cache ou de changement d'appareil.</div>
+  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:8px 10px;border:1px solid rgba(0,153,255,.3);border-radius:8px;background:rgba(0,153,255,.05)">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-sec" id="bkp-dir-btn" onclick="bkpChooseDir()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Choisir le dossier de sauvegarde</button>
+      <span id="bkp-dir-status"></span>
+    </div>
+    <div id="bkp-dir-hint" style="margin-top:6px"></div>
+  </div>
   <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
     <button class="btn btn-sec" onclick="exportBackup()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Exporter mes données</button>
@@ -4480,20 +4487,113 @@ function bkpCounts(data){
   return{produits:n(PK),fournisseurs:n(FK),transitaires:n(TK),devis:n(DK)};
 }
 
-function exportBackup(){
+/* ---- Dossier de sauvegarde automatique (File System Access API) ---- */
+// Le FileSystemDirectoryHandle ne peut pas être stocké en localStorage : on le persiste en IndexedDB.
+const BKP_FS_OK=typeof window.showDirectoryPicker==='function';
+
+function bkpIdb(){
+  return new Promise((res,rej)=>{
+    const rq=indexedDB.open('gf_fs',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('handles');
+    rq.onsuccess=()=>res(rq.result);
+    rq.onerror=()=>rej(rq.error);
+  });
+}
+async function bkpDirGet(){
+  try{
+    const db=await bkpIdb();
+    return await new Promise((res,rej)=>{
+      const rq=db.transaction('handles').objectStore('handles').get('backupDir');
+      rq.onsuccess=()=>res(rq.result||null);rq.onerror=()=>rej(rq.error);
+    });
+  }catch(e){return null;}
+}
+async function bkpDirSet(handle){
+  const db=await bkpIdb();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('handles','readwrite');
+    tx.objectStore('handles').put(handle,'backupDir');
+    tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);
+  });
+}
+// Vérifie/redemande la permission d'écriture sur le dossier mémorisé
+async function bkpDirPerm(handle,ask){
+  const opt={mode:'readwrite'};
+  try{
+    if(await handle.queryPermission(opt)==='granted')return true;
+    if(ask&&await handle.requestPermission(opt)==='granted')return true;
+  }catch(e){}
+  return false;
+}
+async function bkpChooseDir(){
+  if(!BKP_FS_OK)return;
+  try{
+    const handle=await window.showDirectoryPicker({mode:'readwrite'});
+    await bkpDirSet(handle);
+    await bkpDirUI();
+    toast(`Dossier de sauvegarde défini : ${handle.name} ✓`);
+  }catch(e){
+    if(e&&e.name!=='AbortError')toast('Impossible de sélectionner le dossier',true);
+  }
+}
+// Met à jour le statut affiché dans les paramètres
+async function bkpDirUI(){
+  const st=document.getElementById('bkp-dir-status'),hint=document.getElementById('bkp-dir-hint'),btn=document.getElementById('bkp-dir-btn');
+  if(!st)return;
+  if(!BKP_FS_OK){
+    btn.disabled=true;btn.style.opacity='.5';btn.style.cursor='not-allowed';
+    st.textContent='Non disponible sur ce navigateur';
+    hint.textContent='Sur mobile/Safari/Firefox, le fichier sera téléchargé dans votre dossier par défaut.';
+    return;
+  }
+  const h=await bkpDirGet();
+  if(h){
+    st.innerHTML=`Dossier actuel : <b>${h.name}</b>`;
+    hint.textContent='Les exports JSON s\'enregistrent automatiquement dans ce dossier (nom horodaté, aucune sauvegarde écrasée).';
+  }else{
+    st.textContent='Aucun dossier défini';
+    hint.textContent='Sans dossier défini, l\'export utilise le téléchargement classique du navigateur.';
+  }
+}
+
+async function exportBackup(){
   const data={};
   BKP_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=v;});
   const c=bkpCounts(data);
   const backup={app:'Go-Flow',type:'backup',ver:DATA_VER,date:new Date().toISOString(),data};
   const d=new Date(),pad=x=>String(x).padStart(2,'0');
-  const fname=`goflow_backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
-  const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  // Horodatage à la minute : jamais d'écrasement silencieux d'une sauvegarde précédente
+  const fname=`goflow_backup_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.json`;
+  const json=JSON.stringify(backup,null,2);
+  const okMsg=`${c.produits} produits, ${c.fournisseurs} fournisseurs, ${c.transitaires} transitaires, ${c.devis} articles devis`;
+
+  // 1) Écriture directe dans le dossier choisi (Chrome/Edge desktop)
+  if(BKP_FS_OK){
+    const dir=await bkpDirGet();
+    if(dir){
+      try{
+        if(!await bkpDirPerm(dir,true))throw new Error('perm');
+        const fh=await dir.getFileHandle(fname,{create:true});
+        const w=await fh.createWritable();
+        await w.write(json);await w.close();
+        auditLog('export_backup',c);
+        toast(`Sauvegarde enregistrée dans le dossier ${dir.name} ✓ — ${okMsg}`);
+        return;
+      }catch(e){
+        // Dossier déplacé/supprimé ou permission refusée → fallback téléchargement + inviter à re-sélectionner
+        toast('⚠️ Dossier de sauvegarde inaccessible — re-sélectionnez-le dans Paramètres. Téléchargement classique utilisé.',true);
+      }
+    }
+  }
+
+  // 2) Fallback : téléchargement classique du navigateur
+  const blob=new Blob([json],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=fname;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   auditLog('export_backup',c);
-  toast(`Sauvegarde exportée ✓ — ${c.produits} produits, ${c.fournisseurs} fournisseurs, ${c.transitaires} transitaires, ${c.devis} articles devis`);
+  toast(`Sauvegarde exportée ✓ — ${okMsg}`);
 }
 
 function importBackup(){document.getElementById('bkp-file').click();}
@@ -4548,6 +4648,7 @@ function toast(msg,err=false){
 }
 
 init();
+bkpDirUI();
 </script>
 </body>
 </html>
