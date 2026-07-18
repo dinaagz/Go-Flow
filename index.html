@@ -1332,8 +1332,14 @@ const DT=[{
 const CMK='gf_cols';
 const CM_DEFS={
   catalogue:[
+    {k:'photos', lbl:'Photo',                           def:true},
+    {k:'ref',    lbl:'Référence',                       def:true},
+    {k:'nom',    lbl:'Désignation',                     def:true},
     {k:'cat',    lbl:'Catégorie',                       def:true, mob:false},
     {k:'four',   lbl:'Fournisseur',                     def:true},
+    {k:'moq',    lbl:'MOQ',                             def:false,mob:false},
+    {k:'specs',  lbl:'Spécificités',                    def:false,mob:false},
+    {k:'desc',   lbl:'Description',                     def:false,mob:false},
     {k:'cbm',    lbl:'CBM',                             def:false,mob:false},
     {k:'poids',  lbl:'Poids',                           def:false,mob:false},
     {k:'achat',  lbl:'Achat EXW',                       def:false,mob:false},
@@ -1350,6 +1356,9 @@ const CM_DEFS={
     {k:'produit',  lbl:'Produit',                          def:true},
     {k:'ref',      lbl:'Référence',                        def:false,mob:false},
     {k:'four',     lbl:'Fournisseur',                      def:true, mob:false},
+    {k:'moq',      lbl:'MOQ',                              def:false,mob:false},
+    {k:'specs',    lbl:'Spécificités',                     def:false,mob:false},
+    {k:'desc',     lbl:'Description',                      def:false,mob:false},
     {k:'qte',      lbl:'Quantité',                         def:true},
     {k:'transport',lbl:'Transport / CBM / Poids',          def:true, mob:false},
     {k:'achat',    lbl:'Coût d\'achat + frais (étape 1)',  def:true, mob:false},
@@ -1367,6 +1376,7 @@ const CM_DEFS={
     {k:'ref',         g:'Produit',      lbl:'Référence',                def:false,mob:false},
     {k:'cat',         g:'Produit',      lbl:'Catégorie',                def:false,mob:false},
     {k:'specs',       g:'Produit',      lbl:'Spécificités',             def:false,mob:false},
+    {k:'desc',        g:'Produit',      lbl:'Description',              def:false,mob:false},
     {k:'cbm',         g:'Produit',      lbl:'CBM (m³)',                 def:false,mob:false},
     {k:'poids',       g:'Produit',      lbl:'Poids (kg)',               def:false,mob:false},
     {k:'moq',         g:'Produit',      lbl:'MOQ',                      def:true},
@@ -1387,11 +1397,10 @@ const CM_DEFS={
     {k:'total_ttc',   g:'Calcul',       lbl:'Total TTC ligne',          def:false,mob:false},
   ],
 };
-// Colonnes toujours présentes, listées à titre indicatif dans le gestionnaire
-// (le devis n'en a plus : toutes ses colonnes sont librement cochables,
+// Lignes toujours présentes, listées à titre indicatif dans le gestionnaire
+// (catalogue et devis n'en ont plus : toutes leurs colonnes sont librement cochables,
 //  et l'export PDF partage exactement la même sélection que l'aperçu)
 const CM_FIXED={
-  catalogue:['Photo','Réf','Désignation','Actions'],
   simulation:['Prix de Vente total TTC','TVA interne (si assujetti)'],
 };
 const CM_TITLES={catalogue:'Colonnes',simulation:'Lignes',devis:'Colonnes devis'};
@@ -1893,13 +1902,15 @@ function prodGroupCard(g){
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
     </div>`;
   }).join('');
+  const grpBadge=others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:'';
   return`<div class="card">
-  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(w.id)}${others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:''}</div>
+  ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(w.id)}${grpBadge}</div>`:cardTopStrip(w.id,bc,lbl,grpBadge?`<span style="position:static" class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fourn.</span>`:'')}
   <div class="card-body">
-    <div class="card-ref">${w.ref}</div>
-    <div class="card-title">${w.nom}</div>
+    ${cols.ref?`<div class="card-ref">${w.ref}</div>`:''}
+    ${cols.nom?`<div class="card-title">${w.nom}</div>`:''}
     <div class="card-cat">${cols.cat?w.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(w.tr)} ${w.tr}</div>
-    ${cardGallery(w)}
+    ${catInfoRows(w)}
+    ${cols.photos?cardGallery(w):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
@@ -1913,9 +1924,15 @@ function prodGroupCard(g){
 
 function prodGroupTable(groups){
   const C=cols;
-  const ths=['<th></th>','<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
+  const ths=['<th></th>',
+    C.photos ?'<th>Photo</th>'             :'',
+    C.ref    ?'<th>Réf</th>'               :'',
+    C.nom    ?'<th>Désignation</th>'       :'',
     C.cat    ?'<th>Catégorie</th>'         :'',
     C.four   ?'<th>Fournisseur</th>'       :'',
+    C.moq    ?'<th>MOQ</th>'               :'',
+    C.specs  ?'<th>Spécificités</th>'      :'',
+    C.desc   ?'<th>Description</th>'       :'',
     C.cbm    ?'<th>CBM</th>'               :'',
     C.poids  ?'<th>Poids</th>'             :'',
     C.achat  ?'<th>Achat EXW</th>'         :'',
@@ -1937,12 +1954,15 @@ function prodGroupTable(groups){
     const escapedKey=key.replace(/'/g,"\\'");
     const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives" aria-label="Voir alternatives">${ICO('chev')}</button>`:'';
     const winRow=`<tr>
-      <td class="no-print">${expandBtn}</td>
-      <td>${expBox(w.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
-      <td><code style="font-size:10px">${w.ref}</code></td>
-      <td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>
+      <td class="no-print">${expandBtn}${C.photos?'':`<span style="position:relative;display:inline-block;width:22px;height:22px">${expBox(w.id)}</span>`}</td>
+      ${C.photos ?`<td>${expBox(w.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${w.ref}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>`:''}
       ${C.cat    ?`<td><span class="pill-cat">${w.cat}</span></td>`:''}
       ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.moq    ?`<td>${w.moq||1}</td>`:''}
+      ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(w.specs,60)}</td>`:''}
+      ${C.desc   ?`<td style="font-size:11px;color:var(--muted);max-width:220px">${truncTxt(w.desc,80)}</td>`:''}
       ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
       ${C.poids  ?`<td>${w.kg} kg</td>`:''}
       ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
@@ -1962,17 +1982,20 @@ function prodGroupTable(groups){
         <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
     </tr>`;
-    const colCount=4+(Object.values(C).filter(Boolean).length)+1;
+    const colCount=1+(Object.values(C).filter(Boolean).length)+1;
     const altRows=others.map(p=>{
       const fp=fours.find(x=>x.id===p.fid);const cp=calc(p);
       const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" alt="" loading="lazy">`:PH_SM;
       return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
         <td></td>
-        <td>${pimg}</td>
-        <td><code style="font-size:9px">${p.ref}</code></td>
-        <td style="color:var(--muted)">${p.nom}</td>
+        ${C.photos ?`<td>${pimg}</td>`:''}
+        ${C.ref    ?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
+        ${C.nom    ?`<td style="color:var(--muted)">${p.nom}</td>`:''}
         ${C.cat    ?`<td></td>`:''}
         ${C.four   ?`<td>${fourLabel(fp)}</td>`:''}
+        ${C.moq    ?`<td>${p.moq||1}</td>`:''}
+        ${C.specs  ?`<td style="font-size:10px;color:var(--muted)">${truncTxt(p.specs,40)}</td>`:''}
+        ${C.desc   ?`<td style="font-size:10px;color:var(--muted)">${truncTxt(p.desc,50)}</td>`:''}
         ${C.cbm    ?`<td>${Nd(cp.cbm,4)}</td>`:''}
         ${C.poids  ?`<td>${p.kg} kg</td>`:''}
         ${C.achat  ?`<td>${N(cp.exwUX)}</td>`:''}
@@ -1999,6 +2022,28 @@ function toggleGroupTblRow(key,btn){
   if(btn)btn.classList.toggle('open',!open);
 }
 
+// Texte long (Spécificités / Description) : échappé, tronqué, tooltip au survol
+function escH(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function truncTxt(s,n=60){
+  s=String(s||'');
+  if(!s)return'—';
+  return s.length>n?`<span title="${escH(s)}">${escH(s.slice(0,n))}…</span>`:escH(s);
+}
+// Lignes d'info MOQ / Spécificités / Description sur les cartes du catalogue
+function catInfoRows(p){
+  const row=(lbl,val)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-top:2px"><span style="color:var(--muted)">${lbl}</span><span style="font-weight:600;text-align:right">${val}</span></div>`;
+  return[
+    cols.moq?row('MOQ',p.moq||1):'',
+    cols.specs&&p.specs?row('Spécificités',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.specs,80)}</span>`):'',
+    cols.desc&&p.desc?row('Description',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.desc,100)}</span>`):'',
+  ].join('');
+}
+// Bandeau compact remplaçant l'image quand la colonne Photo est décochée
+// (le badge fournisseur et la case de sélection export restent accessibles)
+function cardTopStrip(id,bc,lbl,extra=''){
+  return`<div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:10px 12px 0;position:relative">${expBox(id)}${extra}<span class="badge ${bc}" style="position:static">${lbl}</span></div>`;
+}
+
 // Délai indicatif du transitaire par défaut selon le mode de transport
 function prodDelai(p){
   const t0=trans.length?trans[0]:null;
@@ -2022,6 +2067,8 @@ function showProdDetails(id){
     ['Prix EXW',`${p.prix} ${p.dev||'RMB'}`],['Fret local',p.prach?`${p.prach} ${p.dev||'RMB'}`:'—'],
     ['Dimensions',`${p.l}×${p.la}×${p.h} ${p.dimU||'cm'}`],['CBM',Nd(c.cbm,4)+' m³'],['Poids',p.kg+' kg'],
     ['Transport',p.tr],['Délai livraison',prodDelai(p)],['MOQ',p.moq||1],
+    ...(p.specs?[['Spécificités',escH(p.specs)]]:[]),
+    ...(p.desc?[['Description',escH(p.desc)]]:[]),
     ['Achat EXW (XOF)',N(c.exwUX)],['Coût de Revient HT',N(c.coutRevientUX)],
     ['Frais logistiques (Transitaire)',N(c.fraisLogU)],
     ['Marge',`${N(c.margeU)} (${Nd(c.margePct,1)}%)`],
@@ -2071,12 +2118,13 @@ function prodCard(p){
   const c=calc(p);
   const priceRows=cardPriceRows(p,c);
   return`<div class="card">
-  <div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(p.id)}</div>
+  ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(p.id)}</div>`:cardTopStrip(p.id,bc,lbl)}
   <div class="card-body">
-    <div class="card-ref">${p.ref}</div>
-    <div class="card-title">${p.nom}</div>
+    ${cols.ref?`<div class="card-ref">${p.ref}</div>`:''}
+    ${cols.nom?`<div class="card-title">${p.nom}</div>`:''}
     <div class="card-cat">${cols.cat?p.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(p.tr)} ${p.tr}</div>
-    ${cardGallery(p)}
+    ${catInfoRows(p)}
+    ${cols.photos?cardGallery(p):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
@@ -2089,9 +2137,15 @@ function prodCard(p){
 
 function prodTable(list){
   const C=cols;
-  const ths=['<th>Photo</th>','<th>Réf</th>','<th>Désignation</th>',
+  const ths=[
+    C.photos ?'<th>Photo</th>'             :'',
+    C.ref    ?'<th>Réf</th>'               :'',
+    C.nom    ?'<th>Désignation</th>'       :'',
     C.cat    ?'<th>Catégorie</th>'         :'',
     C.four   ?'<th>Fournisseur</th>'       :'',
+    C.moq    ?'<th>MOQ</th>'               :'',
+    C.specs  ?'<th>Spécificités</th>'      :'',
+    C.desc   ?'<th>Description</th>'       :'',
     C.cbm    ?'<th>CBM</th>'               :'',
     C.poids  ?'<th>Poids</th>'             :'',
     C.achat  ?'<th>Achat EXW</th>'         :'',
@@ -2110,11 +2164,14 @@ function prodTable(list){
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     return`<tr>
-      <td>${expBox(p.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>
-      <td><code style="font-size:10px">${p.ref}</code></td>
-      <td style="font-weight:500;max-width:180px">${p.nom}</td>
+      ${C.photos ?`<td>${expBox(p.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${p.nom}</td>`:''}
       ${C.cat    ?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
       ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
+      ${C.moq    ?`<td>${p.moq||1}</td>`:''}
+      ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
+      ${C.desc   ?`<td style="font-size:11px;color:var(--muted);max-width:220px">${truncTxt(p.desc,80)}</td>`:''}
       ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
       ${C.poids  ?`<td>${p.kg} kg</td>`:''}
       ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
@@ -2126,7 +2183,8 @@ function prodTable(list){
       ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-      <td class="no-print"><div style="display:flex;gap:4px">
+      <td class="no-print"><div style="display:flex;gap:4px;position:relative">
+        ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
@@ -2543,6 +2601,9 @@ function simCalc(){
     ${V.produit?`<div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>`:''}
     ${V.ref?`<div class="sim-row"><span>Référence</span><span>${p.ref}</span></div>`:''}
     ${V.four?`<div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>`:''}
+    ${V.moq?`<div class="sim-row"><span>MOQ</span><span>${p.moq||1}</span></div>`:''}
+    ${V.specs?`<div class="sim-row"><span>Spécificités</span><span style="text-align:right;max-width:220px">${truncTxt(p.specs,80)}</span></div>`:''}
+    ${V.desc?`<div class="sim-row"><span>Description</span><span style="text-align:right;max-width:220px">${truncTxt(p.desc,100)}</span></div>`:''}
     ${V.qte?`<div class="sim-row"><span>Quantité</span><span>${qty} unité${qty>1?'s':''}</span></div>`:''}
     ${V.transport?`
     <div class="sim-row"><span>Transport</span><span>${simTr==='Maritime'?ICO('ship'):ICO('plane')} ${simTr}</span></div>
@@ -2574,14 +2635,39 @@ function simCalc(){
 
 function qsim(id){tab('simulation');document.getElementById('sim-prod').value=id;simSelProd();}
 
-/* ---- EXPORT CSV ---- */
+/* ---- EXPORT CSV ----
+   Synchronisé sur les colonnes cochées dans le catalogue (sélection brute,
+   sans auto-masquage mobile) : une colonne décochée n'apparaît pas dans le CSV. */
 function exportCSV(){
-  const hdr=['Référence','Désignation','Catégorie','Fournisseur','Devise','Prix EXW (devise)','Fret local (devise)','Coût achat HT (devise)','Frais transfert (devise)','Trade Assurance (devise)','Coût de revient HT (devise)','Taux change','Coût de revient HT (XOF)','Marge %','Marge (XOF)','Remise %','Prix de Vente HT (XOF)','CBM m3','Poids kg','Transport','Frais logistiques Transitaire (XOF)','Prix de Vente TTC (XOF)','Prix marché XOF'];
+  const csvEsc=v=>{v=String(v??'');return/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  // clé catalogue → colonnes CSV [en-tête, valeur(p, calc, fournisseur)]
+  const MAP={
+    ref:    [['Référence',(p)=>p.ref]],
+    nom:    [['Désignation',(p)=>p.nom]],
+    cat:    [['Catégorie',(p)=>p.cat]],
+    four:   [['Fournisseur',(p,c,f)=>f?f.nom:p.fn||'']],
+    moq:    [['MOQ',(p)=>p.moq||1]],
+    specs:  [['Spécificités',(p)=>p.specs||'']],
+    desc:   [['Description',(p)=>p.desc||'']],
+    cbm:    [['CBM m3',(p,c)=>Nd(c.cbm,4)]],
+    poids:  [['Poids kg',(p)=>p.kg]],
+    achat:  [['Devise',(p)=>p.dev||'RMB'],['Prix EXW (devise)',(p)=>p.prix],['Coût achat HT (devise)',(p,c)=>Nd(c.coutAchat)]],
+    prach:  [['Fret local (devise)',(p)=>p.prach||0]],
+    revient:[['Frais transfert (devise)',(p,c)=>Nd(c.fTrf)],['Trade Assurance (devise)',(p,c)=>Nd(c.fAss)],['Coût de revient HT (devise)',(p,c)=>Nd(c.coutRevient)],['Taux change',(p,c)=>c.tauxChange],['Coût de revient HT (XOF)',(p,c)=>Math.round(c.coutRevientUX)]],
+    fret:   [['Transport',(p)=>p.tr],['Frais logistiques Transitaire (XOF)',(p,c)=>Math.round(c.fraisLogU)]],
+    marge:  [['Marge %',(p,c)=>Nd(c.margePct,1)],['Marge (XOF)',(p,c)=>Math.round(c.margeU)],['Remise %',(p)=>p.rem||0]],
+    vente:  [['Prix de Vente HT (XOF)',(p,c)=>Math.round(c.pvuHT)]],
+    ttc:    [['Prix de Vente TTC (XOF)',(p,c)=>Math.round(c.pvuTTC)]],
+    delai:  [['Délai',(p)=>prodDelai(p)]],
+    marche: [['Prix marché XOF',(p)=>p.conc||'']],
+  };
+  const active=CM_DEFS.catalogue.filter(d=>colStore.catalogue.visible.includes(d.k)&&MAP[d.k]).flatMap(d=>MAP[d.k]);
+  if(!active.length){toast('Aucune colonne cochée — rien à exporter',true);return;}
   const rows=prods.map(p=>{
     const f=fours.find(x=>x.id===p.fid);const c=calc(p);
-    return[p.ref,p.nom,p.cat,f?f.nom:p.fn||'',p.dev||'RMB',p.prix,p.prach||0,Nd(c.coutAchat),Nd(c.fTrf),Nd(c.fAss),Nd(c.coutRevient),c.tauxChange,Math.round(c.coutRevientUX),Nd(c.margePct,1),Math.round(c.margeU),p.rem||0,Math.round(c.pvuHT),Nd(c.cbm,4),p.kg,p.tr,Math.round(c.fraisLogU),Math.round(c.pvuTTC),p.conc||''].join(';');
+    return active.map(([,fn])=>csvEsc(fn(p,c,f))).join(';');
   });
-  const csv=[hdr.join(';'),...rows].join('\n');
+  const csv=[active.map(([h])=>csvEsc(h)).join(';'),...rows].join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
   a.download=`GoFlow_Catalogue_${new Date().toISOString().slice(0,10)}.csv`;a.click();
@@ -2873,7 +2959,8 @@ function buildDevisGrid(){
       ?`<img src="${p.photos[0]}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">${PH_LG}</div>`
       :`<div class="card-img-placeholder">${PH_LG}</div>`;
     const infos=[
-      SH.specs&&p.specs?row('Spécificités',`<span style="font-weight:400;color:var(--muted)">${String(p.specs).slice(0,80)}</span>`):'',
+      SH.specs&&p.specs?row('Spécificités',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.specs,80)}</span>`):'',
+      SH.desc&&p.desc?row('Description',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.desc,100)}</span>`):'',
       SH.cbm?row('CBM',Nd(c.cbm,4)+' m³'):'',
       SH.poids?row('Poids',(p.poids||p.kg||'—')+' kg'):'',
       SH.moq?row('MOQ',p.moq||1):'',
@@ -2920,6 +3007,7 @@ function buildDevisTable(){
     SH.cat?'<th>Catégorie</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.specs?'<th>Spécificités</th>':'',
+    SH.desc?'<th>Description</th>':'',
     SH.cbm?'<th>CBM</th>':'',
     SH.poids?'<th>Poids</th>':'',
     SH.moq?'<th>MOQ</th>':'',
@@ -2949,7 +3037,8 @@ function buildDevisTable(){
       ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
       ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
-      ${SH.specs?`<td style="font-size:11px;color:var(--muted)">${p.specs||'—'}</td>`:''}
+      ${SH.specs?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
+      ${SH.desc?`<td style="font-size:11px;color:var(--muted);max-width:220px">${truncTxt(p.desc,80)}</td>`:''}
       ${SH.cbm?`<td style="font-size:11px">${Nd(c.cbm,4)} m³</td>`:''}
       ${SH.poids?`<td style="font-size:11px">${p.poids||p.kg||'—'} kg</td>`:''}
       ${SH.moq?`<td style="font-size:11px">${p.moq||1}</td>`:''}
@@ -3040,6 +3129,7 @@ function generateDevisPDF(){
     SH.cat?'<th>Catégorie</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.specs?'<th>Spécificités</th>':'',
+    SH.desc?'<th>Description</th>':'',
     SH.cbm?'<th>CBM (m³)</th>':'',
     SH.poids?'<th>Poids</th>':'',
     SH.moq?'<th>MOQ</th>':'',
@@ -3073,7 +3163,8 @@ function generateDevisPDF(){
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td>${p.cat}</td>`:''}
       ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
-      ${SH.specs?`<td style="font-size:9px">${p.specs||'—'}</td>`:''}
+      ${SH.specs?`<td style="font-size:9px">${escH(p.specs)||'—'}</td>`:''}
+      ${SH.desc?`<td style="font-size:9px">${escH(p.desc)||'—'}</td>`:''}
       ${SH.cbm?`<td>${Nd(c.cbm,4)}</td>`:''}
       ${SH.poids?`<td>${p.poids||p.kg||'—'} kg</td>`:''}
       ${SH.moq?`<td>${p.moq||1}</td>`:''}
@@ -4064,6 +4155,9 @@ let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:
 const EXP_INFOS=[
   {k:'cat',    lbl:'Catégorie',          v:p=>p.cat||''},
   {k:'four',   lbl:'Fournisseur',        v:p=>{const f=fours.find(x=>x.id===p.fid);return f?f.nom:(p.fn||'');}},
+  {k:'moq',    lbl:'MOQ',                v:p=>String(p.moq||1)},
+  {k:'specs',  lbl:'Spécificités',       v:p=>p.specs?String(p.specs).slice(0,60):''},
+  {k:'desc',   lbl:'Description',        v:p=>p.desc?String(p.desc).slice(0,60):''},
   {k:'cbm',    lbl:'CBM',                v:(p,c)=>c.cbm?Nd(c.cbm,4)+' m³':''},
   {k:'poids',  lbl:'Poids',              v:p=>p.kg?p.kg+' kg':''},
   {k:'achat',  lbl:'Achat EXW',          v:(p,c)=>N(c.exwUX)},
