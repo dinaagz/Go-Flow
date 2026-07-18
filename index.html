@@ -1755,6 +1755,7 @@ function tab(name){
     if(b){const on=t===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;}
   });
   if(name==='devis')renderDevis();
+  if(name==='catalogue')renderCat(); // resynchronise les checkboxes/prix après actions dans le devis
 }
 
 function setView(v){
@@ -2298,12 +2299,15 @@ function saveProd(){
     desc:document.getElementById('p-desc').value,specs:document.getElementById('p-specs').value,photos:[...pics]};
   if(editP){const i=prods.findIndex(p=>p.id===editP);prods[i]={...prods[i],...d};toast('Produit mis à jour ✓');}
   else{d.id='P'+String(Date.now()).slice(-8);d.ref=document.getElementById('p-ref').value||d.id;prods.push(d);toast('Produit ajouté ✓');}
-  save('p');closeMod('prod-modal');renderCat();popSim();
+  save('p');closeMod('prod-modal');renderCat();popSim();syncCartFromProds();
 }
 
 function delProd(id){
   if(!confirm('Supprimer ce produit ?'))return;
-  prods=prods.filter(p=>p.id!==id);save('p');renderCat();popSim();toast('Supprimé');
+  prods=prods.filter(p=>p.id!==id);save('p');
+  // Retirer aussi du panier de devis pour garder les deux vues synchronisées
+  if(devisCart.some(x=>x.pid===id)){devisCart=devisCart.filter(x=>x.pid!==id);saveDevisCartLS();}
+  renderCat();popSim();toast('Supprimé');
 }
 
 /* ---- PHOTOS ---- */
@@ -2694,6 +2698,7 @@ function loadDevis(){
   devisCart.forEach(it=>{
     if(typeof it.comment!=='string')it.comment='';
     if(it.snap&&it.snap.moq==null){const p=prods.find(x=>x.id===it.pid);it.snap.moq=p?(p.moq||1):1;}
+    if(it.snap&&it.snap.marge===undefined){const p=prods.find(x=>x.id===it.pid);it.snap.marge=p?p.marge:'';}
   });
   devisClient=LS_GET(DCK,null)||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
   const saved=LS_GET(DPK,null);
@@ -2722,6 +2727,41 @@ function saveDevisPrefs(){
   }
   devisPrefs.fx={dev:devisFX.dev,taux:devisFX.taux};
   LS_SET(DPK,devisPrefs);
+  // Marge personnalisée : réécrite sur les produits du panier pour que le catalogue affiche le même PV HT
+  if(devisPrefs.strategy==='personnalise')applyPersoMargeToCart();
+}
+
+// Propage la marge personnalisée du devis vers les produits du catalogue présents dans le panier
+function applyPersoMargeToCart(){
+  const m=parseFloat(devisPrefs.margePerso);
+  if(isNaN(m)||!devisCart.length)return;
+  let changed=false;
+  devisCart.forEach(it=>{
+    const p=prods.find(x=>x.id===it.pid);
+    if(p&&parseFloat(p.marge)!==m){p.marge=m;changed=true;}
+    if(it.snap)it.snap.marge=m;
+  });
+  if(changed){save('p');saveDevisCartLS();renderCat();}
+}
+
+// Rafraîchit les snapshots du panier depuis les produits vivants (après édition d'un produit)
+function syncCartFromProds(){
+  let changed=false;
+  devisCart.forEach(it=>{
+    const p=prods.find(x=>x.id===it.pid);
+    if(!p||!it.snap)return;
+    const f=fours.find(x=>x.id===p.fid);
+    Object.assign(it.snap,{nom:p.nom,ref:p.ref||it.snap.ref,cat:p.cat,fid:p.fid,fn:p.fn,
+      prix:p.prix,prach:p.prach||0,dev:p.dev||'RMB',marge:p.marge,
+      l:p.l,la:p.la,h:p.h,kg:p.kg,tr:p.tr,moq:p.moq||1,
+      photos:p.photos||[],desc:p.desc||'',specs:p.specs||'',
+      four_nom:f?f.nom:it.snap.four_nom,four_pays:f?f.pays:it.snap.four_pays,four_contact:f?f.contact:it.snap.four_contact});
+    changed=true;
+  });
+  if(changed){
+    saveDevisCartLS();
+    if(document.getElementById('t-devis').style.display!=='none')renderDevisCart();
+  }
 }
 
 function updateCartBadge(){
@@ -2799,12 +2839,21 @@ function onDevisTauxChange(){
 }
 
 /* ---- CALCUL DEVIS (mêmes règles que le moteur central, marge selon la stratégie du devis) ---- */
+// Marge effective d'un item : celle du produit vivant du catalogue (fallback : snapshot),
+// modulée par la stratégie du devis — garantit le même PV HT que le catalogue en stratégie standard
+function devisItemMarge(item){
+  const live=prods.find(x=>x.id===item.pid);
+  const src=live||item.snap||{};
+  const base=(src.marge!==''&&src.marge!=null&&!isNaN(parseFloat(src.marge)))?parseFloat(src.marge):S.tauxMarge;
+  const strat=devisPrefs.strategy||'marge_fixe';
+  if(strat==='competitif')return base*0.6;
+  if(strat==='premium')return base*1.2;
+  if(strat==='personnalise')return parseFloat(devisPrefs.margePerso)||base;
+  return base;
+}
 function calcDevis(item){
   const p=item.snap;
-  const strat=devisPrefs.strategy||'marge_fixe';
-  const base=devisPrefs.margeFixe||35;
-  const perso=devisPrefs.margePerso||base;
-  const mgPct=strat==='competitif'?base*0.6:strat==='premium'?base*1.2:strat==='personnalise'?perso:base;
+  const mgPct=devisItemMarge(item);
   const e=calcEngine({
     exw:parseFloat(p.prix)||0,fretLocal:parseFloat(p.prach)||0,dev:p.dev||'RMB',
     qty:item.qty||1,tauxChange:xofRate(p.dev||'RMB'),
@@ -2830,7 +2879,7 @@ function addToCart(pid){
     cid:'C'+String(Date.now()).slice(-8),pid,qty:1,comment:'',
     snap:{
       nom:p.nom,ref:p.ref,cat:p.cat,fid:p.fid,fn:p.fn,
-      prix:p.prix,prach:p.prach||0,dev:p.dev||'RMB',
+      prix:p.prix,prach:p.prach||0,dev:p.dev||'RMB',marge:p.marge,
       l:p.l,la:p.la,h:p.h,kg:p.kg,tr:p.tr,moq:p.moq||1,
       photos:p.photos||[],desc:p.desc||'',specs:p.specs||'',
       four_nom:f?f.nom:'',four_pays:f?f.pays:'',four_contact:f?f.contact:'',
@@ -2843,7 +2892,7 @@ function addToCart(pid){
 
 function removeFromCart(cid){
   devisCart=devisCart.filter(x=>x.cid!==cid);
-  saveDevisCartLS();renderDevisCart();
+  saveDevisCartLS();renderDevisCart();renderCat();
 }
 
 function updateCartQty(cid,qty){
@@ -2883,7 +2932,7 @@ function dvNoteField(item){
 function clearCart(){
   if(!devisCart.length)return;
   if(!confirm('Vider entièrement le panier de devis ?'))return;
-  devisCart=[];saveDevisCartLS();renderDevisCart();toast('Panier vidé');
+  devisCart=[];saveDevisCartLS();renderDevisCart();renderCat();toast('Panier vidé');
 }
 
 function isInCart(pid){return devisCart.some(x=>x.pid===pid);}
@@ -2898,10 +2947,10 @@ function setStrategy(s){
   const persoRow=document.getElementById('strat-perso-row');
   persoRow.style.display=s==='personnalise'?'flex':'none';
   const msgs={
-    marge_fixe:`Marge standard de ${base}% appliquée sur le prix EXW.`,
-    competitif:`Prix compétitif : marge réduite à ${(base*0.6).toFixed(1)}% (−40 % vs standard) pour séduire le client.`,
-    premium:`Position premium : marge de ${(base*1.2).toFixed(1)}% (+20 % vs standard) pour clientèle haut de gamme.`,
-    personnalise:`Marge personnalisée : entrez librement votre taux ci-dessus.`
+    marge_fixe:`Marge du catalogue appliquée à chaque produit (marge produit, sinon ${S.tauxMarge}% par défaut) — mêmes prix que dans le Catalogue.`,
+    competitif:`Prix compétitif : marge de chaque produit réduite de 40 % pour séduire le client.`,
+    premium:`Position premium : marge de chaque produit majorée de 20 % pour clientèle haut de gamme.`,
+    personnalise:`Marge personnalisée : entrez librement votre taux ci-dessus — il est aussi appliqué aux produits du panier dans le Catalogue.`
   };
   document.getElementById('strat-detail').textContent=msgs[s]||'';
   renderDevisCart();
