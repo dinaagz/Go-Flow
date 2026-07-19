@@ -1373,6 +1373,7 @@ const CM_DEFS={
   devis:[
     {k:'photos',      g:'Produit',      lbl:'Photo',                    def:false,mob:false},
     {k:'nom',         g:'Produit',      lbl:'Désignation',              def:true},
+    {k:'commentaire', g:'Produit',      lbl:'Commentaire client',       def:true},
     {k:'ref',         g:'Produit',      lbl:'Référence',                def:false,mob:false},
     {k:'cat',         g:'Produit',      lbl:'Catégorie',                def:false,mob:false},
     {k:'specs',       g:'Produit',      lbl:'Spécificités',             def:false,mob:false},
@@ -1380,7 +1381,6 @@ const CM_DEFS={
     {k:'cbm',         g:'Produit',      lbl:'CBM (m³)',                 def:false,mob:false},
     {k:'poids',       g:'Produit',      lbl:'Poids (kg)',               def:false,mob:false},
     {k:'moq',         g:'Produit',      lbl:'MOQ',                      def:true},
-    {k:'comment',     g:'Produit',      lbl:'Commentaire client',       def:false,mob:false},
     {k:'fournisseur', g:'Produit',      lbl:'Fournisseur',              def:false,mob:false},
     {k:'transitaire', g:'Transitaire',  lbl:'Transitaire',              def:false,mob:false},
     {k:'type_fret',   g:'Transitaire',  lbl:'Type de fret',             def:false,mob:false},
@@ -2915,15 +2915,16 @@ function dvClearComment(cid){
   item.comment='';saveDevisCartLS();
   document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
 }
-// Champ de saisie inline (carte et table) — discret, italique, auto-sauvegardé
-function dvNoteField(item){
+// Champ de saisie inline (carte et table) — éditable au clic, auto-sauvegardé.
+// fs = taille de police, alignée sur la désignation du contexte (13.5px carte / 12.5px table)
+function dvNoteField(item,fs){
   const esc=String(item.comment||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  return`<div style="display:flex;align-items:center;gap:6px;margin-top:6px">
-    <span style="color:var(--muted);flex-shrink:0" title="Commentaire (note interne)">${ICO('pencil')}</span>
-    <input type="text" value="${esc}" maxlength="300" placeholder="Ajouter une note…"
+  return`<div style="display:flex;align-items:center;gap:6px">
+    <span style="color:var(--muted);flex-shrink:0" title="Commentaire client">${ICO('pencil')}</span>
+    <input type="text" value="${esc}" maxlength="300" placeholder="Ajouter un commentaire…"
       aria-label="Commentaire sur ${String(item.snap.nom||'').replace(/"/g,'&quot;')}"
       oninput="dvComment('${item.cid}',this.value)"
-      style="flex:1;min-width:0;border:none;border-bottom:1px dashed var(--border);background:transparent;font-size:11px;font-style:italic;color:var(--muted);padding:2px 0;outline:none">
+      style="flex:1;min-width:120px;border:none;border-bottom:1px dashed var(--border);background:transparent;font-size:${fs||'12.5px'};font-weight:500;color:var(--nuit);padding:2px 0;outline:none">
     <button data-dvnote-clear="${item.cid}" onclick="dvClearComment('${item.cid}')" title="Effacer le commentaire" aria-label="Effacer le commentaire"
       style="display:${item.comment?'inline-flex':'none'};align-items:center;border:none;background:transparent;cursor:pointer;color:var(--muted);padding:2px">${ICO('x')}</button>
   </div>`;
@@ -3028,6 +3029,7 @@ function buildDevisGrid(){
       <div class="card-body">
         ${SH.ref?`<div class="card-ref">${p.ref}</div>`:''}
         ${SH.nom?`<div class="card-title">${p.nom}</div>`:''}
+        ${SH.commentaire?`<div style="margin:2px 0 4px">${dvNoteField(item,'13.5px')}</div>`:''}
         ${SH.cat?`<div class="card-cat">${p.cat}</div>`:''}
         ${infos}
         ${SH.prix_ht||SH.prix_ttc?`<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
@@ -3041,7 +3043,6 @@ function buildDevisGrid(){
           ${SH.total_ht?`<span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.pvtHT)}</span>`:''}
         </div>`:SH.total_ht?row('Total HT ligne',Ndv(c.pvtHT)):''}
         ${SH.total_ttc?row('Total TTC ligne',`<span style="color:var(--bleu-t)">${Ndv(c.pvtTTC)}</span>`):''}
-        ${dvNoteField(item)}
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
       </div></div>`;
   }).join('')}</div>`;
@@ -3052,6 +3053,7 @@ function buildDevisTable(){
   const ths=[
     SH.photos?'<th>Photo</th>':'',
     SH.nom?'<th>Désignation</th>':'',
+    SH.commentaire?'<th>Commentaire</th>':'',
     SH.ref?'<th>Réf</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
@@ -3075,7 +3077,6 @@ function buildDevisTable(){
     SH.total_ttc?`<th>Total TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th class="no-print">Actions</th>',
   ].join('');
-  const nbTh=ths.split('<th').length-1;
   const rows=devisCart.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const imgSrc=p.photos&&p.photos[0];
@@ -3083,6 +3084,7 @@ function buildDevisTable(){
     return`<tr>
       ${SH.photos?`<td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" loading="lazy">`:PH_SM}</td>`:''}
       ${SH.nom?`<td style="font-weight:500;max-width:160px">${p.nom}</td>`:''}
+      ${SH.commentaire?`<td style="min-width:180px">${dvNoteField(item,'12.5px')}</td>`:''}
       ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
       ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
@@ -3112,8 +3114,7 @@ function buildDevisTable(){
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
       </div></td>
-    </tr>
-    <tr class="no-print"><td colspan="${nbTh}" style="padding:0 12px 8px;border-top:none">${dvNoteField(item)}</td></tr>`;
+    </tr>`;
   }).join('');
   return`<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
@@ -3174,6 +3175,7 @@ function generateDevisPDF(){
   const colH=[
     SH.photos?'<th>Photo</th>':'',
     SH.nom?'<th>Désignation</th>':'',
+    SH.commentaire?'<th>Commentaire</th>':'',
     SH.ref?'<th>Réf.</th>':'',
     SH.cat?'<th>Catégorie</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
@@ -3202,13 +3204,12 @@ function generateDevisPDF(){
   const escC=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const rowsHtml=devisCart.map(item=>{
     const c=calcDevis(item),p=item.snap;
-    // Commentaire : sous-ligne sous le produit, uniquement si la colonne « Commentaire client » est cochée
-    const commentRow=SH.comment&&item.comment?`<tr><td colspan="${nbCols}" style="font-size:9px;font-style:italic;color:#666;border-top:none;padding-top:0">Note : ${escC(item.comment)}</td></tr>`:'';
     const imgCell=SH.photos?`<td style="text-align:center">${p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`:''}</td>`:'';
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     return`<tr>
       ${imgCell}
       ${SH.nom?`<td><strong>${p.nom}</strong></td>`:''}
+      ${SH.commentaire?`<td style="font-style:italic">${item.comment?escC(item.comment):''}</td>`:''}
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td>${p.cat}</td>`:''}
       ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
@@ -3230,7 +3231,7 @@ function generateDevisPDF(){
       ${SH.qte?`<td style="text-align:center">${item.qty}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.total_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
-    </tr>${commentRow}`;
+    </tr>`;
   }).join('');
   const cs=devisCart.map(calcDevis);
   const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
