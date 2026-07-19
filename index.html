@@ -160,6 +160,9 @@ select.filt:hover{border-color:#C3CADC}
 .cd-row{display:flex;justify-content:space-between;gap:10px;padding:2px 0;color:var(--muted);font-variant-numeric:tabular-nums}
 .cd-tot{font-weight:700;color:var(--text);border-top:1px dashed var(--border2);margin-top:3px;padding-top:4px}
 .cd-note{font-size:9.5px;color:var(--muted);margin-top:3px;font-style:italic}
+.dv-note-ta{flex:1;min-width:120px;border:none;border-bottom:1px dashed var(--border);background:transparent;font-family:'Poppins',sans-serif;font-weight:500;color:var(--nuit);padding:2px 0;outline:none;resize:vertical;min-height:40px;max-height:120px;overflow-y:auto;white-space:pre-wrap;word-wrap:break-word;line-height:1.4}
+@media(max-width:767px){.dv-note-ta{min-height:44px}}
+.dv-note-txt{white-space:pre-wrap;word-wrap:break-word;line-height:1.4}
 .sim-sec{font-size:9.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin:10px 0 2px}
 .card-acts{display:flex;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border)}
 .card-acts .btn-sm{padding:7px 9px}
@@ -2083,7 +2086,7 @@ function showDevisDetails(cid){
   openDetails(p.nom,[
     ['Référence',p.ref],['Fournisseur',p.fn||'—'],['MOQ',p.moq||1],['Quantité',item.qty],
     ...(p.specs?[['Spécificités',p.specs]]:[]),
-    ...(item.comment?[['Commentaire',item.comment]]:[]),
+    ...(item.comment?[['Commentaire',`<span class="dv-note-txt">${item.comment.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`]]:[]),
     ['Coût de Revient Unit.',Ndv(c.coutRevientUX)],['Frais Log. Unit.',Ndv(c.fraisLogU)],
     ['Marge (interne)',Nd(c.mgPct,1)+'%'],
     ['Prix Vente HT/u',Ndv(c.pvuHT)],['Prix Vente TTC/u',Ndv(c.pvuTTC)],
@@ -2915,16 +2918,23 @@ function dvClearComment(cid){
   item.comment='';saveDevisCartLS();
   document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
 }
-// Champ de saisie inline (carte et table) — éditable au clic, auto-sauvegardé.
+// Auto-resize du textarea commentaire : hauteur adaptée au contenu, plafonnée à 120px (scroll au-delà)
+function dvNoteGrow(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+// Champ de saisie inline (carte et table) — textarea multi-lignes, éditable au clic, auto-sauvegardé.
 // fs = taille de police, alignée sur la désignation du contexte (13.5px carte / 12.5px table)
 function dvNoteField(item,fs){
-  const esc=String(item.comment||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  return`<div style="display:flex;align-items:center;gap:6px">
-    <span style="color:var(--muted);flex-shrink:0" title="Commentaire client">${ICO('pencil')}</span>
-    <input type="text" value="${esc}" maxlength="300" placeholder="Ajouter un commentaire…"
+  const esc=String(item.comment||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const rows=Math.min(6,Math.max(2,String(item.comment||'').split('\n').length));
+  return`<div style="display:flex;align-items:flex-start;gap:6px">
+    <span style="color:var(--muted);flex-shrink:0;margin-top:4px" title="Commentaire client">${ICO('pencil')}</span>
+    <textarea class="dv-note-ta" rows="${rows}" maxlength="300" placeholder="Ajouter une note..."
       aria-label="Commentaire sur ${String(item.snap.nom||'').replace(/"/g,'&quot;')}"
-      oninput="dvComment('${item.cid}',this.value)"
-      style="flex:1;min-width:120px;border:none;border-bottom:1px dashed var(--border);background:transparent;font-size:${fs||'12.5px'};font-weight:500;color:var(--nuit);padding:2px 0;outline:none">
+      oninput="dvComment('${item.cid}',this.value);dvNoteGrow(this)"
+      onfocus="dvNoteGrow(this)"
+      style="font-size:${fs||'12.5px'}">${esc}</textarea>
     <button data-dvnote-clear="${item.cid}" onclick="dvClearComment('${item.cid}')" title="Effacer le commentaire" aria-label="Effacer le commentaire"
       style="display:${item.comment?'inline-flex':'none'};align-items:center;border:none;background:transparent;cursor:pointer;color:var(--muted);padding:2px">${ICO('x')}</button>
   </div>`;
@@ -3209,7 +3219,7 @@ function generateDevisPDF(){
     return`<tr>
       ${imgCell}
       ${SH.nom?`<td><strong>${p.nom}</strong></td>`:''}
-      ${SH.commentaire?`<td style="font-style:italic">${item.comment?escC(item.comment):''}</td>`:''}
+      ${SH.commentaire?`<td style="font-style:italic;white-space:pre-wrap;word-wrap:break-word;line-height:1.4">${item.comment?escC(item.comment):''}</td>`:''}
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${SH.cat?`<td>${p.cat}</td>`:''}
       ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
