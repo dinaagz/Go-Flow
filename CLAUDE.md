@@ -42,21 +42,33 @@ Everything lives in `index.html` — CSS, HTML, and JS in one file (~4400 lines)
   - `TRI(tr)` → ship/plane icon for transport mode
   - `PH_LG` / `PH_SM` — image placeholder icons (large card / small table)
 
-### Data layer (localStorage)
+### Data layer (localStorage + IndexedDB)
 
-| Key | Content |
-|-----|---------|
-| `gf_s` | Global settings (exchange rate, all-inclusive forwarder rates, margin %, transfer fees `trf`, Trade Assurance `assu`, internal VAT `tvaInterne`) |
-| `gf_p` | Products array |
-| `gf_f` | Suppliers array |
-| `gf_t` | Freight forwarders array |
-| `gf_cols` | Universal column preferences per view: `{catalogue|simulation|devis: {visible: [key…], touched: bool, known: [key…]}}` (the `devis` selection also drives the PDF export; a legacy `pdf` key is ignored). Legacy `gf_c` / `gf_dp.show` are auto-migrated on first load |
-| `gf_win` | Winner overrides per group key `{grpKey: prodId}` |
-| `gf_audit` | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel |
-| `gf_imp` | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}, lastHtml: {name, txt, ts}}` (`lastHtml` = last imported HTML ≤400 KB, re-parsable from step 1) |
-| `gf_exp` | Image-export prefs: `{tpl, bg, txt, logoPos, infosOn, infosOrder}`. `infosOn`/`infosOrder` = info lines shown on exported images (same keys as `CM_DEFS.catalogue`); `null` = synced with the catalogue's visible columns. Legacy `showMarge` only feeds the sync default |
+Storage is split by weight: small settings stay in **localStorage**; everything that can grow large (product photos, supplier logos, audit history, imported HTML) lives in **IndexedDB** (database `gf_store`, single object store `kv`, values keyed by the same `gf_*` strings) to avoid the ~5-10 MB localStorage quota. Access goes through `IDB_GET(key, fallback)` / `IDB_SET(key, val)` / `IDB_DELETE(key)` — same resilient contract as `LS_GET`/`LS_SET` (corrupt data → fallback, write failure → toast) but async; both `IDB_GET`/`IDB_SET` transparently fall back to `localStorage` if IndexedDB is unavailable (e.g. strict private browsing), so the app degrades gracefully rather than losing data. All of it is mirrored in in-memory globals (`prods`, `fours`, `trans`, `colStore`, `winOverrides`, `auditHist`, `devisCart`/`devisClient`/`devisPrefs`, `impPrefsCache`, `expPrefs`) loaded once during `init()` — reads never hit storage again after startup; only mutations persist (fire-and-forget `IDB_SET`).
 
-`DATA_VER` constant controls localStorage migrations — bump it to force a reset of `gf_p` and `gf_f` when the data schema changes.
+**One-time migration**: `migrateToIdb()` runs at the top of `init()`, copies each key below out of `localStorage` into IndexedDB the first time a returning user loads the updated app, then deletes the `localStorage` copy to reclaim quota immediately. Idempotent via the `__migrated_v1` flag key in IndexedDB. Transparent to the user — no data loss, no action required.
+
+| Key | Store | Content |
+|-----|-------|---------|
+| `gf_s` | localStorage | Global settings (exchange rate, all-inclusive forwarder rates, margin %, transfer fees `trf`, Trade Assurance `assu`, internal VAT `tvaInterne`) |
+| `gf_v` | localStorage | `DATA_VER` marker used for the reset-on-schema-change migration below |
+| `gf_warn` | localStorage | Timestamp of the last "export your data" reminder toast (weekly) |
+| `gf_p` | IndexedDB | Products array (photos, incl. base64 from bulk image upload) |
+| `gf_f` | IndexedDB | Suppliers array (logos) |
+| `gf_t` | IndexedDB | Freight forwarders array |
+| `gf_cols` | IndexedDB | Universal column preferences per view: `{catalogue|simulation|devis: {visible: [key…], touched: bool, known: [key…]}}` (the `devis` selection also drives the PDF export; a legacy `pdf` key is ignored). Legacy `gf_c` (still in localStorage, negligible size) / `gf_dp.show` are auto-migrated on first load |
+| `gf_win` | IndexedDB | Winner overrides per group key `{grpKey: prodId}` |
+| `gf_audit` | IndexedDB | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel; cached in-memory as `auditHist` |
+| `gf_d` / `gf_dc` / `gf_dp` | IndexedDB | Devis cart / client / prefs |
+| `gf_devref` | IndexedDB | Devis reference number counter (cached in-memory as `devRefCache`) |
+| `gf_imp` | IndexedDB | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}, lastHtml: {name, txt, ts}}` (`lastHtml` = last imported HTML ≤5 MB, re-parsable from step 1; cached in-memory via `impPrefs()`/`impPrefsSave()`) |
+| `gf_exp` | IndexedDB | Image-export prefs: `{tpl, bg, txt, logoPos, infosOn, infosOrder}`. `infosOn`/`infosOrder` = info lines shown on exported images (same keys as `CM_DEFS.catalogue`); `null` = synced with the catalogue's visible columns. Legacy `showMarge` only feeds the sync default |
+
+`DATA_VER` constant (stored in `gf_v`, localStorage) controls migrations — bump it to force a reset of `gf_p` and `gf_f` (now deleted from IndexedDB via `IDB_DELETE`) when the data schema changes.
+
+**Backup/restore**: `exportBackup()`/`handleBackupFile()` (Paramètres → Exporter/Importer mes données) read a full snapshot via `bkpSnapshot()` (built from the in-memory globals + localStorage, not a raw storage dump) and restore each key to its correct store (`BKP_LS_KEYS` for localStorage, IndexedDB otherwise), so backups work identically regardless of which browser storage a value lives in.
+
+**Storage usage & cleanup**: the Paramètres panel's "Stockage local" section (`renderStoragePanel()`) shows a per-category size breakdown (`storBreakdown()`/`storBytes()`) plus the browser's overall quota via `navigator.storage.estimate()` when available, with one-click cleanup actions (`storClearAudit()` empties the audit history, `storClearLastHtml()` drops the memorized import HTML).
 
 ### Default data
 

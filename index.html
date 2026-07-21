@@ -647,6 +647,10 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <div id="bkp-dir-status" style="margin-top:6px"></div>
     <div id="bkp-dir-hint" style="margin-top:4px"></div>
   </div>
+  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid rgba(0,204,119,.3);border-radius:8px;background:rgba(0,204,119,.05)">
+    <div style="font-weight:700;color:var(--text);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg> Stockage local</div>
+    <div id="stor-panel">Calcul en cours…</div>
+  </div>
   <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
     <button class="btn btn-sec" onclick="exportBackup()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Exporter mes données</button>
@@ -1195,6 +1199,105 @@ const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
 // Stockage résilient : données corrompues → valeur de repli ; quota plein → toast au lieu d'un crash silencieux
 function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
 function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);}}
+
+/* ===== STOCKAGE LOCAL VOLUMINEUX (IndexedDB) =====
+   localStorage (gf_s réglages, gf_v version, gf_warn rappel) reste en place pour les
+   petites valeurs. Toutes les données volumineuses (produits, fournisseurs, transitaires,
+   colonnes, historique, devis, import/export — photos et HTML en base64 inclus) vivent
+   dans IndexedDB (base gf_store, magasin kv) pour éviter la saturation du quota
+   localStorage (5-10 Mo selon navigateur). Migration automatique et transparente au
+   premier chargement après mise à jour : voir migrateToIdb(). */
+const IDB_NAME='gf_store',IDB_STORE='kv';
+let _idbDbP=null;
+function idbDb(){
+  if(_idbDbP)return _idbDbP;
+  _idbDbP=new Promise((res,rej)=>{
+    if(!window.indexedDB){rej(new Error('IndexedDB indisponible'));return;}
+    const rq=indexedDB.open(IDB_NAME,1);
+    rq.onupgradeneeded=()=>{if(!rq.result.objectStoreNames.contains(IDB_STORE))rq.result.createObjectStore(IDB_STORE);};
+    rq.onsuccess=()=>res(rq.result);
+    rq.onerror=()=>rej(rq.error);
+  });
+  return _idbDbP;
+}
+function idbGetRaw(key){
+  return idbDb().then(db=>new Promise((res,rej)=>{
+    const rq=db.transaction(IDB_STORE).objectStore(IDB_STORE).get(key);
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));
+}
+function idbSetRaw(key,val){
+  return idbDb().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).put(val,key);
+    tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);
+  }));
+}
+function idbDeleteRaw(key){
+  return idbDb().then(db=>new Promise((res,rej)=>{
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).delete(key);
+    tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);
+  }));
+}
+function idbAllEntries(){
+  return idbDb().then(db=>new Promise((res,rej)=>{
+    const store=db.transaction(IDB_STORE).objectStore(IDB_STORE);
+    const ks=store.getAllKeys(),vs=store.getAll();
+    let done=0,out={};
+    const fin=()=>{if(++done===2)res(out);};
+    ks.onsuccess=()=>{out._keys=ks.result;fin();};
+    vs.onsuccess=()=>{out._vals=vs.result;fin();};
+    ks.onerror=vs.onerror=()=>rej(ks.error||vs.error);
+  }));
+}
+// Détection unique : bascule silencieuse sur localStorage si IndexedDB est indisponible
+// (navigation privée stricte de certains navigateurs anciens) — compatibilité avant tout.
+let _idbAvailP=null;
+function idbAvailable(){
+  if(!_idbAvailP)_idbAvailP=idbDb().then(()=>true,()=>false);
+  return _idbAvailP;
+}
+// Lecture/écriture résilientes, même contrat que LS_GET/LS_SET mais asynchrone
+async function IDB_GET(k,fb){
+  if(!await idbAvailable())return LS_GET(k,fb);
+  try{const v=await idbGetRaw(k);return v===undefined||v===null?fb:v;}catch(e){console.warn('IndexedDB corrompu ou indisponible:',k,e);return LS_GET(k,fb);}
+}
+function IDB_SET(k,v){
+  return idbAvailable().then(ok=>{
+    if(!ok){LS_SET(k,v);return;}
+    return idbSetRaw(k,v).catch(e=>{
+      console.warn('Échec écriture IndexedDB:',k,e);
+      toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);
+    });
+  });
+}
+async function IDB_DELETE(k){
+  if(!await idbAvailable()){localStorage.removeItem(k);return;}
+  try{await idbDeleteRaw(k);}catch(e){console.warn('Échec suppression IndexedDB:',k,e);}
+}
+
+// Clés autrefois en localStorage, désormais dans IndexedDB (données volumineuses)
+const IDB_MIGRATE_KEYS=['gf_p','gf_f','gf_t','gf_cols','gf_win','gf_audit','gf_d','gf_dc','gf_dp','gf_imp','gf_exp','gf_devref'];
+const IDB_MIGR_FLAG='__migrated_v1';
+// Migration automatique, une seule fois : copie chaque clé de localStorage vers IndexedDB
+// puis la retire de localStorage pour libérer immédiatement le quota. Idempotent (flag posé après coup).
+async function migrateToIdb(){
+  if(!await idbAvailable())return; // pas d'IndexedDB : on reste sur localStorage pour ces clés (compat maximale)
+  if(await IDB_GET(IDB_MIGR_FLAG,false))return;
+  let moved=0;
+  for(const k of IDB_MIGRATE_KEYS){
+    const raw=localStorage.getItem(k);
+    if(raw!=null){
+      try{await idbSetRaw(k,JSON.parse(raw));moved++;}catch(e){console.warn('Migration : donnée corrompue ignorée',k,e);}
+      localStorage.removeItem(k);
+    }
+  }
+  await idbSetRaw(IDB_MIGR_FLAG,true);
+  if(moved)console.info(`Go.Flow : ${moved} clé(s) migrée(s) de localStorage vers IndexedDB`);
+}
+/* ===== FIN STOCKAGE LOCAL VOLUMINEUX ===== */
+
 const DATA_VER=4;
 // Tarifs transitaire TOUT-COMPRIS (fret + douane + taxes) — la TVA n'est jamais ajoutée par-dessus.
 // trf  : frais de transfert de fonds {mode:'pct'|'fixe', val} appliqués sur le coût d'achat HT
@@ -1415,9 +1518,9 @@ const CM_TITLES={catalogue:'Colonnes',simulation:'Lignes',devis:'Colonnes devis'
 let colStore={};
 const isMob=()=>window.matchMedia('(max-width:767px)').matches;
 
-function cmLoad(){
-  let saved=LS_GET(CMK,null),migrated=false;
-  if(!saved){saved=cmMigrateLegacy();migrated=!!saved;}
+async function cmLoad(){
+  let saved=await IDB_GET(CMK,null),migrated=false;
+  if(!saved){saved=await cmMigrateLegacy();migrated=!!saved;}
   colStore={};
   Object.keys(CM_DEFS).forEach(v=>{
     const defs=CM_DEFS[v],sv=saved&&saved[v];
@@ -1428,19 +1531,22 @@ function cmLoad(){
   });
   if(migrated)cmSave();
 }
-function cmMigrateLegacy(){
-  // Reprise des anciens réglages gf_c (catalogue) et gf_dp.show (devis)
+async function cmMigrateLegacy(){
+  // Reprise des anciens réglages gf_c (catalogue, resté en localStorage — négligeable) et gf_dp.show (devis)
   const out={};
   const c=LS_GET('gf_c',null);
   if(c)out.catalogue={visible:Object.keys(c).filter(k=>c[k]),touched:true,known:Object.keys(c)};
-  const dp=LS_GET(DPK,null);
+  const dp=await IDB_GET(DPK,null);
   if(dp&&dp.show)out.devis={visible:Object.keys(dp.show).filter(k=>dp.show[k]),touched:true,known:Object.keys(dp.show)};
   return Object.keys(out).length?out:null;
 }
-function cmSave(){
+function cmSerialize(){
   const o={};
   Object.keys(colStore).forEach(v=>{o[v]={visible:colStore[v].visible,touched:colStore[v].touched,known:CM_DEFS[v].map(d=>d.k)};});
-  LS_SET(CMK,o);
+  return o;
+}
+function cmSave(){
+  IDB_SET(CMK,cmSerialize());
 }
 // Ensemble effectif {clé:bool} — auto-masque les colonnes non essentielles sur mobile
 // tant que l'utilisateur n'a pas personnalisé la vue (touched)
@@ -1533,23 +1639,24 @@ let S={},prods=[],fours=[],trans=[],editP=null,editF=null,editT=null,view='grid'
 let grouped=false,stratPrix='prix_bas',winOverrides={};
 const WK='gf_win';
 
-function init(){
+async function init(){
+  await migrateToIdb();
   // Fusion avec les défauts + migration : l'ancien champ `tva` devient `tvaInterne`
   const s0=LS_GET(SK,null)||{};
   S={...DS,...s0,trf:{...DS.trf,...(s0.trf||{})},assu:{...DS.assu,...(s0.assu||{})}};
   if(s0.tva!=null&&s0.tvaInterne==null)S.tvaInterne=s0.tva;
   delete S.tva;
-  cmLoad();
+  await cmLoad();
   // Réinitialisation si version de données obsolète (anciens chemins Produit_devis/, anciens noms Bailey/Clara)
   const storedVer=parseInt(localStorage.getItem(VK)||'0');
   if(storedVer<DATA_VER){
-    localStorage.removeItem(PK);
-    localStorage.removeItem(FK);
+    await IDB_DELETE(PK);
+    await IDB_DELETE(FK);
     localStorage.setItem(VK,DATA_VER);
   }
-  fours=LS_GET(FK,null);
+  fours=await IDB_GET(FK,null);
   if(!fours||!fours.length)fours=DF.map(f=>({...f}));
-  prods=LS_GET(PK,null);
+  prods=await IDB_GET(PK,null);
   if(!prods||!prods.length){prods=buildProds();save('p');}
   // Semis des fournisseurs par défaut ajoutés après coup (ex. Paine F003)
   DF.forEach(d=>{if(!fours.some(f=>f.id===d.id||f.nom===d.nom))fours.push({...d});});
@@ -1564,10 +1671,10 @@ function init(){
     }
   });
   save('f');
-  trans=LS_GET(TK,[]);
+  trans=await IDB_GET(TK,[]);
   // Semis du transitaire par défaut s'il n'existe pas encore dans la liste
   if(!trans.some(t=>t.nom===DT[0].nom)){trans.unshift({...DT[0]});save('t');}
-  winOverrides=LS_GET(WK,{});
+  winOverrides=await IDB_GET(WK,{});
   // Silent migration: add grp field to products that lack it
   let migrated=false;
   prods.forEach(p=>{
@@ -1575,7 +1682,11 @@ function init(){
   });
   if(migrated)save('p');
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  loadS();loadDevis();
+  await auditLoad();
+  await devRefLoad();
+  await impLoadPrefs();
+  await expLoadPrefs();
+  loadS();await loadDevis();
   cmMount('catalogue','cm-catalogue');
   cmMount('simulation','cm-simulation');
   cmMount('devis','cm-devis');
@@ -1598,10 +1709,10 @@ function buildProds(){
 }
 
 function save(t){
-  if(t==='p')LS_SET(PK,prods);
-  if(t==='f')LS_SET(FK,fours);
-  if(t==='t')LS_SET(TK,trans);
-  if(t==='s')LS_SET(SK,S);
+  if(t==='p')IDB_SET(PK,prods);
+  if(t==='f')IDB_SET(FK,fours);
+  if(t==='t')IDB_SET(TK,trans);
+  if(t==='s')LS_SET(SK,S); // réglages légers : restent en localStorage
 }
 
 function loadS(){
@@ -1631,7 +1742,7 @@ function saveSettings(){
 
 function toggleSettings(){
   const ov=document.getElementById('spanel');
-  if(ov.classList.contains('open'))closeMod('spanel');else openMod('spanel');
+  if(ov.classList.contains('open'))closeMod('spanel');else{openMod('spanel');renderStoragePanel();}
 }
 
 /* ---- ESPACE UTILISATEUR (avatar + menu déroulant) ---- */
@@ -1723,7 +1834,14 @@ function calc(p,o={}){
 
 /* ---- HISTORIQUE AUDIT ---- */
 const AK='gf_audit';
-function auditLog(type,data){const h=LS_GET(AK,[]);h.unshift({ts:new Date().toISOString(),type,data});LS_SET(AK,h.slice(0,100));}
+let auditHist=null; // cache mémoire, chargé une fois au démarrage (auditLoad)
+async function auditLoad(){auditHist=await IDB_GET(AK,[]);}
+function auditLog(type,data){
+  if(!auditHist)auditHist=[];
+  auditHist.unshift({ts:new Date().toISOString(),type,data});
+  auditHist=auditHist.slice(0,100);
+  IDB_SET(AK,auditHist);
+}
 // CSV avec BOM UTF-8 et « ; » pour ouverture directe dans Excel FR
 function auditToCSV(h){
   const esc=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
@@ -1732,7 +1850,7 @@ function auditToCSV(h){
   return '\uFEFF'+lines.join('\r\n');
 }
 async function exportAudit(){
-  const h=LS_GET(AK,[]);
+  const h=auditHist||[];
   if(!h.length){toast('Aucun calcul dans l\'historique audit',true);return;}
   const sel=document.getElementById('audit-fmt');
   const fmt=(sel&&sel.value==='csv')?'csv':'json';
@@ -1836,7 +1954,7 @@ function selectWinner(key,prods){
 function setWinner(key,prodId,event){
   if(event)event.stopPropagation();
   winOverrides[key]=prodId;
-  LS_SET(WK,winOverrides);
+  IDB_SET(WK,winOverrides);
   renderCat();toast('Fournisseur sélectionné comme gagnant ✓');
 }
 
@@ -2744,22 +2862,22 @@ let fxReqSeq=0;
 const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35};
 
 /* ---- CHARGEMENT / PERSISTANCE ---- */
-function loadDevis(){
-  devisCart=LS_GET(DK,[]);
+async function loadDevis(){
+  devisCart=await IDB_GET(DK,[]);
   // Rétro-compatibilité : commentaire absent sur les anciens paniers + MOQ non figé dans le snapshot
   devisCart.forEach(it=>{
     if(typeof it.comment!=='string')it.comment='';
     if(it.snap&&it.snap.moq==null){const p=prods.find(x=>x.id===it.pid);it.snap.moq=p?(p.moq||1):1;}
     if(it.snap&&it.snap.marge===undefined){const p=prods.find(x=>x.id===it.pid);it.snap.marge=p?p.marge:'';}
   });
-  devisClient=LS_GET(DCK,null)||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
-  const saved=LS_GET(DPK,null);
+  devisClient=(await IDB_GET(DCK,null))||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
+  const saved=await IDB_GET(DPK,null);
   devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved}:{...DV_PREFS_DEFAULT};
   delete devisPrefs.show; // migré vers gf_cols (cmMigrateLegacy)
   if(saved&&saved.fx){devisFX={dev:saved.fx.dev||'XOF',taux:saved.fx.taux||1};}
   updateCartBadge();
 }
-function saveDevisCartLS(){LS_SET(DK,devisCart);updateCartBadge();}
+function saveDevisCartLS(){IDB_SET(DK,devisCart);updateCartBadge();}
 function saveDevisClient(){
   devisClient={
     nom:document.getElementById('dv-nom').value,
@@ -2770,7 +2888,7 @@ function saveDevisClient(){
     ville:document.getElementById('dv-ville').value,
     assujetti:document.getElementById('dv-assuj').checked,
   };
-  LS_SET(DCK,devisClient);
+  IDB_SET(DCK,devisClient);
 }
 function saveDevisPrefs(){
   if(devisPrefs.strategy==='personnalise'){
@@ -2778,7 +2896,7 @@ function saveDevisPrefs(){
     if(el)devisPrefs.margePerso=parseFloat(el.value)||35;
   }
   devisPrefs.fx={dev:devisFX.dev,taux:devisFX.taux};
-  LS_SET(DPK,devisPrefs);
+  IDB_SET(DPK,devisPrefs);
   // Marge personnalisée : réécrite sur les produits du panier pour que le catalogue affiche le même PV HT
   if(devisPrefs.strategy==='personnalise')applyPersoMargeToCart();
 }
@@ -3218,6 +3336,8 @@ function openPdfConfig(){
    (client + lignes) est inchangé, les téléchargements réutilisent le même numéro ;
    un devis modifié incrémente le compteur. */
 const DVREFK='gf_devref';
+let devRefCache=null; // cache mémoire, chargé une fois au démarrage (devRefLoad)
+async function devRefLoad(){devRefCache=(await IDB_GET(DVREFK,null))||{seq:0,sig:''};}
 function devisInitiales(){
   const nom=String(devisClient.nom||devisClient.ent||'CLIENT').trim();
   const words=nom.split(/\s+/).filter(Boolean);
@@ -3240,9 +3360,9 @@ function devisSignature(){
   });
 }
 function devisRef(now){
-  const st=LS_GET(DVREFK,null)||{seq:0,sig:''};
+  const st=devRefCache||(devRefCache={seq:0,sig:''});
   const sig=devisSignature();
-  if(st.sig!==sig||!st.seq){st.seq=(st.seq||0)+1;st.sig=sig;LS_SET(DVREFK,st);}
+  if(st.sig!==sig||!st.seq){st.seq=(st.seq||0)+1;st.sig=sig;IDB_SET(DVREFK,st);}
   const num=String(st.seq).padStart(3,'0')+'A';
   const d=String(now.getFullYear()%100).padStart(2,'0')
     +String(now.getMonth()+1).padStart(2,'0')
@@ -3423,6 +3543,10 @@ function generateDevisPDF(){
    Dernier mapping mémorisé par type + dernier HTML re-parsable (gf_imp).
    ============================================================ */
 const IMPK='gf_imp';
+let impPrefsCache=null; // cache mémoire, chargé une fois au démarrage (impLoadPrefs) — peut contenir un HTML jusqu'à 400 Ko (lastHtml)
+async function impLoadPrefs(){impPrefsCache=(await IDB_GET(IMPK,null))||{};}
+function impPrefs(){return impPrefsCache||(impPrefsCache={});}
+function impPrefsSave(){IDB_SET(IMPK,impPrefsCache||{});}
 const impNorm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
 const impT=v=>String(v==null?'':v).trim();
 const impNum=v=>{if(v==null||v==='')return 0;const n=parseFloat(String(v).replace(/\s/g,'').replace(/,/g,'.').replace(/[^\d.\-]/g,''));return isNaN(n)?0:n;};
@@ -3724,23 +3848,23 @@ function impFromHTML(file,txt){
     if(nImg)toast(`${nImg} image${nImg>1?'s':''} associée${nImg>1?'s':''} automatiquement aux produits`);
   }
 }
-/* Le HTML original est mémorisé (gf_imp.lastHtml) pour pouvoir re-parser sans re-téléverser */
+/* Le HTML original est mémorisé (gf_imp.lastHtml, IndexedDB) pour pouvoir re-parser sans re-téléverser */
 function impSaveLastHtml(name,txt){
-  if(txt.length>400000)return; // trop volumineux pour localStorage
-  const prefs=LS_GET(IMPK,{});
+  if(txt.length>5000000)return; // plafond raisonnable même sur IndexedDB (évite de gonfler la mémoire indéfiniment)
+  const prefs=impPrefs();
   prefs.lastHtml={name,txt,ts:new Date().toISOString()};
-  LS_SET(IMPK,prefs);
+  impPrefsSave();
 }
 function impRenderLastHtml(){
   const el=document.getElementById('imp-last-html');
   if(!el)return;
-  const lh=LS_GET(IMPK,{}).lastHtml;
+  const lh=impPrefs().lastHtml;
   if(!lh){el.style.display='none';el.innerHTML='';return;}
   el.style.display='block';
   el.innerHTML=`<button class="btn btn-ghost btn-sm" onclick="impReparseLast()">${ICO('file')} Re-analyser le dernier HTML importé — ${String(lh.name).replace(/</g,'&lt;')} (${new Date(lh.ts).toLocaleDateString('fr-FR')})</button>`;
 }
 function impReparseLast(){
-  const lh=LS_GET(IMPK,{}).lastHtml;
+  const lh=impPrefs().lastHtml;
   if(!lh){toast('Aucun HTML mémorisé',true);return;}
   try{impFromHTML({name:lh.name},lh.txt);}catch(e){toast('Re-analyse impossible — '+(e.message||e),true);}
 }
@@ -3781,7 +3905,7 @@ function impRenderMap(){
   const sec=document.getElementById('imp-map-sec');
   if(impState.mode==='edit'){sec.style.display='none';return;}
   sec.style.display='block';
-  const saved=(LS_GET(IMPK,{}).map||{})[type]||{};
+  const saved=(impPrefs().map||{})[type]||{};
   const fields=IMP_FIELDS[type],used=[];
   const guess={};
   fields.forEach(f=>{
@@ -3905,9 +4029,9 @@ function impRun(){
   const map=impMapping(type);
   if(map.nom==null){toast('Associez la colonne « Nom » — champ obligatoire',true);return;}
   if(impState.mode==='map'){
-    const prefs=LS_GET(IMPK,{});prefs.map=prefs.map||{};
+    const prefs=impPrefs();prefs.map=prefs.map||{};
     const m={};Object.keys(map).forEach(k=>{m[impNorm(impState.headers[map[k]])]=k;});
-    prefs.map[type]=m;LS_SET(IMPK,prefs);
+    prefs.map[type]=m;impPrefsSave();
   }
   const rows=impState.rows;
   const added=[],errs=[],warns=[];
@@ -4296,7 +4420,9 @@ const EXP_TPLS=[
   {k:'catalogue',lbl:'Fiche catalogue',sw:'linear-gradient(90deg,#E9EDF6 50%,#fff 50%)'},
 ];
 let expMode=false,expSel=new Set(),expIdx=0,expPrevSeq=0,expDragKey=null;
-let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,infosOn:null,infosOrder:null,...LS_GET(EXK,{})};
+let expPrefs={tpl:'classique',bg:'#FFFFFF',txt:'#1A1D33',logoPos:'br',showMarge:false,infosOn:null,infosOrder:null};
+// Les préférences persistées (IndexedDB) sont fusionnées dans l'objet existant (mêmes références) par expLoadPrefs(), appelée depuis init()
+async function expLoadPrefs(){Object.assign(expPrefs,await IDB_GET(EXK,{}));}
 
 /* ---- Informations affichées sur l'image ----
    Mêmes clés que les colonnes du catalogue (CM_DEFS.catalogue) : tant que
@@ -4337,7 +4463,7 @@ function expInfoState(){
 }
 function expInfoSave(st){
   expPrefs.infosOrder=st.order;expPrefs.infosOn=st.on;
-  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+  IDB_SET(EXK,expPrefs);expRenderInfos();expPreview();
 }
 function expInfoToggle(k,on){
   const st=expInfoState();
@@ -4362,7 +4488,7 @@ function expInfoMoveTo(k,before){
 }
 function expSyncCat(){
   expPrefs.infosOn=null;expPrefs.infosOrder=null;
-  LS_SET(EXK,expPrefs);expRenderInfos();expPreview();
+  IDB_SET(EXK,expPrefs);expRenderInfos();expPreview();
   toast('Informations synchronisées avec les colonnes du catalogue ✓');
 }
 function expInfoDragStart(e,k){expDragKey=k;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',k);}catch(_){}}
@@ -4434,12 +4560,12 @@ function expRenderTpls(){
   document.getElementById('exp-tpls').innerHTML=EXP_TPLS.map(t=>
     `<button class="tpl-btn${expPrefs.tpl===t.k?' active':''}" onclick="expSetTpl('${t.k}')" aria-pressed="${expPrefs.tpl===t.k}"><span class="tpl-sw" style="background:${t.sw}"></span>${t.lbl}</button>`).join('');
 }
-function expSetTpl(k){expPrefs.tpl=k;LS_SET(EXK,expPrefs);expRenderTpls();expPreview();}
+function expSetTpl(k){expPrefs.tpl=k;IDB_SET(EXK,expPrefs);expRenderTpls();expPreview();}
 function expPrefChange(){
   expPrefs.bg=document.getElementById('exp-bg').value;
   expPrefs.txt=document.getElementById('exp-txt').value;
   expPrefs.logoPos=document.getElementById('exp-logo').value;
-  LS_SET(EXK,expPrefs);expPreview();
+  IDB_SET(EXK,expPrefs);expPreview();
 }
 function expNav(d){const n=expSel.size;if(!n)return;expIdx=(expIdx+d+n)%n;expPreview();}
 async function expPreview(){
@@ -4793,14 +4919,96 @@ document.addEventListener('keydown',e=>{
   }
 });
 document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
-/* ===== SAUVEGARDE & RESTAURATION (backup JSON localStorage) ===== */
-// Clés incluses dans le backup — les valeurs sont copiées en chaînes brutes (pas de re-sérialisation)
-const BKP_KEYS=[SK,PK,FK,TK,VK,WK,AK,DK,DCK,DPK,'gf_cols','gf_imp','gf_exp'];
+/* ===== SAUVEGARDE & RESTAURATION (backup JSON — localStorage pour gf_s/gf_v, IndexedDB pour le reste) ===== */
+// Clés incluses dans le backup (voir bkpSnapshot) : gf_s/gf_v restent en localStorage (réglages légers),
+// gf_p/gf_f/gf_t/gf_win/gf_audit/gf_d/gf_dc/gf_dp/gf_cols/gf_imp/gf_exp vivent en IndexedDB
+const BKP_LS_KEYS=new Set([SK,VK]);
 const BKP_WARN_K='gf_warn';
 
 function bkpCounts(data){
   const n=k=>{try{const v=JSON.parse(data[k]||'null');return Array.isArray(v)?v.length:0;}catch(e){return 0;}};
   return{produits:n(PK),fournisseurs:n(FK),transitaires:n(TK),devis:n(DK)};
+}
+// Instantané des données actuelles (mémoire + localStorage) au format {clé: chaîne JSON}, prêt pour bkpCounts / export
+function bkpSnapshot(){
+  const data={};
+  data[SK]=localStorage.getItem(SK);
+  data[VK]=localStorage.getItem(VK);
+  data[PK]=JSON.stringify(prods);
+  data[FK]=JSON.stringify(fours);
+  data[TK]=JSON.stringify(trans);
+  data[WK]=JSON.stringify(winOverrides);
+  data[AK]=JSON.stringify(auditHist||[]);
+  data[DK]=JSON.stringify(devisCart);
+  data[DCK]=JSON.stringify(devisClient);
+  data[DPK]=JSON.stringify(devisPrefs);
+  data['gf_cols']=JSON.stringify(cmSerialize());
+  data['gf_imp']=JSON.stringify(impPrefs());
+  data['gf_exp']=JSON.stringify(expPrefs);
+  Object.keys(data).forEach(k=>{if(data[k]==null)delete data[k];});
+  return data;
+}
+
+/* ---- SUIVI DE L'UTILISATION & NETTOYAGE DU STOCKAGE ---- */
+function storBytes(v){try{return new Blob([JSON.stringify(v)]).size;}catch(e){return 0;}}
+function storFmt(n){
+  if(n<1024)return n+' o';
+  if(n<1048576)return(n/1024).toFixed(1)+' Ko';
+  return(n/1048576).toFixed(2)+' Mo';
+}
+// Répartition détaillée des données actuelles par catégorie (comptage + poids JSON approximatif)
+function storBreakdown(){
+  const lastHtmlSize=impPrefs().lastHtml?storBytes(impPrefs().lastHtml):0;
+  return[
+    {lbl:'Produits (photos incluses)',n:prods.length,size:storBytes(prods)},
+    {lbl:'Fournisseurs',n:fours.length,size:storBytes(fours)},
+    {lbl:'Transitaires',n:trans.length,size:storBytes(trans)},
+    {lbl:'Panier devis',n:devisCart.length,size:storBytes(devisCart)+storBytes(devisClient)+storBytes(devisPrefs)},
+    {lbl:'Historique des calculs',n:(auditHist||[]).length,size:storBytes(auditHist||[])},
+    {lbl:'HTML mémorisé (import)',n:lastHtmlSize?1:0,size:lastHtmlSize},
+    {lbl:'Préférences (colonnes, export, réglages)',n:'',size:storBytes(cmSerialize())+storBytes(expPrefs)+storBytes(winOverrides)+(localStorage.getItem(SK)||'').length},
+  ];
+}
+async function renderStoragePanel(){
+  const el=document.getElementById('stor-panel');
+  if(!el)return;
+  const rows=storBreakdown();
+  const total=rows.reduce((s,r)=>s+r.size,0);
+  let quotaLine='';
+  if(navigator.storage&&navigator.storage.estimate){
+    try{
+      const est=await navigator.storage.estimate();
+      if(est.quota)quotaLine=`<div style="margin-top:6px">Utilisé par le navigateur (toutes données du site) : <b>${storFmt(est.usage||0)}</b> / ${storFmt(est.quota)} (${Math.round(100*(est.usage||0)/est.quota)}%)</div>`;
+    }catch(e){}
+  }
+  const hasHtml=!!impPrefs().lastHtml;
+  const hasAudit=(auditHist||[]).length>0;
+  el.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:11.5px">
+      ${rows.map(r=>`<tr><td style="padding:2px 0">${r.lbl}${r.n!==''?` <span style="color:var(--muted)">(${r.n})</span>`:''}</td><td style="padding:2px 0;text-align:right;font-variant-numeric:tabular-nums">${storFmt(r.size)}</td></tr>`).join('')}
+      <tr style="border-top:1px solid rgba(0,204,119,.3);font-weight:700"><td style="padding:4px 0">Total (données Go.Flow)</td><td style="padding:4px 0;text-align:right">${storFmt(total)}</td></tr>
+    </table>
+    ${quotaLine}
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-sec btn-sm" onclick="storClearAudit()" ${hasAudit?'':'disabled'}><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Vider l'historique des calculs</button>
+      <button class="btn btn-sec btn-sm" onclick="storClearLastHtml()" ${hasHtml?'':'disabled'}><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Supprimer le HTML mémorisé</button>
+    </div>`;
+}
+function storClearAudit(){
+  if(!(auditHist||[]).length)return;
+  if(!confirm('Vider tout l\'historique des calculs ? Cette action est irréversible.'))return;
+  auditHist=[];
+  IDB_SET(AK,auditHist);
+  toast('Historique des calculs vidé ✓');
+  renderStoragePanel();
+}
+function storClearLastHtml(){
+  const p=impPrefs();
+  if(!p.lastHtml)return;
+  delete p.lastHtml;
+  impPrefsSave();
+  toast('HTML mémorisé supprimé ✓');
+  renderStoragePanel();
 }
 
 /* ---- Dossier de sauvegarde automatique (File System Access API) ---- */
@@ -4922,8 +5130,7 @@ async function bkpTrySaveToDir(fname,content){
 }
 
 async function exportBackup(){
-  const data={};
-  BKP_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=v;});
+  const data=bkpSnapshot();
   const c=bkpCounts(data);
   const backup={app:'Go-Flow',type:'backup',ver:DATA_VER,date:new Date().toISOString(),data};
   const d=new Date(),pad=x=>String(x).padStart(2,'0');
@@ -4958,7 +5165,7 @@ function handleBackupFile(input){
   if(!file)return;
   const rd=new FileReader();
   rd.onerror=()=>toast('Lecture du fichier impossible — données actuelles inchangées',true);
-  rd.onload=()=>{
+  rd.onload=async()=>{
     let j;
     try{j=JSON.parse(rd.result);}catch(e){toast('Fichier corrompu ou format invalide — données actuelles inchangées',true);return;}
     if(!j||j.app!=='Go-Flow'||j.type!=='backup'||!j.data||typeof j.data!=='object'){
@@ -4970,12 +5177,17 @@ function handleBackupFile(input){
       `• ${c.produits} produits\n• ${c.fournisseurs} fournisseurs\n• ${c.transitaires} transitaires\n• ${c.devis} articles au panier devis\n\n`+
       `⚠️ Toutes les données actuelles seront remplacées.`))return;
     try{
-      Object.keys(j.data).forEach(k=>{
-        if(k.indexOf('gf_')===0&&typeof j.data[k]==='string')localStorage.setItem(k,j.data[k]);
-      });
+      for(const k of Object.keys(j.data)){
+        if(k.indexOf('gf_')!==0||typeof j.data[k]!=='string')continue;
+        if(BKP_LS_KEYS.has(k)){localStorage.setItem(k,j.data[k]);continue;}
+        try{await IDB_SET(k,JSON.parse(j.data[k]));}catch(e){console.warn('Restauration : donnée ignorée',k,e);}
+      }
       // Empêche la migration DATA_VER de purger les données restaurées au rechargement
       const bv=parseInt(j.data[VK]||'0');
       localStorage.setItem(VK,String(Math.max(DATA_VER,isNaN(bv)?0:bv)));
+      // Recharge l'historique tout juste restauré (cache mémoire) avant d'y ajouter l'entrée d'import,
+      // sinon l'ancien cache écraserait l'historique restauré
+      auditHist=await IDB_GET(AK,[]);
       auditLog('import_backup',c);
       toast('Sauvegarde restaurée ✓ — rechargement…');
       setTimeout(()=>location.reload(),800);
