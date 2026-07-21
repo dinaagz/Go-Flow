@@ -15,10 +15,11 @@ Go.Flow est une console d'import statique (single-page HTML, ~4 400 lignes, sans
 - La gestion des **fournisseurs** (Alibaba, contacts, devis PDF)
 - La gestion des **transitaires** (tarifs tout-compris maritime/aérien)
 - Un **simulateur de commande** complet (transport, remise, TVA interne)
-- Un **générateur de devis client** avec export PDF configurable
+- Un **générateur de devis client** avec commentaires par produit et export PDF configurable
 - L'**import en masse** (CSV, Excel, PDF, HTML) et l'**export d'images produit** design
+- La **sauvegarde et restauration** des données, avec dossier de sauvegarde automatique
 
-Aucun serveur, aucune base de données — tout fonctionne en `localStorage` et s'exporte en PDF, CSV, PNG ou ZIP.
+Aucun serveur, aucune base de données — tout fonctionne en `localStorage` et s'exporte en PDF, CSV, JSON, PNG ou ZIP.
 
 ---
 
@@ -36,8 +37,10 @@ L'interface adopte un layout SaaS : sidebar fixe sur desktop (nav horizontale su
 - **37 produits pré-chargés** dans 8 catégories : Hydrafacial, Picolaser/Tatouage, Analyse de peau, RF Microneedling, HIFU, Photothérapie LED, Équipement & Accessoires, Dentaire
 - Galeries photos (jusqu'à 3 images cliquables par produit, servies depuis le CDN raw GitHub)
 - Vue **grille** et vue **tableau**, filtres texte / catégorie / fournisseur
+- Colonnes disponibles au choix : Photo · Référence · Désignation · Catégorie · Fournisseur · MOQ · Spécificités · Description · CBM · Poids · Achat EXW · Fret local · Coût de revient · Frais logistiques · Marge · Vente HT/TTC · Délai · Prix marché
 - **Sélecteur de colonnes universel** (voir plus bas) + bouton « Voir détails » (œil) ouvrant une fiche complète — pratique sur mobile où les colonnes secondaires sont masquées par défaut
 - **Mode Groupé** : les 37 produits se regroupent en **13 groupes** (clé `grp`) pour comparer les fournisseurs d'un même équipement
+- Bouton **Dupliquer** sur chaque produit (pré-remplit la fiche d'ajout à partir d'un produit existant)
 - **Import** en masse et **Export image** directement depuis la toolbar
 
 ### ⊞ Mode Groupé (comparaison fournisseurs)
@@ -93,12 +96,14 @@ Tous les prix passent par un moteur unique en 3 étapes :
 
 ### 📄 Devis client
 - Panier multi-produits avec stratégie de prix par devis
-- **Export PDF configurable** : colonnes au choix (préférence séparée `pdf`), bloc prix toujours inclus (Prix unitaire HT · Qté · Prix total HT · Frais logistiques · Prix total TTC)
-- Les colonnes internes (coût de revient, marge, EXW) ne sont **jamais** exportables sur le PDF client
+- **Commentaire par produit** (zone de texte multi-lignes, affiché en colonne dédiée dans l'aperçu et le PDF)
+- **Référence de devis** auto-générée (`DV_XXX.001A.AAMMJJ`, initiales du client + compteur + date), stable tant que le contenu du panier ne change pas
+- **Export PDF configurable** : toutes les colonnes (y compris Désignation, Qté, Total HT) sont libres à cocher — l'aperçu, le sélecteur et le PDF partagent exactement la même sélection (WYSIWYG), aucune colonne fixe imposée
+- Les colonnes internes (coût de revient, marge, EXW) sont décochées par défaut ; le modal PDF avertit qu'elles deviennent visibles côté client si cochées
 - Case « client assujetti » pour afficher la ligne TVA interne
 
 ### 🗂️ Sélecteur de colonnes universel
-Un composant unique gère la visibilité des colonnes pour **Catalogue / Simulation / Devis / PDF** :
+Un composant unique gère la visibilité des colonnes pour **Catalogue / Simulation / Devis** (le PDF partage la sélection du Devis, aucune préférence séparée) :
 - Dropdown avec compteur `visibles/total`, « Tout afficher », « Réinitialiser »
 - Sur mobile (<768 px), les colonnes non essentielles sont auto-masquées tant que l'utilisateur n'a pas personnalisé la vue
 - Préférences persistées en `localStorage` (`gf_cols`), robustes aux ajouts/suppressions de colonnes dans le code
@@ -117,10 +122,17 @@ Mode sélection dans le Catalogue → modal de personnalisation :
 - **Lignes d'infos** configurables (les 13 infos du catalogue, cochables et réordonnables par drag & drop ; par défaut synchronisées avec les colonnes visibles du catalogue)
 - Téléchargement en PNG individuels ou en **ZIP** (writer ZIP intégré, sans dépendance)
 
+### 💾 Sauvegarde & restauration
+Depuis le panneau Paramètres (icône avatar → Paramètres) :
+- **Exporter mes données** : télécharge un JSON complet (produits, fournisseurs, transitaires, préférences, panier devis) horodaté à la minute — jamais d'écrasement silencieux
+- **Importer mes données** : restaure un JSON exporté après confirmation (aperçu du contenu : nb produits/fournisseurs/transitaires/articles devis), avec rechargement automatique
+- **Dossier de sauvegarde automatique** (Chrome/Edge desktop, File System Access API) : une fois un dossier choisi, chaque export JSON s'y écrit directement sans passer par le téléchargement du navigateur ; retombe en téléchargement classique si le dossier devient inaccessible
+- Rappel hebdomadaire non intrusif si aucun export récent n'a été fait
+
 ### 📤 Autres exports
 - **CSV** : catalogue complet avec toutes les colonnes de calcul
 - **PDF** : impression de la vue active (colonne Actions masquée à l'impression)
-- **Audit** : journal des calculs et actions (changements de paramètres, devis générés, imports, exports) exportable en JSON depuis le panneau Paramètres
+- **Audit** : journal des calculs et actions (changements de paramètres, devis générés, imports, exports, sauvegardes) exportable en JSON/CSV depuis le panneau Paramètres, avec écriture dans le dossier de sauvegarde si configuré
 
 ---
 
@@ -157,7 +169,7 @@ Go-Flow/
 
 - HTML5 / CSS3 / JavaScript vanilla — aucune dépendance au chargement (SheetJS et pdf.js chargés à la demande pour l'import Excel/PDF uniquement)
 - Polices : Montserrat (titres/chiffres) + Poppins (texte) via Google Fonts
-- Persistance : `localStorage` (clés `gf_s`, `gf_p`, `gf_f`, `gf_t`, `gf_cols`, `gf_win`, `gf_audit`, `gf_imp`, `gf_exp`)
+- Persistance : `localStorage` (clés `gf_s`, `gf_p`, `gf_f`, `gf_t`, `gf_cols`, `gf_win`, `gf_audit`, `gf_imp`, `gf_exp`, `gf_d`/`gf_dc`/`gf_dp` pour le devis, `gf_devref` pour la numérotation) + `IndexedDB` pour mémoriser le dossier de sauvegarde automatique (le handle ne peut pas être stocké en `localStorage`)
 - Images : URLs raw GitHub CDN (CORS ok pour l'export canvas)
 - Déploiement : [Vercel](https://vercel.com)
 
