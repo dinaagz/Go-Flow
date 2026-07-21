@@ -6,7 +6,7 @@
 <title>Go.Flow — Console Import Go Group</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
 --rouge:#FF2244;--orange:#FF6600;--jaune:#FFD700;--vert:#00CC77;--bleu:#0099FF;--violet:#7733FF;
@@ -439,7 +439,11 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
   .sim-row{border-bottom-color:#ddd}
 }
 /* ===== PRINT — DEVIS PDF ===== */
-#devis-print-area{display:none}
+/* font-synthesis:none — aucune graisse synthétique : seules les graisses réellement
+   chargées (Poppins 400/600/700, Montserrat 700–900) sont utilisées → rendu uniforme */
+#devis-print-area{display:none;font-family:'Poppins',sans-serif;font-weight:400;font-synthesis:none;-webkit-font-smoothing:auto;text-rendering:optimizeLegibility}
+#devis-print-area strong,#devis-print-area b{font-weight:700}
+.dv-num,.dv-table tfoot td{font-family:'Montserrat',sans-serif}
 .dv-hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1A1A2E;padding-bottom:14px;margin-bottom:18px}
 .dv-logo{font-family:'Montserrat',sans-serif;font-weight:900;font-size:28px;color:#1A1A2E}
 .dv-meta{font-size:11px;color:#555;text-align:right;line-height:1.6}
@@ -509,6 +513,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+<symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
 <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
 <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
 <symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></symbol>
@@ -1918,6 +1923,7 @@ function prodGroupCard(g){
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
@@ -1981,6 +1987,7 @@ function prodGroupTable(groups){
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
@@ -2132,6 +2139,7 @@ function prodCard(p){
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check')+' Devis':ICO('quote')}</button>
@@ -2191,6 +2199,7 @@ function prodTable(list){
         ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
@@ -2201,8 +2210,9 @@ function prodTable(list){
 }
 
 /* ---- PRODUCT MODAL ---- */
+let dupSrc=null; // copie source lors d'une duplication — fusionnée à l'enregistrement
 function openProdModal(id=null){
-  editP=id;pics=[];
+  editP=id;pics=[];dupSrc=null;
   document.getElementById('p-thumbs').innerHTML='';
   document.getElementById('calc-prev').style.display='none';
   const sel=document.getElementById('p-four');
@@ -2243,6 +2253,38 @@ function openProdModal(id=null){
   }
   updateSLink();
   openMod('prod-modal');
+}
+
+/* Duplique un produit : ouvre le modal « nouveau produit » pré-rempli avec une
+   copie complète (galerie d'images incluse via dupSrc) et une nouvelle référence
+   incrémentée. Le produit original n'est jamais modifié ; l'ajout au catalogue
+   n'a lieu qu'à la validation (saveProd). */
+function dupProd(id){
+  const p=prods.find(x=>x.id===id);
+  if(!p)return;
+  openProdModal(null);
+  dupSrc=JSON.parse(JSON.stringify(p));
+  document.getElementById('pm-title').textContent='Dupliquer le produit';
+  document.getElementById('p-nom').value=p.nom;
+  document.getElementById('p-cat').value=p.cat;
+  document.getElementById('p-four').value=p.fid||'';
+  document.getElementById('p-prix').value=p.prix;
+  document.getElementById('p-prach').value=p.prach||'';
+  document.getElementById('p-dev').value=p.dev||'RMB';
+  document.getElementById('p-l').value=p.l;
+  document.getElementById('p-la').value=p.la;
+  document.getElementById('p-h').value=p.h;
+  document.getElementById('p-dimu').value=p.dimU||'cm';
+  document.getElementById('p-poids').value=p.kg;
+  document.getElementById('p-trans').value=p.tr;
+  document.getElementById('p-marge').value=p.marge;
+  document.getElementById('p-rem').value=p.rem||0;
+  document.getElementById('p-conc').value=p.conc||'';
+  document.getElementById('p-moq').value=p.moq||1;
+  document.getElementById('p-desc').value=p.desc||'';
+  document.getElementById('p-specs').value=p.specs||'';
+  pics=[...(p.photos||[])];renderThumbs();calcPrev();
+  genRef();updateSLink();
 }
 
 function genRef(){
@@ -2291,7 +2333,7 @@ function saveProd(){
   if(!nom||!cat){toast('Nom et catégorie requis',true);return;}
   const fid=document.getElementById('p-four').value;
   const f=fours.find(x=>x.id===fid);
-  const d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
+  let d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
     prach:parseFloat(document.getElementById('p-prach').value)||0,
     dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
     la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
@@ -2301,7 +2343,14 @@ function saveProd(){
     conc:document.getElementById('p-conc').value,moq:parseInt(document.getElementById('p-moq').value)||1,
     desc:document.getElementById('p-desc').value,specs:document.getElementById('p-specs').value,photos:[...pics]};
   if(editP){const i=prods.findIndex(p=>p.id===editP);prods[i]={...prods[i],...d};toast('Produit mis à jour ✓');}
-  else{d.id='P'+String(Date.now()).slice(-8);d.ref=document.getElementById('p-ref').value||d.id;prods.push(d);toast('Produit ajouté ✓');}
+  else{
+    // Duplication : conserve les champs non couverts par le formulaire (galerie imgs, grp…)
+    // sans jamais toucher au produit original (dupSrc est une copie profonde).
+    if(dupSrc){d={...dupSrc,...d};}
+    d.id='P'+String(Date.now()).slice(-8);d.ref=document.getElementById('p-ref').value||d.id;prods.push(d);
+    toast(dupSrc?'Produit dupliqué ✓':'Produit ajouté ✓');
+  }
+  dupSrc=null;
   save('p');closeMod('prod-modal');renderCat();popSim();syncCartFromProds();
 }
 
@@ -3162,11 +3211,49 @@ function openPdfConfig(){
   cmRefresh('devis');
   openMod('pdf-modal');
 }
+/* ---- Référence devis : DV_[INITIALES].[NNN + lettre].[YYMMDD] ----
+   Initiales (3 lettres) : initiale de chaque mot du nom client ; si <3, complétées
+   par la dernière consonne du premier mot ("BINIZI Mèwè" → B+Z+M = BZM).
+   Numéro : compteur global persistant (gf_devref) — tant que le contenu du devis
+   (client + lignes) est inchangé, les téléchargements réutilisent le même numéro ;
+   un devis modifié incrémente le compteur. */
+const DVREFK='gf_devref';
+function devisInitiales(){
+  const nom=String(devisClient.nom||devisClient.ent||'CLIENT').trim();
+  const words=nom.split(/\s+/).filter(Boolean);
+  const norm=w=>w.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z]/g,'').toUpperCase();
+  let letters=words.map(w=>norm(w)[0]).filter(Boolean);
+  if(letters.length>3)letters=letters.slice(0,3);
+  const w1=norm(words[0]||'');
+  if(letters.length<3&&w1.length>1){
+    const cons=w1.slice(1).replace(/[AEIOUY]/g,'');
+    const extra=cons?cons[cons.length-1]:w1[w1.length-1];
+    if(extra)letters.splice(1,0,extra);
+  }
+  while(letters.length<3)letters.push('X');
+  return letters.slice(0,3).join('');
+}
+function devisSignature(){
+  return JSON.stringify({
+    c:[devisClient.nom||'',devisClient.ent||''],
+    items:devisCart.map(i=>[i.pid,i.qty,i.comment||''])
+  });
+}
+function devisRef(now){
+  const st=LS_GET(DVREFK,null)||{seq:0,sig:''};
+  const sig=devisSignature();
+  if(st.sig!==sig||!st.seq){st.seq=(st.seq||0)+1;st.sig=sig;LS_SET(DVREFK,st);}
+  const num=String(st.seq).padStart(3,'0')+'A';
+  const d=String(now.getFullYear()%100).padStart(2,'0')
+    +String(now.getMonth()+1).padStart(2,'0')
+    +String(now.getDate()).padStart(2,'0');
+  return`DV_${devisInitiales()}.${num}.${d}`;
+}
 function generateDevisPDF(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
   const now=new Date();
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  const ref='DV-'+now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0')+'-'+String(Math.floor(Math.random()*900)+100);
+  const ref=devisRef(now);
   // Sélection brute du gestionnaire de colonnes (sans auto-masquage mobile) :
   // le PDF reflète exactement les cases cochées dans le modal, sur tout écran
   const SH={};CM_DEFS.devis.forEach(d=>{SH[d.k]=colStore.devis.visible.includes(d.k);});
@@ -3260,7 +3347,7 @@ function generateDevisPDF(){
         <div style="font-size:11px;color:#555">globalgo.tg@gmail.com · +228 96 02 39 03</div>
       </div>
       <div class="dv-meta">
-        <div style="font-size:16px;font-weight:800;color:#1A1A2E">DEVIS N° ${ref}</div>
+        <div class="dv-num" style="font-size:16px;font-weight:800;color:#1A1A2E">DEVIS N° ${ref}</div>
         <div>Date : ${dateFr}</div>
         <div style="margin-top:6px;font-size:10px;color:#aaa">Valable 30 jours</div>
       </div>
@@ -3313,7 +3400,11 @@ function generateDevisPDF(){
     strategie:devisPrefs.strategy,parametres:{...S},
     lignes:devisCart.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
     totaux:{totHT:r2(totHT),fraisLog:r2(totLog),tva:r2(totTVA),totTTC:r2(totTTC+totTVA)}});
+  // Nom de fichier suggéré à l'enregistrement PDF : GoShip_[REFDEVIS].pdf
+  const prevTitle=document.title;
+  document.title='GoShip_'+ref;
   window.print();
+  document.title=prevTitle;
   document.body.classList.remove('printing-devis');
 }
 
