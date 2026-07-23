@@ -861,7 +861,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         <div id="dv-fx-msg" class="fx-status"></div>
       </div>
       <div class="fgrp full" style="font-size:11px;color:var(--muted)">
-        Ce taux convertit tous les montants du devis vers la devise choisie — appliqué directement (sans passer par un taux intermédiaire différent) pour les produits déjà achetés dans cette même devise. La colonne optionnelle « Taux de change » du panier affiche le taux réellement appliqué à chaque produit.
+        Ce taux convertit tous les montants du devis vers la devise choisie — appliqué directement (sans passer par un taux intermédiaire différent) pour les produits déjà achetés dans cette même devise.
       </div>
     </div>
   </div>
@@ -1426,18 +1426,17 @@ const CM_DEFS={
     {k:'specs',       g:'Produit',    lbl:'Spécificités',       def:false,mob:false},
     {k:'fournisseur', g:'Produit',    lbl:'Fournisseur',        def:false,mob:false},
     {k:'moq',         g:'Produit',    lbl:'MOQ',                def:false,mob:false},
+    {k:'qte',         g:'Produit',    lbl:'Qté',                def:true}, // avant les colonnes de totaux (Coût Total, Prix total HT, Frais logistiques, Prix TTC)
     {k:'poids',       g:'Produit',    lbl:'Poids (kg)',         def:false,mob:false},
     {k:'cbm',         g:'Produit',    lbl:'CBM (m³)',           def:false,mob:false},
     // SECTION SOURCING — devise d'achat du produit
     {k:'prix_exw',    g:'Sourcing',   lbl:'Prix EXW',           def:false,mob:false},
     {k:'cout_total',  g:'Sourcing',   lbl:'Coût Total',         def:false,mob:false},
-    // SECTION VENTE — devise du devis
-    {k:'taux_change', g:'Vente',      lbl:'Taux de change',     def:false,mob:false},
-    {k:'cr_unitaire', g:'Vente',      lbl:'CR Unitaire',        def:false,mob:false},
+    // SECTION VENTE — devise du devis (taux de change : paramètre global du devis, non affiché par produit)
+    {k:'cr_unitaire', g:'Vente',      lbl:'Coût unit. HT',      def:false,mob:false},
     {k:'taux_marge',  g:'Vente',      lbl:'Taux de Marge',      def:false,mob:false},
     {k:'marge',       g:'Vente',      lbl:'Marge',              def:false,mob:false},
     {k:'prix_ht',     g:'Vente',      lbl:'Prix HT',            def:true},
-    {k:'qte',         g:'Vente',      lbl:'Qté',                def:true},
     {k:'total_ht',    g:'Vente',      lbl:'Prix total HT',      def:true},
     // SECTION LOGISTIQUE — devise du devis
     {k:'frais_log',   g:'Logistique', lbl:'Frais logistiques Estimé', def:false,mob:false},
@@ -2137,8 +2136,7 @@ function showDevisDetails(cid){
     // Sourcing (devise d'achat)
     ['Prix EXW',`${Nd(parseFloat(c.prix_src)||0,2)} ${devSymbol}`],['Coût Total',`${Nd(c.coutRevient,2)} ${devSymbol}`],
     // Vente (devise du devis)
-    ['Taux de change',`1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF`],
-    ['CR Unitaire',Ndv(c.coutRevientUX)],['Taux de Marge',Nd(c.mgPct,1)+'%'],['Marge',Ndv(c.margeU)],
+    ['Coût unit. HT',Ndv(c.coutRevientUX)],['Taux de Marge',Nd(c.mgPct,1)+'%'],['Marge',Ndv(c.margeU)],
     ['Prix HT',Ndv(c.pvuHT)],['Prix total HT',Ndv(c.pvtHT)],
     // Logistique (devise du devis)
     ['Frais logistiques Estimé',Ndv(c.fraisLog)],
@@ -3268,7 +3266,7 @@ function buildDevisGrid(list){
     const imgHtml=p.photos&&p.photos[0]
       ?`<img src="${p.photos[0]}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">${PH_LG}</div>`
       :`<div class="card-img-placeholder">${PH_LG}</div>`;
-    // SECTION PRODUIT (infos complémentaires)
+    // SECTION PRODUIT (infos complémentaires) — Qté placée avant les colonnes de totaux
     const infosProduit=[
       SH.specs&&p.specs?row('Spécificités',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.specs,80)}</span>`):'',
       SH.fournisseur?row('Fournisseur',p.fn||'—'):'',
@@ -3283,8 +3281,7 @@ function buildDevisGrid(list){
     ].filter(Boolean).join('');
     // SECTION VENTE (devise du devis)
     const infosVente=[
-      SH.taux_change?row('Taux de change',`1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF`):'',
-      SH.cr_unitaire?row('CR Unitaire',Ndv(c.coutRevientUX)):'',
+      SH.cr_unitaire?row('Coût unit. HT',Ndv(c.coutRevientUX)):'',
       SH.taux_marge?row('Taux de Marge',`<span style="color:var(--vert-t)">${Nd(c.mgPct,1)}%</span>`):'',
       SH.marge?row('Marge',Ndv(c.margeU)):'',
     ].filter(Boolean).join('');
@@ -3296,17 +3293,17 @@ function buildDevisGrid(list){
         ${SH.commentaire?`<div style="margin:2px 0 4px">${dvNoteField(item,'13.5px')}</div>`:''}
         ${SH.cat?`<div class="card-cat">${p.cat}</div>`:''}
         ${infosProduit}
+        ${SH.qte?`<div class="cart-qty-ctrl">
+          <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
+          <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
+          <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
+        </div>`:''}
         ${infosSourcing}
         ${infosVente}
         ${SH.prix_ht?`<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:8px">
           <div class="cart-price-tag">${Ndv(c.pvuHT)} <small style="font-weight:400;font-size:10px;color:var(--muted)">Prix HT/u</small></div>
         </div>`:''}
-        ${SH.qte?`<div class="cart-qty-ctrl">
-          <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
-          <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)">
-          <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
-          ${SH.total_ht?`<span style="font-size:10px;color:var(--muted);margin-left:4px">= ${Ndv(c.pvtHT)}</span>`:''}
-        </div>`:SH.total_ht?row('Prix total HT',Ndv(c.pvtHT)):''}
+        ${SH.total_ht?row('Prix total HT',Ndv(c.pvtHT)):''}
         ${SH.frais_log?row('Frais logistiques Estimé',Ndv(c.fraisLog)):''}
         ${SH.prix_ttc?row('Prix TTC Estimé',`<span style="color:var(--bleu-t)">${Ndv(c.pvtTTC)}</span>`):''}
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
@@ -3328,18 +3325,17 @@ function buildDevisTable(list){
     SH.specs?'<th>Spécificités</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.moq?'<th>MOQ</th>':'',
+    SH.qte?'<th>Qté</th>':'',
     SH.poids?'<th>Poids (kg)</th>':'',
     SH.cbm?'<th>CBM (m³)</th>':'',
     // SECTION SOURCING (devise d'achat)
     SH.prix_exw?'<th>Prix EXW</th>':'',
     SH.cout_total?'<th>Coût Total</th>':'',
     // SECTION VENTE (devise du devis)
-    SH.taux_change?'<th>Taux de change</th>':'',
-    SH.cr_unitaire?`<th>CR Unitaire${devL}</th>`:'',
+    SH.cr_unitaire?`<th>Coût unit. HT${devL}</th>`:'',
     SH.taux_marge?'<th>Taux de Marge</th>':'',
     SH.marge?`<th>Marge${devL}</th>`:'',
     SH.prix_ht?`<th>Prix HT${devL}</th>`:'',
-    SH.qte?'<th>Qté</th>':'',
     SH.total_ht?`<th>Prix total HT${devL}</th>`:'',
     // SECTION LOGISTIQUE (devise du devis)
     SH.frais_log?`<th>Frais logistiques Estimé${devL}</th>`:'',
@@ -3359,20 +3355,19 @@ function buildDevisTable(list){
       ${SH.specs?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
       ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
       ${SH.moq?`<td style="font-size:11px">${p.moq||1}</td>`:''}
-      ${SH.poids?`<td style="font-size:11px">${p.poids||p.kg||'—'} kg</td>`:''}
-      ${SH.cbm?`<td style="font-size:11px">${Nd(c.cbm,4)} m³</td>`:''}
-      ${SH.prix_exw?`<td style="font-size:11px;font-weight:600">${Nd(parseFloat(c.prix_src)||0,2)} ${devSymbol}</td>`:''}
-      ${SH.cout_total?`<td style="font-size:11px">${Nd(c.coutRevient,2)} ${devSymbol}</td>`:''}
-      ${SH.taux_change?`<td style="font-size:11px">1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</td>`:''}
-      ${SH.cr_unitaire?`<td style="font-size:11px">${Ndv(c.coutRevientUX)}</td>`:''}
-      ${SH.taux_marge?`<td style="font-size:11px;color:var(--vert-t);font-weight:600">${Nd(c.mgPct,1)}%</td>`:''}
-      ${SH.marge?`<td style="font-size:11px">${Ndv(c.margeU)}</td>`:''}
-      ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.qte?`<td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
         <button onclick="dvQty('${item.cid}',${item.qty+1})">+</button>
       </div></td>`:''}
+      ${SH.poids?`<td style="font-size:11px">${p.poids||p.kg||'—'} kg</td>`:''}
+      ${SH.cbm?`<td style="font-size:11px">${Nd(c.cbm,4)} m³</td>`:''}
+      ${SH.prix_exw?`<td style="font-size:11px;font-weight:600">${Nd(parseFloat(c.prix_src)||0,2)} ${devSymbol}</td>`:''}
+      ${SH.cout_total?`<td style="font-size:11px">${Nd(c.coutRevient,2)} ${devSymbol}</td>`:''}
+      ${SH.cr_unitaire?`<td style="font-size:11px">${Ndv(c.coutRevientUX)}</td>`:''}
+      ${SH.taux_marge?`<td style="font-size:11px;color:var(--vert-t);font-weight:600">${Nd(c.mgPct,1)}%</td>`:''}
+      ${SH.marge?`<td style="font-size:11px">${Ndv(c.margeU)}</td>`:''}
+      ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="font-size:11px">${Ndv(c.fraisLog)}</td>`:''}
       ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.pvtTTC)}</td>`:''}
@@ -3501,18 +3496,17 @@ function generateDevisPDF(){
     SH.specs?'<th>Spécificités</th>':'',
     SH.fournisseur?'<th>Fournisseur</th>':'',
     SH.moq?'<th>MOQ</th>':'',
+    SH.qte?'<th>Qté</th>':'',
     SH.poids?'<th>Poids</th>':'',
     SH.cbm?'<th>CBM (m³)</th>':'',
     // SECTION SOURCING (devise d'achat)
     SH.prix_exw?'<th style="white-space:nowrap">Prix EXW</th>':'',
     SH.cout_total?'<th style="white-space:nowrap">Coût Total</th>':'',
     // SECTION VENTE (devise du devis)
-    SH.taux_change?'<th style="white-space:nowrap">Taux de change</th>':'',
-    SH.cr_unitaire?`<th style="white-space:nowrap">CR Unitaire${devL}</th>`:'',
+    SH.cr_unitaire?`<th style="white-space:nowrap">Coût unit. HT${devL}</th>`:'',
     SH.taux_marge?'<th>Taux de Marge</th>':'',
     SH.marge?`<th style="white-space:nowrap">Marge${devL}</th>`:'',
     SH.prix_ht?`<th style="white-space:nowrap">Prix HT${devL}</th>`:'',
-    SH.qte?'<th>Qté</th>':'',
     SH.total_ht?`<th style="white-space:nowrap">Prix total HT${devL}</th>`:'',
     // SECTION LOGISTIQUE (devise du devis)
     SH.frais_log?`<th style="white-space:nowrap">Frais logistiques Estimé*${devL}</th>`:'',
@@ -3535,16 +3529,15 @@ function generateDevisPDF(){
       ${SH.specs?`<td style="font-size:9px">${escH(p.specs)||'—'}</td>`:''}
       ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
       ${SH.moq?`<td>${p.moq||1}</td>`:''}
+      ${SH.qte?`<td style="text-align:center">${item.qty}</td>`:''}
       ${SH.poids?`<td>${p.poids||p.kg||'—'} kg</td>`:''}
       ${SH.cbm?`<td>${Nd(c.cbm,4)}</td>`:''}
       ${SH.prix_exw?`<td style="white-space:nowrap">${Nd(parseFloat(c.prix_src)||0,2)} ${devSymbol}</td>`:''}
       ${SH.cout_total?`<td style="white-space:nowrap">${Nd(c.coutRevient,2)} ${devSymbol}</td>`:''}
-      ${SH.taux_change?`<td style="white-space:nowrap">1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</td>`:''}
       ${SH.cr_unitaire?`<td style="white-space:nowrap">${Ndv(c.coutRevientUX)}</td>`:''}
       ${SH.taux_marge?`<td>${Nd(c.mgPct,1)}%</td>`:''}
       ${SH.marge?`<td style="white-space:nowrap">${Ndv(c.margeU)}</td>`:''}
       ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
-      ${SH.qte?`<td style="text-align:center">${item.qty}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>`:''}
       ${SH.prix_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
