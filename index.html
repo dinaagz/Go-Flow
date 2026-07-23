@@ -2147,25 +2147,152 @@ function showProdDetails(id){
     ['Prix marché',p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'],
   ],p.photos&&p.photos[0]);
 }
+/* ---- ÉDITION DES CHAMPS D'UNE LIGNE DE DEVIS (modal « Voir détails ») ----
+   Champs négociables (prix EXW, fret local, poids, dimensions, MOQ) : la valeur saisie est
+   mémorisée sur cette ligne ET sur le produit du catalogue (p.nego), sans jamais modifier
+   sa valeur par défaut — réutilisable telle quelle sur un autre devis, qui garde le choix
+   Catalogue/Négocié (par défaut : Catalogue). Les autres champs (désignation, référence,
+   description, spécificités, catégorie, devise, mode transport) s'éditent librement, propres
+   à cette ligne uniquement, sans impact sur le catalogue. */
+const DV_FIELD_GROUP={prix:'prix',prach:'prach',kg:'kg',moq:'moq',l:'dims',la:'dims',h:'dims'};
+const DV_NEGO_GROUPS={prix:['prix'],prach:['prach'],kg:['kg'],moq:['moq'],dims:['l','la','h']};
+
+function dvFlash(el){
+  if(!el)return;
+  el.classList.remove('dv-flash');void el.offsetWidth;el.classList.add('dv-flash');
+}
+
+function refreshDevisAfterEdit(item,field){
+  const list=getFilteredDevisCart();
+  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+  renderDevisTotal(list);
+  const dm=document.getElementById('detail-modal');
+  if(dm.classList.contains('open')){
+    showDevisDetails(item.cid);
+    if(field){const row=document.querySelector(`#detail-body [data-dv-field="${field}"]`);if(row)dvFlash(row);}
+  }
+}
+
+// Champ simple (texte / select / description) — ce devis uniquement, jamais répercuté au catalogue
+function dvEditSimple(cid,field,val){
+  const item=devisCart.find(x=>x.cid===cid);if(!item)return;
+  item.snap[field]=val;
+  item.edited=item.edited||{};
+  item.edited[field]=(val!==item.orig[field]);
+  saveDevisCartLS();
+  toast('Modification enregistrée ✓');
+  refreshDevisAfterEdit(item,field);
+}
+
+// Champ chiffré négociable — enregistre la valeur sur cette ligne ET comme valeur négociée
+// réutilisable sur le produit du catalogue (dont la valeur par défaut reste inchangée)
+function dvEditNego(cid,field,val){
+  const item=devisCart.find(x=>x.cid===cid);if(!item)return;
+  const num=parseFloat(val);
+  if(isNaN(num)||num<0)return;
+  const group=DV_FIELD_GROUP[field];
+  item.snap[field]=num;
+  item.nego=item.nego||{};item.nego[field]=num;
+  item.active=item.active||{};item.active[group]='nego';
+  item.edited=item.edited||{};item.edited[field]=(num!==item.orig[field]);
+  const p=prods.find(x=>x.id===item.pid);
+  if(p){p.nego=p.nego||{};p.nego[field]=num;save('p');}
+  saveDevisCartLS();
+  toast('Valeur négociée enregistrée ✓ (le catalogue garde sa valeur par défaut)');
+  refreshDevisAfterEdit(item,field);
+}
+
+// Bascule Catalogue ⇄ Négocié pour un champ (ou groupe de champs) négociable
+function dvToggleSource(cid,group,src){
+  const item=devisCart.find(x=>x.cid===cid);if(!item)return;
+  const fields=DV_NEGO_GROUPS[group];if(!fields)return;
+  item.active=item.active||{};item.active[group]=src;
+  fields.forEach(f=>{
+    if(src==='cat')item.snap[f]=item.orig[f];
+    else if(item.nego&&item.nego[f]!=null)item.snap[f]=item.nego[f];
+  });
+  item.edited=item.edited||{};
+  fields.forEach(f=>{item.edited[f]=(item.snap[f]!==item.orig[f]);});
+  saveDevisCartLS();
+  refreshDevisAfterEdit(item,fields[0]);
+}
+
+function dvModalQty(cid,val){
+  dvQty(cid,val);
+  if(document.getElementById('detail-modal').classList.contains('open'))showDevisDetails(cid);
+}
+
+// Ligne éditable simple — pas de mémoire catalogue, badge « modifié » si différent de l'ajout au devis
+function dvEditRow(item,field,label,inputHtml){
+  const mod=item.edited&&item.edited[field];
+  return`<div class="detail-row dv-edit-row" data-dv-field="${field}">
+    <span>${label}${mod?`<span class="dv-mod-badge" title="Modifié pour ce devis">${ICO('pencil')}</span>`:''}</span>
+    <span class="dv-edit-val">${inputHtml}</span>
+  </div>`;
+}
+// Ligne éditable chiffrée « négociable » — bascule Catalogue / Négocié, valeur mémorisée sur le produit
+function dvNegoRow(item,group,fields,label,unit){
+  const active=(item.active&&item.active[group])||'cat';
+  const hasNego=fields.some(f=>item.nego&&item.nego[f]!=null);
+  const mod=fields.some(f=>item.edited&&item.edited[f]);
+  const inputs=fields.map(f=>`<input type="number" class="fc dv-nego-inp" step="0.01" min="0"
+    value="${item.snap[f]??''}" onchange="dvEditNego('${item.cid}','${f}',this.value)" aria-label="${label}">`).join('<span style="color:var(--muted);font-size:11px">×</span>');
+  const toggle=hasNego?`<div class="dv-src-toggle">
+      <button type="button" class="dv-src-pill${active==='cat'?' active':''}" onclick="dvToggleSource('${item.cid}','${group}','cat')">Catalogue</button>
+      <button type="button" class="dv-src-pill${active==='nego'?' active':''}" onclick="dvToggleSource('${item.cid}','${group}','nego')">Négocié</button>
+    </div>`:'';
+  return`<div class="detail-row dv-edit-row" data-dv-field="${fields[0]}">
+    <span>${label}${mod?`<span class="dv-mod-badge" title="Différent de la valeur catalogue">${ICO('pencil')}</span>`:''}</span>
+    <span class="dv-edit-val">
+      <span style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end">${inputs}${unit?`<small style="color:var(--muted)">${unit}</small>`:''}</span>
+      ${toggle}
+    </span>
+  </div>`;
+}
+
 function showDevisDetails(cid){
   const item=devisCart.find(x=>x.cid===cid);if(!item)return;
   const c=calcDevis(item),p=item.snap;
-  const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
-  openDetails(p.nom,[
-    ['Référence',p.ref],['Fournisseur',p.fn||'—'],['MOQ',p.moq||1],['Quantité',item.qty],
-    ...(p.specs?[['Spécificités',p.specs]]:[]),
-    ...(item.comment?[['Commentaire',`<span class="dv-note-txt">${item.comment.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`]]:[]),
-    // Sourcing (devise d'achat)
-    ['Prix EXW',`${Nd(parseFloat(c.prix_src)||0,2)} ${devSymbol}`],['Coût Total',`${Nd(c.coutRevient,2)} ${devSymbol}`],
-    // Vente (devise du devis)
-    ['Coût unit. HT',Ndv(c.coutRevientUX)],['Taux de Marge',Nd(c.mgPct,1)+'%'],['Marge',Ndv(c.margeU)],
-    ['Prix HT',Ndv(c.pvuHT)],['Prix total HT',Ndv(c.pvtHT)],
-    // Logistique (devise du devis)
-    ['Frais logistiques Estimé',Ndv(c.fraisLog)],
-    ...(c.tvaM?[['TVA interne',Ndv(c.tvaM)]]:[]),
-    ['Prix TTC Estimé',Ndv(c.pvtTTC)],
-    ['Transitaire',p.trans_nom||'—'],['Délai estimé',p.trans_delai?p.trans_delai+' j':'—'],
-  ],p.photos&&p.photos[0]);
+  const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[p.dev]||p.dev;
+  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const catOpts=(CATS[p.cat]?'':`<option selected>${esc(p.cat)}</option>`)+
+    Object.keys(CATS).map(k=>`<option${p.cat===k?' selected':''}>${k}</option>`).join('');
+  const devOpts=(DV_NAMES[p.dev]?'':`<option value="${esc(p.dev)}" selected>${esc(p.dev)}</option>`)+
+    ['RMB','USD','EUR','XOF'].map(d=>`<option value="${d}"${p.dev===d?' selected':''}>${DV_NAMES[d]}</option>`).join('');
+  const trOpts=['Maritime','Aérien'].map(t=>`<option${p.tr===t?' selected':''}>${t}</option>`).join('');
+  document.getElementById('detail-title').textContent=p.nom;
+  document.getElementById('detail-body').innerHTML=
+    (p.photos&&p.photos[0]?`<img src="${p.photos[0]}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px" onerror="this.style.display='none'">`:'')+
+    `<div class="detail-sec">Informations modifiables</div>`+
+    dvEditRow(item,'nom','Désignation',`<input type="text" class="fc" style="width:170px" value="${esc(p.nom)}" onchange="dvEditSimple('${cid}','nom',this.value)">`)+
+    dvEditRow(item,'ref','Référence',`<input type="text" class="fc" style="width:170px" value="${esc(p.ref)}" onchange="dvEditSimple('${cid}','ref',this.value)">`)+
+    dvEditRow(item,'cat','Catégorie',`<select class="fc" style="width:170px" onchange="dvEditSimple('${cid}','cat',this.value)">${catOpts}</select>`)+
+    dvEditRow(item,'dev','Devise',`<select class="fc" style="width:170px" onchange="dvEditSimple('${cid}','dev',this.value)">${devOpts}</select>`)+
+    dvNegoRow(item,'prix',['prix'],'Prix EXW',devSymbol)+
+    dvNegoRow(item,'prach',['prach'],'Frais locaux (/commande)',devSymbol)+
+    dvEditRow(item,'tr','Mode transport',`<select class="fc" style="width:170px" onchange="dvEditSimple('${cid}','tr',this.value)">${trOpts}</select>`)+
+    dvNegoRow(item,'dims',['l','la','h'],'Dimensions (L × l × h)',p.dimU||'cm')+
+    dvNegoRow(item,'kg',['kg'],'Poids','kg')+
+    dvNegoRow(item,'moq',['moq'],'MOQ','')+
+    dvEditRow(item,'specs','Spécificités',`<textarea class="fc" rows="2" style="width:170px;resize:vertical" onchange="dvEditSimple('${cid}','specs',this.value)">${esc(p.specs)}</textarea>`)+
+    dvEditRow(item,'desc','Description',`<textarea class="fc" rows="2" style="width:170px;resize:vertical" onchange="dvEditSimple('${cid}','desc',this.value)">${esc(p.desc)}</textarea>`)+
+    `<div class="detail-row"><span>Quantité</span><span><input type="number" class="fc" style="width:70px;text-align:right" min="1" value="${item.qty}" onchange="dvModalQty('${cid}',this.value)"></span></div>`+
+    (item.comment?`<div class="detail-row"><span>Commentaire</span><span class="dv-note-txt">${esc(item.comment)}</span></div>`:'')+
+    `<div class="detail-sec">Valeurs calculées (lecture seule)</div>`+
+    `<div class="detail-row"><span>CBM</span><span>${Nd(c.cbm,4)} m³</span></div>`+
+    `<div class="detail-row"><span>Coût Total</span><span>${Nd(c.coutRevient,2)} ${devSymbol}</span></div>`+
+    `<div class="detail-row"><span>Coût unit. HT</span><span>${Ndv(c.coutRevientUX)}</span></div>`+
+    `<div class="detail-row"><span>Taux de Marge</span><span>${Nd(c.mgPct,1)}%</span></div>`+
+    `<div class="detail-row"><span>Marge</span><span>${Ndv(c.margeU)}</span></div>`+
+    `<div class="detail-row"><span>Prix HT</span><span>${Ndv(c.pvuHT)}</span></div>`+
+    `<div class="detail-row"><span>Prix total HT</span><span>${Ndv(c.pvtHT)}</span></div>`+
+    `<div class="detail-row"><span>Frais logistiques Estimé</span><span>${Ndv(c.fraisLog)}</span></div>`+
+    (c.tvaM?`<div class="detail-row"><span>TVA interne</span><span>${Ndv(c.tvaM)}</span></div>`:'')+
+    `<div class="detail-row"><span>Prix TTC Estimé</span><span>${Ndv(c.pvtTTC)}</span></div>`+
+    `<div class="detail-row"><span>Fournisseur</span><span>${esc(p.fn)||'—'}</span></div>`+
+    `<div class="detail-row"><span>Transitaire</span><span>${esc(p.trans_nom)||'—'}</span></div>`+
+    `<div class="detail-row"><span>Délai estimé</span><span>${p.trans_delai?p.trans_delai+' j':'—'}</span></div>`;
+  openMod('detail-modal');
 }
 
 function fourLabel(f){
