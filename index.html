@@ -306,6 +306,21 @@ textarea.fc{resize:vertical;min-height:70px}
 .detail-row{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border)}
 .detail-row span:first-child{color:var(--muted)}
 .detail-row span:last-child{font-weight:600;text-align:right}
+.detail-sec{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 4px;padding-top:8px;border-top:1px solid var(--border)}
+.detail-sec:first-child{margin-top:0;border-top:none;padding-top:0}
+/* ---- ÉDITION INLINE DES CHAMPS DEVIS ---- */
+.dv-edit-row{align-items:flex-start}
+.dv-edit-row span:first-child{display:flex;align-items:center;padding-top:5px}
+.dv-edit-val{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.dv-edit-val input.fc,.dv-edit-val select.fc,.dv-edit-val textarea.fc{font-size:12px;padding:5px 7px}
+.dv-nego-inp{width:64px;text-align:right}
+.dv-src-toggle{display:flex;gap:4px}
+.dv-src-pill{font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--border2);background:var(--surface);color:var(--muted);cursor:pointer;font-family:'Poppins',sans-serif}
+.dv-src-pill.active{background:var(--bleu);color:#fff;border-color:var(--bleu)}
+.dv-mod-badge{margin-left:6px;color:var(--orange-t);display:inline-flex;vertical-align:middle}
+.dv-mod-badge svg{width:11px;height:11px}
+@keyframes dvFlashPulse{0%{background:rgba(0,204,119,.28)}100%{background:transparent}}
+.dv-flash{animation:dvFlashPulse .8s ease}
 /* ===== DEVIS ===== */
 .strat-btn{flex:1;padding:12px;border:1.5px solid var(--border2);border-radius:12px;background:var(--surface);cursor:pointer;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;text-align:center;transition:all .18s;line-height:1.5;color:var(--text)}
 .strat-btn .ic{width:15px;height:15px;vertical-align:-3px;color:var(--muted)}
@@ -1075,6 +1090,14 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     </div>
     <div class="modal-body">
       <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Le PDF contient <b>exactement les colonnes cochées ci-dessous</b> — la même sélection que l'aperçu du devis (choix enregistré automatiquement). <b>Attention :</b> les colonnes internes (Coût de Revient, Marge, EXW) seront visibles par le client si elles sont cochées.</div>
+      <div class="fgrp" style="margin-bottom:14px"><label class="flbl" for="pdf-lang">Langue du document</label>
+        <select class="fc" id="pdf-lang" onchange="pdfLang=this.value">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+          <option value="zh">中文（简体）</option>
+        </select>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">Ce choix ne concerne que ce PDF — l'interface de l'application reste en français.</div>
+      </div>
       <div class="col-picker-wrap" id="cm-pdf"></div>
       <div class="fact">
         <button class="btn btn-sec" onclick="closeMod('pdf-modal')">Annuler</button>
@@ -2765,6 +2788,7 @@ let devisFilters={q:'',cat:'',four:'',trans:'',sort:''};
 let devisFX={dev:'XOF',taux:1};
 let fxCache={rates:null,ts:0};
 let fxReqSeq=0;
+let pdfLang='fr'; // langue du PDF en cours de génération uniquement — n'affecte jamais l'interface
 
 // Les colonnes du devis (aperçu ET export PDF) sont gérées par le gestionnaire universel (CM_DEFS.devis)
 const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35};
@@ -2777,6 +2801,16 @@ function loadDevis(){
     if(typeof it.comment!=='string')it.comment='';
     if(it.snap&&it.snap.moq==null){const p=prods.find(x=>x.id===it.pid);it.snap.moq=p?(p.moq||1):1;}
     if(it.snap&&it.snap.marge===undefined){const p=prods.find(x=>x.id===it.pid);it.snap.marge=p?p.marge:'';}
+    // Rétro-compatibilité : édition des champs devis absente sur les anciens paniers —
+    // orig prend simplement le snapshot existant comme référence catalogue (pas d'historique antérieur connu)
+    if(!it.orig){
+      const s=it.snap||{};
+      it.orig={nom:s.nom,ref:s.ref,cat:s.cat,dev:s.dev,tr:s.tr,desc:s.desc,specs:s.specs,
+        prix:s.prix,prach:s.prach,kg:s.kg,l:s.l,la:s.la,h:s.h,moq:s.moq};
+    }
+    if(!it.nego)it.nego={};
+    if(!it.active)it.active={prix:'cat',prach:'cat',kg:'cat',dims:'cat',moq:'cat'};
+    if(!it.edited)it.edited={};
   });
   devisClient=LS_GET(DCK,null)||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
   const saved=LS_GET(DPK,null);
@@ -2965,7 +2999,15 @@ function addToCart(pid){
       four_nom:f?f.nom:'',four_pays:f?f.pays:'',four_contact:f?f.contact:'',
       trans_nom:t0?t0.nom:'',trans_type:t0?t0.type:'',
       trans_delai:t0?(p.tr==='Aérien'?t0.aerd:t0.mard)||'':''
-    }
+    },
+    // Édition devis : orig = valeurs catalogue figées à l'ajout (référence pour le bouton « Catalogue »)
+    // nego = valeurs négociées connues pour ce produit (héritées du catalogue, réutilisables entre devis)
+    // active = source actuellement appliquée par champ négociable ; edited = marqueurs « modifié » (badge)
+    orig:{nom:p.nom,ref:p.ref,cat:p.cat,dev:p.dev||'RMB',tr:p.tr,desc:p.desc||'',specs:p.specs||'',
+      prix:p.prix,prach:p.prach||0,kg:p.kg,l:p.l,la:p.la,h:p.h,moq:p.moq||1},
+    nego:{...(p.nego||{})},
+    active:{prix:'cat',prach:'cat',kg:'cat',dims:'cat',moq:'cat'},
+    edited:{}
   });
   saveDevisCartLS();renderCat();toast(p.nom+' ajouté au devis ✓');
 }
@@ -3349,6 +3391,8 @@ function renderDevisTotal(list){
 function openPdfConfig(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
   cmRefresh('devis');
+  const langSel=document.getElementById('pdf-lang');
+  if(langSel)langSel.value=pdfLang;
   openMod('pdf-modal');
 }
 /* ---- Référence devis : DV_[INITIALES].[NNN + lettre].[YYMMDD] ----
@@ -3389,13 +3433,116 @@ function devisRef(now){
     +String(now.getDate()).padStart(2,'0');
   return`DV_${devisInitiales()}.${num}.${d}`;
 }
+/* ---- TRADUCTION DU PDF (fr par défaut — texte identique à l'original, en/zh disponibles) ----
+   Le choix de langue ne s'applique qu'au document généré, jamais à l'interface. */
+const PDF_LOCALE={fr:'fr-FR',en:'en-US',zh:'zh-CN'};
+const PDF_I18N={
+  fr:{
+    th:{photo:'Photo',nom:'Désignation',commentaire:'Commentaire',ref:'Réf.',cat:'Catégorie',fournisseur:'Fournisseur',
+      specs:'Spécificités',desc:'Description',cbm:'CBM (m³)',poids:'Poids',moq:'MOQ',transitaire:'Transitaire',
+      mode:'Mode',delai:'Délai',prixDevise:'Prix devise',prixExw:'Prix EXW (XOF)',coutRevient:'Coût de revient/u',
+      fraisLog:'Frais Log./u*',marge:'Marge %',prixHT:'Prix unitaire HT',prixTTC:'Prix unitaire TTC',qte:'Qté',
+      totalHT:'Prix total HT',totalTTC:'Prix total TTC'},
+    client:{email:'Email : ',tel:'Tél : ',adr:'Adresse : ',assujetti:'Client assujetti à la TVA',aucune:'Aucune information client'},
+    hdr:{devisNum:'DEVIS N° ',date:'Date : ',valable:'Valable 30 jours',destinataire:'Destinataire'},
+    mode:{aerien:'Aérien',maritime:'Maritime'},
+    foot:{sousTotalHT:'Sous-total HT',fraisLog:'Frais logistiques* — tout-compris',
+      tva:pct=>`TVA interne (${pct}%) — sur le montant HT`,totalTTC:'TOTAL TTC'},
+    cgv:{
+      titre:'Conditions générales :',
+      devise:dev=>dev==='XOF'?'Francs CFA (XOF)':dev+' — convertis depuis XOF',
+      taux:(dev,taux)=>dev!=='XOF'?`<strong>Taux de change appliqué : 1 ${dev} = ${Nd(taux,4)} XOF</strong> (taux indicatif) — `:'<strong>Taux de change du jour appliqué</strong> — ',
+      intro:(devisePhrase,tauxPhrase)=>`Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en ${devisePhrase}. ${tauxPhrase}de légères variations peuvent être constatées au moment de la commande.<br>`,
+      fraisLog:'<strong>Frais logistiques (*) :</strong> Tarif transitaire <strong>tout-compris (fret + douane + taxes)</strong> — aucune TVA ni taxe supplémentaire ne s\'ajoute aux frais logistiques. Les montants indiqués sont des estimations ; le montant définitif pourra différer légèrement.<br>',
+      tva:pct=>`<strong>TVA :</strong> Client assujetti — la TVA interne (${pct}%) est calculée sur le montant HT des marchandises et affichée séparément ci-dessus.<br>`,
+      validation:'<strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant HT</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>',
+      post:'<strong>Post-acheminement :</strong> Les frais de livraison locale (post-acheminement) sont également à la charge du client et ne sont pas inclus dans ce devis.<br>',
+      delais:'<strong>Délais :</strong> Les délais de livraison indiqués sont estimatifs et peuvent varier selon le mode de transport et les conditions douanières.<br><br>',
+      footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em>'
+    }
+  },
+  en:{
+    th:{photo:'Photo',nom:'Description',commentaire:'Comment',ref:'Ref.',cat:'Category',fournisseur:'Supplier',
+      specs:'Specifications',desc:'Description',cbm:'CBM (m³)',poids:'Weight',moq:'MOQ',transitaire:'Freight forwarder',
+      mode:'Mode',delai:'Lead time',prixDevise:'Unit price (source)',prixExw:'EXW price (XOF)',coutRevient:'Cost price/u',
+      fraisLog:'Freight cost/u*',marge:'Margin %',prixHT:'Unit price excl. tax',prixTTC:'Unit price incl. tax',qte:'Qty',
+      totalHT:'Total excl. tax',totalTTC:'Total incl. tax'},
+    client:{email:'Email: ',tel:'Phone: ',adr:'Address: ',assujetti:'VAT-registered client',aucune:'No client information'},
+    hdr:{devisNum:'QUOTE NO. ',date:'Date: ',valable:'Valid for 30 days',destinataire:'Recipient'},
+    mode:{aerien:'Air',maritime:'Sea'},
+    foot:{sousTotalHT:'Subtotal excl. tax',fraisLog:'Freight costs* — all-inclusive',
+      tva:pct=>`Local VAT (${pct}%) — on amount excl. tax`,totalTTC:'TOTAL incl. tax'},
+    cgv:{
+      titre:'Terms and conditions:',
+      devise:dev=>dev==='XOF'?'CFA Francs (XOF)':dev+' — converted from XOF',
+      taux:(dev,taux)=>dev!=='XOF'?`<strong>Exchange rate applied: 1 ${dev} = ${Nd(taux,4)} XOF</strong> (indicative rate) — `:'<strong>Current day\'s exchange rate applied</strong> — ',
+      intro:(devisePhrase,tauxPhrase)=>`This quote is issued by Go Group and is valid for 30 days from its issue date. Prices are expressed in ${devisePhrase}. ${tauxPhrase}slight variations may occur at order time.<br>`,
+      fraisLog:'<strong>Freight costs (*):</strong> Forwarder rate <strong>all-inclusive (freight + customs + taxes)</strong> — no VAT or additional tax is added on top of freight costs. Amounts shown are estimates; the final amount may differ slightly.<br>',
+      tva:pct=>`<strong>VAT:</strong> VAT-registered client — local VAT (${pct}%) is calculated on the merchandise amount excl. tax and shown separately above.<br>`,
+      validation:'<strong>Order confirmation:</strong> To confirm the order, the client must pay the <strong>full amount excl. tax</strong> shown above. No order will be placed before full payment is received.<br>',
+      post:'<strong>Last-mile delivery:</strong> Local delivery costs (last-mile) are also the client\'s responsibility and are not included in this quote.<br>',
+      delais:'<strong>Lead times:</strong> The delivery lead times shown are estimates and may vary depending on the mode of transport and customs conditions.<br><br>',
+      footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promised. Delivered.</em>'
+    }
+  },
+  zh:{
+    th:{photo:'图片',nom:'品名',commentaire:'备注',ref:'参考号',cat:'类别',fournisseur:'供应商',
+      specs:'规格',desc:'描述',cbm:'体积 (CBM/m³)',poids:'重量',moq:'起订量',transitaire:'货运代理',
+      mode:'运输方式',delai:'交货期',prixDevise:'原币单价',prixExw:'EXW价格 (XOF)',coutRevient:'单位成本价',
+      fraisLog:'单位物流费*',marge:'利润率 %',prixHT:'不含税单价',prixTTC:'含税单价',qte:'数量',
+      totalHT:'不含税总额',totalTTC:'含税总额'},
+    client:{email:'邮箱：',tel:'电话：',adr:'地址：',assujetti:'需缴纳增值税客户',aucune:'无客户信息'},
+    hdr:{devisNum:'报价单编号 ',date:'日期：',valable:'有效期30天',destinataire:'客户'},
+    mode:{aerien:'空运',maritime:'海运'},
+    foot:{sousTotalHT:'不含税小计',fraisLog:'物流费*（全包价）',
+      tva:pct=>`内部增值税 (${pct}%) — 基于不含税金额`,totalTTC:'含税总计'},
+    cgv:{
+      titre:'一般条款：',
+      devise:dev=>dev==='XOF'?'非洲法郎 (XOF)':dev+' — 由XOF换算',
+      taux:(dev,taux)=>dev!=='XOF'?`<strong>已应用汇率：1 ${dev} = ${Nd(taux,4)} XOF</strong>（参考汇率）— `:'<strong>已应用当日汇率</strong> — ',
+      intro:(devisePhrase,tauxPhrase)=>`本报价单由Go Group出具，自开具之日起30天内有效。价格以${devisePhrase}计。${tauxPhrase}下单时可能出现小幅波动。<br>`,
+      fraisLog:'<strong>物流费用 (*)：</strong>货运代理费用为<strong>全包价（运费+关税+税费）</strong>——物流费用之外不再另收增值税或其他税费。所示金额为估算，最终金额可能略有不同。<br>',
+      tva:pct=>`<strong>增值税：</strong>客户需缴纳增值税——内部增值税 (${pct}%) 按不含税货值计算，并在上方单独列出。<br>`,
+      validation:'<strong>订单确认：</strong>为确认订单，客户须支付上述<strong>全部不含税金额</strong>。在收到全额付款前，订单不会启动。<br>',
+      post:'<strong>末端运输：</strong>本地配送费用（末端运输）由客户自行承担，不包含在本报价单中。<br>',
+      delais:'<strong>交货期：</strong>所示交货期为估算值，可能因运输方式及清关情况而有所变化。<br><br>',
+      footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>承诺。交付。</em>'
+    }
+  }
+};
+// Catégories connues traduites ; toute catégorie personnalisée non répertoriée conserve son texte d'origine
+const PDF_CAT_I18N={
+  'Hydrafacial':{en:'Hydrafacial',zh:'水光仪'},
+  'Picolaser/Tatouage':{en:'Picolaser/Tattoo removal',zh:'皮秒/纹身'},
+  'Analyse de peau':{en:'Skin analysis',zh:'皮肤检测'},
+  'RF Microneedling':{en:'RF Microneedling',zh:'射频微针'},
+  'HIFU':{en:'HIFU',zh:'高强度聚焦超声(HIFU)'},
+  'Photothérapie LED':{en:'LED phototherapy',zh:'LED光疗'},
+  'Équipement & Accessoires':{en:'Equipment & accessories',zh:'设备与配件'},
+  'Dentaire':{en:'Dental',zh:'牙科'}
+};
+function pdfT(lang){return PDF_I18N[lang]||PDF_I18N.fr;}
+// Contenu produit (nom/description/spécificités) : utilise un champ traduit optionnel (ex. nom_en, desc_zh)
+// s'il existe sur le produit, sinon conserve le contenu d'origine — aucune donnée n'est requise pour que ça fonctionne.
+function trF(obj,field,lang){
+  if(!obj||!lang||lang==='fr')return obj?obj[field]:'';
+  const v=obj[field+'_'+lang];
+  return(v!=null&&String(v).trim()!=='')?v:obj[field];
+}
+function trCat(cat,lang){
+  if(!cat||!lang||lang==='fr')return cat;
+  const m=PDF_CAT_I18N[cat];
+  return(m&&m[lang])?m[lang]:cat;
+}
 function generateDevisPDF(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
   // Le PDF suit exactement l'aperçu affiché : mêmes lignes, même ordre (recherche/filtres/tri actifs)
   const dvList=getFilteredDevisCart();
   if(!dvList.length){toast('Aucun produit ne correspond aux filtres actuels',true);return;}
   const now=new Date();
-  const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const lang=PDF_I18N[pdfLang]?pdfLang:'fr'; // langue choisie pour ce document uniquement
+  const T=pdfT(lang);
+  const dateFr=now.toLocaleDateString(PDF_LOCALE[lang]||'fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref=devisRef(now);
   // Sélection brute du gestionnaire de colonnes (sans auto-masquage mobile) :
   // le PDF reflète exactement les cases cochées dans le modal, sur tout écran
@@ -3404,39 +3551,39 @@ function generateDevisPDF(){
   const cl=devisClient;
   const clientHtml=[
     cl.nom||cl.ent?`<strong>${[cl.nom,cl.ent].filter(Boolean).join(' — ')}</strong>`:'',
-    cl.email?`Email : ${cl.email}`:'',
-    cl.tel?`Tél : ${cl.tel}`:'',
-    cl.adr?`Adresse : ${cl.adr}`:'',
+    cl.email?`${T.client.email}${cl.email}`:'',
+    cl.tel?`${T.client.tel}${cl.tel}`:'',
+    cl.adr?`${T.client.adr}${cl.adr}`:'',
     cl.ville||'',
-    cl.assujetti?'<em>Client assujetti à la TVA</em>':''
-  ].filter(Boolean).join('<br>')||'<span style="color:#999;font-style:italic">Aucune information client</span>';
+    cl.assujetti?`<em>${T.client.assujetti}</em>`:''
+  ].filter(Boolean).join('<br>')||`<span style="color:#999;font-style:italic">${T.client.aucune}</span>`;
   // En-têtes : toutes les colonnes suivent la sélection de l'aperçu — aucune colonne forcée.
   const devL=devisFX.dev!=='XOF'?' ('+devisFX.dev+')':'';
   const colH=[
-    SH.photos?'<th>Photo</th>':'',
-    SH.nom?'<th>Désignation</th>':'',
-    SH.commentaire?'<th>Commentaire</th>':'',
-    SH.ref?'<th>Réf.</th>':'',
-    SH.cat?'<th>Catégorie</th>':'',
-    SH.fournisseur?'<th>Fournisseur</th>':'',
-    SH.specs?'<th>Spécificités</th>':'',
-    SH.desc?'<th>Description</th>':'',
-    SH.cbm?'<th>CBM (m³)</th>':'',
-    SH.poids?'<th>Poids</th>':'',
-    SH.moq?'<th>MOQ</th>':'',
-    SH.transitaire?'<th>Transitaire</th>':'',
-    SH.type_fret?'<th>Mode</th>':'',
-    SH.delai?'<th>Délai</th>':'',
-    SH.dev_source?'<th>Prix devise</th>':'',
-    SH.prix_exw?'<th style="white-space:nowrap">Prix EXW (XOF)</th>':'',
-    SH.cout_revient?`<th style="white-space:nowrap">Coût de revient/u${devL}</th>`:'',
-    SH.frais_log?`<th style="white-space:nowrap">Frais Log./u*${devL}</th>`:'',
-    SH.marge?'<th>Marge %</th>':'',
-    SH.prix_ht?`<th style="white-space:nowrap">Prix unitaire HT${devL}</th>`:'',
-    SH.prix_ttc?`<th style="white-space:nowrap">Prix unitaire TTC${devL}</th>`:'',
-    SH.qte?'<th>Qté</th>':'',
-    SH.total_ht?`<th style="white-space:nowrap">Prix total HT${devL}</th>`:'',
-    SH.total_ttc?`<th style="white-space:nowrap">Prix total TTC${devL}</th>`:'',
+    SH.photos?`<th>${T.th.photo}</th>`:'',
+    SH.nom?`<th>${T.th.nom}</th>`:'',
+    SH.commentaire?`<th>${T.th.commentaire}</th>`:'',
+    SH.ref?`<th>${T.th.ref}</th>`:'',
+    SH.cat?`<th>${T.th.cat}</th>`:'',
+    SH.fournisseur?`<th>${T.th.fournisseur}</th>`:'',
+    SH.specs?`<th>${T.th.specs}</th>`:'',
+    SH.desc?`<th>${T.th.desc}</th>`:'',
+    SH.cbm?`<th>${T.th.cbm}</th>`:'',
+    SH.poids?`<th>${T.th.poids}</th>`:'',
+    SH.moq?`<th>${T.th.moq}</th>`:'',
+    SH.transitaire?`<th>${T.th.transitaire}</th>`:'',
+    SH.type_fret?`<th>${T.th.mode}</th>`:'',
+    SH.delai?`<th>${T.th.delai}</th>`:'',
+    SH.dev_source?`<th>${T.th.prixDevise}</th>`:'',
+    SH.prix_exw?`<th style="white-space:nowrap">${T.th.prixExw}</th>`:'',
+    SH.cout_revient?`<th style="white-space:nowrap">${T.th.coutRevient}${devL}</th>`:'',
+    SH.frais_log?`<th style="white-space:nowrap">${T.th.fraisLog}${devL}</th>`:'',
+    SH.marge?`<th>${T.th.marge}</th>`:'',
+    SH.prix_ht?`<th style="white-space:nowrap">${T.th.prixHT}${devL}</th>`:'',
+    SH.prix_ttc?`<th style="white-space:nowrap">${T.th.prixTTC}${devL}</th>`:'',
+    SH.qte?`<th>${T.th.qte}</th>`:'',
+    SH.total_ht?`<th style="white-space:nowrap">${T.th.totalHT}${devL}</th>`:'',
+    SH.total_ttc?`<th style="white-space:nowrap">${T.th.totalTTC}${devL}</th>`:'',
   ].join('');
   const nbCols=Math.max(1,colH.split('<th').length-1);
   const spanVal=Math.min(2,Math.max(1,nbCols-1)),spanLbl=Math.max(1,nbCols-spanVal);
@@ -3446,20 +3593,21 @@ function generateDevisPDF(){
     const c=calcDevis(item),p=item.snap;
     const imgCell=SH.photos?`<td style="text-align:center">${p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`:''}</td>`:'';
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
+    const modeTxt=p.tr==='Aérien'?T.mode.aerien:T.mode.maritime;
     return`<tr>
       ${imgCell}
-      ${SH.nom?`<td><strong>${p.nom}</strong></td>`:''}
+      ${SH.nom?`<td><strong>${trF(p,'nom',lang)}</strong></td>`:''}
       ${SH.commentaire?`<td style="font-style:italic;white-space:pre-wrap;word-wrap:break-word;line-height:1.4">${item.comment?escC(item.comment):''}</td>`:''}
       ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
-      ${SH.cat?`<td>${p.cat}</td>`:''}
+      ${SH.cat?`<td>${trCat(p.cat,lang)}</td>`:''}
       ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
-      ${SH.specs?`<td style="font-size:9px">${escH(p.specs)||'—'}</td>`:''}
-      ${SH.desc?`<td style="font-size:9px">${escH(p.desc)||'—'}</td>`:''}
+      ${SH.specs?`<td style="font-size:9px">${escH(trF(p,'specs',lang))||'—'}</td>`:''}
+      ${SH.desc?`<td style="font-size:9px">${escH(trF(p,'desc',lang))||'—'}</td>`:''}
       ${SH.cbm?`<td>${Nd(c.cbm,4)}</td>`:''}
       ${SH.poids?`<td>${p.poids||p.kg||'—'} kg</td>`:''}
       ${SH.moq?`<td>${p.moq||1}</td>`:''}
       ${SH.transitaire?`<td>${p.trans_nom||'—'}</td>`:''}
-      ${SH.type_fret?`<td>${p.tr==='Aérien'?'Aérien':'Maritime'}</td>`:''}
+      ${SH.type_fret?`<td>${modeTxt}</td>`:''}
       ${SH.delai?`<td>${p.trans_delai?p.trans_delai+'j':'—'}</td>`:''}
       ${SH.dev_source?`<td style="font-weight:600">${c.prix_src} ${devSymbol}</td>`:''}
       ${SH.prix_exw?`<td style="white-space:nowrap">${N(c.exwUX)}</td>`:''}
@@ -3490,13 +3638,13 @@ function generateDevisPDF(){
         <div style="font-size:11px;color:#555">globalgo.tg@gmail.com · +228 96 02 39 03</div>
       </div>
       <div class="dv-meta">
-        <div class="dv-num" style="font-size:16px;font-weight:800;color:#1A1A2E">DEVIS N° ${ref}</div>
-        <div>Date : ${dateFr}</div>
-        <div style="margin-top:6px;font-size:10px;color:#aaa">Valable 30 jours</div>
+        <div class="dv-num" style="font-size:16px;font-weight:800;color:#1A1A2E">${T.hdr.devisNum}${ref}</div>
+        <div>${T.hdr.date}${dateFr}</div>
+        <div style="margin-top:6px;font-size:10px;color:#aaa">${T.hdr.valable}</div>
       </div>
     </div>
     <div class="dv-client-box">
-      <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Destinataire</div>
+      <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${T.hdr.destinataire}</div>
       ${clientHtml}
     </div>
     <table class="dv-table">
@@ -3505,41 +3653,41 @@ function generateDevisPDF(){
       <tfoot>
         ${anyHT||anyTTC?`
         <tr style="background:#f5f5f7">
-          <td colspan="${spanLbl}" style="text-align:right;font-weight:600;font-size:12px">Sous-total HT${devL}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-weight:600;font-size:12px">${T.foot.sousTotalHT}${devL}</td>
           <td colspan="${spanVal}" style="font-weight:700;font-size:13px;white-space:nowrap">${Ndv(totHT)}</td>
         </tr>
         `:''}
         ${anyTTC||SH.frais_log?`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">Frais logistiques* — tout-compris${devL}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${T.foot.fraisLog}${devL}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totLog)}</td>
         </tr>
         `:''}
         ${cl.assujetti&&(anyHT||anyTTC)?`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">TVA interne (${S.tvaInterne}%) — sur le montant HT</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${T.foot.tva(S.tvaInterne)}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totTVA)}</td>
         </tr>
         `:''}
         ${anyTTC?`
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">TOTAL TTC${devL}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">${T.foot.totalTTC}${devL}</td>
           <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(totTTC+totTVA)}</td>
         </tr>
         `:''}
       </tfoot>
     </table>
     <div class="dv-cgs">
-      <strong>Conditions générales :</strong><br>
-      Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en ${devisFX.dev==='XOF'?'Francs CFA (XOF)':devisFX.dev+' — convertis depuis XOF'}. ${devisFX.dev!=='XOF'?`<strong>Taux de change appliqué : 1 ${devisFX.dev} = ${Nd(devisFX.taux,4)} XOF</strong> (taux indicatif) — `:'<strong>Taux de change du jour appliqué</strong> — '}de légères variations peuvent être constatées au moment de la commande.<br>
-      <strong>Frais logistiques (*) :</strong> Tarif transitaire <strong>tout-compris (fret + douane + taxes)</strong> — aucune TVA ni taxe supplémentaire ne s'ajoute aux frais logistiques. Les montants indiqués sont des estimations ; le montant définitif pourra différer légèrement.<br>
-      ${cl.assujetti?`<strong>TVA :</strong> Client assujetti — la TVA interne (${S.tvaInterne}%) est calculée sur le montant HT des marchandises et affichée séparément ci-dessus.<br>`:''}
-      <strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant HT</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>
-      <strong>Post-acheminement :</strong> Les frais de livraison locale (post-acheminement) sont également à la charge du client et ne sont pas inclus dans ce devis.<br>
-      <strong>Délais :</strong> Les délais de livraison indiqués sont estimatifs et peuvent varier selon le mode de transport et les conditions douanières.<br><br>
-      <strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em>
+      <strong>${T.cgv.titre}</strong><br>
+      ${T.cgv.intro(T.cgv.devise(devisFX.dev),T.cgv.taux(devisFX.dev,devisFX.taux))}
+      ${T.cgv.fraisLog}
+      ${cl.assujetti?T.cgv.tva(S.tvaInterne):''}
+      ${T.cgv.validation}
+      ${T.cgv.post}
+      ${T.cgv.delais}
+      ${T.cgv.footer}
     </div>`;
-  auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,
+  auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,lang,
     strategie:devisPrefs.strategy,parametres:{...S},
     lignes:dvList.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
     totaux:{totHT:r2(totHT),fraisLog:r2(totLog),tva:r2(totTVA),totTTC:r2(totTTC+totTVA)}});
