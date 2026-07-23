@@ -168,6 +168,10 @@ select.filt:hover{border-color:#C3CADC}
 .card-acts .btn-sm{padding:7px 9px}
 .pill-cat{background:#EEF1FA;color:#4A5065;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:500;white-space:nowrap}
 .pill-more{font-size:9px;background:var(--bleu-t);color:#fff;padding:2px 6px;border-radius:999px;margin-left:5px;font-weight:600;vertical-align:1px}
+.dv-chip{display:inline-flex;align-items:center;gap:5px;background:#EDF6FF;color:var(--bleu-t);border:1px solid rgba(0,153,255,.25);padding:4px 8px 4px 10px;border-radius:999px;font-size:11.5px;font-weight:500}
+.dv-chip button{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:none;cursor:pointer;color:inherit;padding:2px;border-radius:50%;line-height:0}
+.dv-chip button:hover{background:rgba(0,153,255,.15)}
+.dv-chip .ic{width:11px;height:11px}
 /* ===== TABLES ===== */
 .tbl-wrap{overflow:auto;background:var(--surface);border-radius:14px;border:1px solid var(--border);box-shadow:var(--sh-xs);max-height:calc(100dvh - 230px)}
 table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
@@ -862,6 +866,27 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         <button class="btn btn-danger btn-sm" onclick="clearCart()"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg> Vider</button>
       </div>
     </div>
+    <div class="toolbar" id="dv-toolbar" style="display:none;margin-bottom:8px">
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher (nom, réf, fournisseur)..." aria-label="Rechercher dans le devis" id="dv-search" oninput="dvFilterChange()"></div>
+      <select class="filt" id="dv-f-cat" onchange="dvFilterChange()" aria-label="Filtrer par catégorie"><option value="">Toutes catégories</option></select>
+      <select class="filt" id="dv-f-four" onchange="dvFilterChange()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
+      <select class="filt" id="dv-f-trans" onchange="dvFilterChange()" aria-label="Filtrer par transitaire"><option value="">Tous transitaires</option></select>
+      <select class="filt" id="dv-sort" onchange="dvFilterChange()" aria-label="Trier les produits">
+        <option value="">Tri : ordre du panier</option>
+        <option value="nom_asc">Nom (A→Z)</option>
+        <option value="nom_desc">Nom (Z→A)</option>
+        <option value="prix_asc">Prix HT croissant</option>
+        <option value="prix_desc">Prix HT décroissant</option>
+        <option value="qty_asc">Quantité croissante</option>
+        <option value="qty_desc">Quantité décroissante</option>
+        <option value="four_asc">Fournisseur (A→Z)</option>
+        <option value="four_desc">Fournisseur (Z→A)</option>
+        <option value="cat_asc">Catégorie (A→Z)</option>
+        <option value="cat_desc">Catégorie (Z→A)</option>
+      </select>
+      <button class="btn btn-sec btn-sm" onclick="resetDevisFilters()" title="Réinitialiser les filtres et le tri">Réinitialiser</button>
+    </div>
+    <div id="dv-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div id="dv-cart-cont"></div>
     <div id="dv-total-bar"></div>
   </div>
@@ -2734,8 +2759,9 @@ function exportCSV(){
    MODULE DEVIS — État global + Panier + PDF
    Séparé intentionnellement de calc() (simulation interne)
    ============================================================ */
-const DK='gf_d',DCK='gf_dc',DPK='gf_dp';
+const DK='gf_d',DCK='gf_dc',DPK='gf_dp',DFK='gf_dvfilt';
 let devisCart=[],devisClient={},devisPrefs={},devisView='grid';
+let devisFilters={q:'',cat:'',four:'',trans:'',sort:''};
 let devisFX={dev:'XOF',taux:1};
 let fxCache={rates:null,ts:0};
 let fxReqSeq=0;
@@ -2757,6 +2783,8 @@ function loadDevis(){
   devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved}:{...DV_PREFS_DEFAULT};
   delete devisPrefs.show; // migré vers gf_cols (cmMigrateLegacy)
   if(saved&&saved.fx){devisFX={dev:saved.fx.dev||'XOF',taux:saved.fx.taux||1};}
+  const savedFilt=LS_GET(DFK,null);
+  devisFilters=savedFilt?{q:'',cat:'',four:'',trans:'',sort:'',...savedFilt}:{q:'',cat:'',four:'',trans:'',sort:''};
   updateCartBadge();
 }
 function saveDevisCartLS(){LS_SET(DK,devisCart);updateCartBadge();}
@@ -2965,7 +2993,8 @@ function dvComment(cid,val){
 function dvClearComment(cid){
   const item=devisCart.find(x=>x.cid===cid);if(!item)return;
   item.comment='';saveDevisCartLS();
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
+  const list=getFilteredDevisCart();
+  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
 }
 // Auto-resize du textarea commentaire : hauteur adaptée au contenu, plafonnée à 120px (scroll au-delà)
 function dvNoteGrow(el){
@@ -2996,6 +3025,97 @@ function clearCart(){
 }
 
 function isInCart(pid){return devisCart.some(x=>x.pid===pid);}
+
+/* ---- RECHERCHE / FILTRES / TRI DU DEVIS ----
+   État persistant (gf_dvfilt) : recherche texte + filtres catégorie/fournisseur/transitaire
+   + tri. S'applique à l'aperçu (grille/liste), à la barre de totaux ET au PDF généré,
+   qui doivent toujours refléter exactement les mêmes lignes, dans le même ordre. */
+const DV_SORT_LABELS={
+  nom_asc:'Nom (A→Z)',nom_desc:'Nom (Z→A)',
+  prix_asc:'Prix HT croissant',prix_desc:'Prix HT décroissant',
+  qty_asc:'Quantité croissante',qty_desc:'Quantité décroissante',
+  four_asc:'Fournisseur (A→Z)',four_desc:'Fournisseur (Z→A)',
+  cat_asc:'Catégorie (A→Z)',cat_desc:'Catégorie (Z→A)',
+};
+function saveDevisFilters(){LS_SET(DFK,devisFilters);}
+function dvFilterChange(){
+  devisFilters.q=document.getElementById('dv-search').value||'';
+  devisFilters.cat=document.getElementById('dv-f-cat').value||'';
+  devisFilters.four=document.getElementById('dv-f-four').value||'';
+  devisFilters.trans=document.getElementById('dv-f-trans').value||'';
+  devisFilters.sort=document.getElementById('dv-sort').value||'';
+  saveDevisFilters();
+  renderDevisCart();
+}
+function dvClearFilter(key){
+  devisFilters[key]='';
+  saveDevisFilters();
+  renderDevisCart();
+}
+function resetDevisFilters(){
+  devisFilters={q:'',cat:'',four:'',trans:'',sort:''};
+  localStorage.removeItem(DFK);
+  renderDevisCart();
+}
+// Retourne le panier filtré + trié selon devisFilters — source unique pour l'aperçu et le PDF
+function getFilteredDevisCart(){
+  const q=(devisFilters.q||'').toLowerCase().trim();
+  let list=devisCart.filter(it=>{
+    const p=it.snap;
+    if(q&&!((p.nom||'').toLowerCase().includes(q)||(p.ref||'').toLowerCase().includes(q)||(p.fn||'').toLowerCase().includes(q)))return false;
+    if(devisFilters.cat&&p.cat!==devisFilters.cat)return false;
+    if(devisFilters.four&&p.fn!==devisFilters.four)return false;
+    if(devisFilters.trans&&p.trans_nom!==devisFilters.trans)return false;
+    return true;
+  });
+  if(devisFilters.sort){
+    const ix=devisFilters.sort.lastIndexOf('_');
+    const key=devisFilters.sort.slice(0,ix),dir=devisFilters.sort.slice(ix+1);
+    const mul=dir==='desc'?-1:1;
+    list=[...list].sort((a,b)=>{
+      let va,vb;
+      if(key==='nom'){va=(a.snap.nom||'').toLowerCase();vb=(b.snap.nom||'').toLowerCase();}
+      else if(key==='prix'){va=calcDevis(a).pvuHT;vb=calcDevis(b).pvuHT;}
+      else if(key==='qty'){va=a.qty||0;vb=b.qty||0;}
+      else if(key==='four'){va=(a.snap.fn||'').toLowerCase();vb=(b.snap.fn||'').toLowerCase();}
+      else if(key==='cat'){va=(a.snap.cat||'').toLowerCase();vb=(b.snap.cat||'').toLowerCase();}
+      else return 0;
+      if(va<vb)return-1*mul;
+      if(va>vb)return 1*mul;
+      return 0;
+    });
+  }
+  return list;
+}
+// Remplit les <select> de filtres à partir des valeurs présentes dans le panier
+// (et nettoie un filtre devenu orphelin, ex : dernier produit d'une catégorie retiré)
+function dvPopulateFilterSelects(){
+  const cats=[...new Set(devisCart.map(i=>i.snap.cat).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const fours_=[...new Set(devisCart.map(i=>i.snap.fn).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const transs=[...new Set(devisCart.map(i=>i.snap.trans_nom).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  if(devisFilters.cat&&!cats.includes(devisFilters.cat))devisFilters.cat='';
+  if(devisFilters.four&&!fours_.includes(devisFilters.four))devisFilters.four='';
+  if(devisFilters.trans&&!transs.includes(devisFilters.trans))devisFilters.trans='';
+  const fill=(id,items,curVal,allLbl)=>{
+    document.getElementById(id).innerHTML=`<option value="">${allLbl}</option>`+
+      items.map(v=>`<option value="${escH(v)}"${v===curVal?' selected':''}>${escH(v)}</option>`).join('');
+  };
+  fill('dv-f-cat',cats,devisFilters.cat,'Toutes catégories');
+  fill('dv-f-four',fours_,devisFilters.four,'Tous fournisseurs');
+  fill('dv-f-trans',transs,devisFilters.trans,'Tous transitaires');
+}
+// Puces de filtres actifs, chacune supprimable individuellement
+function dvRenderChips(){
+  const chips=[];
+  if(devisFilters.q)chips.push(['q','Recherche : "'+devisFilters.q+'"']);
+  if(devisFilters.cat)chips.push(['cat','Catégorie : '+devisFilters.cat]);
+  if(devisFilters.four)chips.push(['four','Fournisseur : '+devisFilters.four]);
+  if(devisFilters.trans)chips.push(['trans','Transitaire : '+devisFilters.trans]);
+  if(devisFilters.sort)chips.push(['sort','Tri : '+(DV_SORT_LABELS[devisFilters.sort]||devisFilters.sort)]);
+  document.getElementById('dv-filter-chips').innerHTML=chips.map(([key,lbl])=>
+    `<span class="dv-chip">${escH(lbl)}<button onclick="dvClearFilter('${key}')" aria-label="Retirer ce filtre">${ICO('x')}</button></span>`
+  ).join('');
+}
 
 /* ---- STRATÉGIE DE PRIX ---- */
 function setStrategy(s){
@@ -3047,21 +3167,38 @@ function renderDevis(){
 }
 
 function renderDevisCart(){
-  document.getElementById('dv-count').textContent=devisCart.length;
   const cont=document.getElementById('dv-cart-cont');
+  const tb=document.getElementById('dv-toolbar');
   if(!devisCart.length){
+    document.getElementById('dv-count').textContent='0';
     cont.innerHTML=`<div class="empty"><div class="empty-ico">${ICO('cart')}</div><h3>Panier vide</h3><p>Ajoutez des produits depuis le Catalogue.</p></div>`;
-    document.getElementById('dv-total-bar').innerHTML='';return;
+    document.getElementById('dv-total-bar').innerHTML='';
+    if(tb)tb.style.display='none';
+    document.getElementById('dv-filter-chips').innerHTML='';
+    return;
   }
-  cont.innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
-  renderDevisTotal();
+  if(tb)tb.style.display='';
+  dvPopulateFilterSelects();
+  const se=document.getElementById('dv-search');
+  if(se.value!==(devisFilters.q||''))se.value=devisFilters.q||'';
+  document.getElementById('dv-sort').value=devisFilters.sort||'';
+  dvRenderChips();
+  const list=getFilteredDevisCart();
+  document.getElementById('dv-count').textContent=list.length+' / '+devisCart.length;
+  if(!list.length){
+    cont.innerHTML=`<div class="empty"><div class="empty-ico">${ICO('inbox')}</div><h3>Aucun produit ne correspond aux filtres</h3><p>Ajustez ou réinitialisez les filtres et le tri.</p></div>`;
+  }else{
+    cont.innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+  }
+  renderDevisTotal(list);
 }
 
-function buildDevisGrid(){
+function buildDevisGrid(list){
+  list=list||getFilteredDevisCart();
   const SH=cmVisible('devis');
   // ligne d'info « label / valeur » — une par colonne cochée
   const row=(lbl,val)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-top:2px"><span style="color:var(--muted)">${lbl}</span><span style="font-weight:600;text-align:right">${val}</span></div>`;
-  return`<div class="grid">${devisCart.map(item=>{
+  return`<div class="grid">${list.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     const imgHtml=p.photos&&p.photos[0]
@@ -3107,7 +3244,8 @@ function buildDevisGrid(){
   }).join('')}</div>`;
 }
 
-function buildDevisTable(){
+function buildDevisTable(list){
+  list=list||getFilteredDevisCart();
   const SH=cmVisible('devis');
   const ths=[
     SH.photos?'<th>Photo</th>':'',
@@ -3136,7 +3274,7 @@ function buildDevisTable(){
     SH.total_ttc?`<th>Total TTC${devisFX.dev!=='XOF'?' ('+devisFX.dev+')':''}</th>`:'',
     '<th class="no-print">Actions</th>',
   ].join('');
-  const rows=devisCart.map(item=>{
+  const rows=list.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const imgSrc=p.photos&&p.photos[0];
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
@@ -3180,14 +3318,16 @@ function buildDevisTable(){
 
 function dvQty(cid,qty){
   updateCartQty(cid,qty);
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid():buildDevisTable();
-  renderDevisTotal();
+  const list=getFilteredDevisCart();
+  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+  renderDevisTotal(list);
 }
 
-function renderDevisTotal(){
-  if(!devisCart.length){document.getElementById('dv-total-bar').innerHTML='';return;}
-  const cs=devisCart.map(calcDevis);
-  const totQty=devisCart.reduce((s,i)=>s+i.qty,0);
+function renderDevisTotal(list){
+  list=list||getFilteredDevisCart();
+  if(!list.length){document.getElementById('dv-total-bar').innerHTML='';return;}
+  const cs=list.map(calcDevis);
+  const totQty=list.reduce((s,i)=>s+i.qty,0);
   const totMarge=cs.reduce((s,c)=>s+c.margeTot,0);
   const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
   const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
@@ -3251,6 +3391,9 @@ function devisRef(now){
 }
 function generateDevisPDF(){
   if(!devisCart.length){toast('Panier vide — ajoutez des produits au devis',true);return;}
+  // Le PDF suit exactement l'aperçu affiché : mêmes lignes, même ordre (recherche/filtres/tri actifs)
+  const dvList=getFilteredDevisCart();
+  if(!dvList.length){toast('Aucun produit ne correspond aux filtres actuels',true);return;}
   const now=new Date();
   const dateFr=now.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   const ref=devisRef(now);
@@ -3299,7 +3442,7 @@ function generateDevisPDF(){
   const spanVal=Math.min(2,Math.max(1,nbCols-1)),spanLbl=Math.max(1,nbCols-spanVal);
   // Lignes
   const escC=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const rowsHtml=devisCart.map(item=>{
+  const rowsHtml=dvList.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const imgCell=SH.photos?`<td style="text-align:center">${p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`:''}</td>`:'';
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
@@ -3330,7 +3473,7 @@ function generateDevisPDF(){
       ${SH.total_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
-  const cs=devisCart.map(calcDevis);
+  const cs=dvList.map(calcDevis);
   const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
   const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
   const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
@@ -3398,7 +3541,7 @@ function generateDevisPDF(){
     </div>`;
   auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,
     strategie:devisPrefs.strategy,parametres:{...S},
-    lignes:devisCart.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
+    lignes:dvList.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
     totaux:{totHT:r2(totHT),fraisLog:r2(totLog),tva:r2(totTVA),totTTC:r2(totTTC+totTVA)}});
   // Nom de fichier suggéré à l'enregistrement PDF : GoShip_[REFDEVIS].pdf
   const prevTitle=document.title;
