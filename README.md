@@ -19,7 +19,7 @@ Go.Flow est une console d'import statique (single-page HTML, ~4 400 lignes, sans
 - L'**import en masse** (CSV, Excel, PDF, HTML) et l'**export d'images produit** design
 - La **sauvegarde et restauration** des données, avec dossier de sauvegarde automatique
 
-Aucun serveur, aucune base de données — tout fonctionne en `localStorage` et s'exporte en PDF, CSV, JSON, PNG ou ZIP.
+Aucun serveur, aucune base de données — tout fonctionne en `localStorage`/`IndexedDB` (navigateur) et s'exporte en PDF, CSV, JSON, PNG ou ZIP.
 
 ---
 
@@ -95,18 +95,22 @@ Tous les prix passent par un moteur unique en 3 étapes :
 - Récapitulatif détaillé suivant les 3 étapes du moteur de calcul
 
 ### 📄 Devis client
-- Panier multi-produits avec stratégie de prix par devis
+- Panier multi-produits avec stratégie de prix par devis ; **recherche, filtres (catégorie/fournisseur/transitaire) et tri**, synchronisés entre l'aperçu écran et le PDF
+- **Édition des champs par produit directement dans le devis** (prix EXW négocié, frais locaux, dimensions, poids, MOQ, spécificités, description, catégorie, devise, mode de transport…) sans toucher à la fiche catalogue d'origine — un badge « modifié » signale les valeurs différentes du catalogue, avec possibilité de revenir à la valeur d'origine
+- **Devise du devis** indépendante de la devise d'achat : conversion directe (XOF ou autre, taux modifiable) entre le prix EXW du produit et la devise affichée au client
+- **Assurance produit** optionnelle (taux %, calculée sur le sous-total HT et incluse dans le total)
 - **Commentaire par produit** (zone de texte multi-lignes, affiché en colonne dédiée dans l'aperçu et le PDF)
 - **Référence de devis** auto-générée (`DV_XXX.001A.AAMMJJ`, initiales du client + compteur + date), stable tant que le contenu du panier ne change pas
-- **Export PDF configurable** : toutes les colonnes (y compris Désignation, Qté, Total HT) sont libres à cocher — l'aperçu, le sélecteur et le PDF partagent exactement la même sélection (WYSIWYG), aucune colonne fixe imposée
-- Les colonnes internes (coût de revient, marge, EXW) sont décochées par défaut ; le modal PDF avertit qu'elles deviennent visibles côté client si cochées
+- **Export PDF configurable** : toutes les colonnes (regroupées Produit / Sourcing / Vente / Logistique, y compris Désignation, Qté, Prix total HT) sont libres à cocher — l'aperçu, le sélecteur et le PDF partagent exactement la même sélection (WYSIWYG), aucune colonne fixe imposée
+- **PDF en français, anglais ou chinois simplifié** — le choix ne concerne que le document généré, l'interface reste en français ; conditions générales de vente incluses en option
+- Les colonnes internes (coût de revient, marge, taux de marge) sont décochées par défaut ; le modal PDF avertit qu'elles deviennent visibles côté client si cochées
 - Case « client assujetti » pour afficher la ligne TVA interne
 
 ### 🗂️ Sélecteur de colonnes universel
 Un composant unique gère la visibilité des colonnes pour **Catalogue / Simulation / Devis** (le PDF partage la sélection du Devis, aucune préférence séparée) :
 - Dropdown avec compteur `visibles/total`, « Tout afficher », « Réinitialiser »
 - Sur mobile (<768 px), les colonnes non essentielles sont auto-masquées tant que l'utilisateur n'a pas personnalisé la vue
-- Préférences persistées en `localStorage` (`gf_cols`), robustes aux ajouts/suppressions de colonnes dans le code
+- Préférences persistées (`gf_cols`), robustes aux ajouts/suppressions de colonnes dans le code
 
 ### 📥 Import en masse
 Boutons « Importer » dans Catalogue / Fournisseurs / Transitaires :
@@ -122,11 +126,12 @@ Mode sélection dans le Catalogue → modal de personnalisation :
 - **Lignes d'infos** configurables (les 13 infos du catalogue, cochables et réordonnables par drag & drop ; par défaut synchronisées avec les colonnes visibles du catalogue)
 - Téléchargement en PNG individuels ou en **ZIP** (writer ZIP intégré, sans dépendance)
 
-### 💾 Sauvegarde & restauration
+### 💾 Sauvegarde, stockage & restauration
 Depuis le panneau Paramètres (icône avatar → Paramètres) :
 - **Exporter mes données** : télécharge un JSON complet (produits, fournisseurs, transitaires, préférences, panier devis) horodaté à la minute — jamais d'écrasement silencieux
 - **Importer mes données** : restaure un JSON exporté après confirmation (aperçu du contenu : nb produits/fournisseurs/transitaires/articles devis), avec rechargement automatique
 - **Dossier de sauvegarde automatique** (Chrome/Edge desktop, File System Access API) : une fois un dossier choisi, chaque export JSON s'y écrit directement sans passer par le téléchargement du navigateur ; retombe en téléchargement classique si le dossier devient inaccessible
+- **Stockage local** : répartition de l'espace utilisé par catégorie (produits, images, historique…) et quota global du navigateur, avec nettoyage en un clic (vider l'historique audit, oublier le dernier HTML importé)
 - Rappel hebdomadaire non intrusif si aucun export récent n'a été fait
 
 ### 📤 Autres exports
@@ -169,7 +174,7 @@ Go-Flow/
 
 - HTML5 / CSS3 / JavaScript vanilla — aucune dépendance au chargement (SheetJS et pdf.js chargés à la demande pour l'import Excel/PDF uniquement)
 - Polices : Montserrat (titres/chiffres) + Poppins (texte) via Google Fonts
-- Persistance : `localStorage` (clés `gf_s`, `gf_p`, `gf_f`, `gf_t`, `gf_cols`, `gf_win`, `gf_audit`, `gf_imp`, `gf_exp`, `gf_d`/`gf_dc`/`gf_dp` pour le devis, `gf_devref` pour la numérotation) + `IndexedDB` pour mémoriser le dossier de sauvegarde automatique (le handle ne peut pas être stocké en `localStorage`)
+- Persistance répartie par poids : les réglages légers restent en `localStorage` (`gf_s`, `gf_v`, `gf_warn`) ; tout ce qui peut grossir (produits/photos, fournisseurs, transitaires, préférences de colonnes, historique audit, panier devis, imports HTML) vit en **IndexedDB** pour éviter le quota `localStorage` (~5-10 Mo) — migration automatique et transparente à la première ouverture après mise à jour, avec repli sur `localStorage` si IndexedDB est indisponible (navigation privée stricte)
 - Images : URLs raw GitHub CDN (CORS ok pour l'export canvas)
 - Déploiement : [Vercel](https://vercel.com)
 
