@@ -1,24 +1,27 @@
 # Go.Flow — État Actuel de l'Architecture
 
-> Généré le 2026-07-24 | Version plateforme : data schema v3
+> Mis à jour le 2026-07-24 | Version schéma données : `DATA_VER = 4`
 
 ---
 
 ## 1. Vue d'ensemble
 
-Go.Flow est une **SPA (Single Page Application) statique mono-fichier** développée pour Go Group (Lomé, Togo), société d'import/distribution de matériel esthétique chinois.
+Go.Flow est une **SPA (Single Page Application) statique mono-fichier** développée pour Go Group (Lomé, Togo), société d'import/distribution de matériel esthétique depuis la Chine.
 
 | Caractéristique | Valeur |
 |-----------------|--------|
 | Pattern | SPA single-file statique |
-| Stack | HTML5 / CSS3 / Vanilla JS ES6+ |
-| Fichier principal | `index.html` — 1 501 lignes |
+| Stack | HTML5 / CSS3 / Vanilla JS ES6+ async/await |
+| Fichier principal | `index.html` — **5 782 lignes** |
 | Build tooling | Aucun (zéro dépendance JS) |
 | Déploiement | Vercel — `go-flow-phi.vercel.app` |
-| Hébergement images | GitHub raw CDN |
-| Dépendances externes | Google Fonts uniquement (Montserrat + Poppins) |
-| Persistence des données | `localStorage` navigateur (7 clés) |
-| Version schéma données | `DATA_VER = 3` |
+| Hébergement images | GitHub raw CDN (`RAWBASE`) |
+| Dépendances externes | Google Fonts (Montserrat + Poppins) |
+| Persistence principale | **IndexedDB** (`gf_store` / `kv`) |
+| Persistence légère | `localStorage` (paramètres + version) |
+| Version schéma données | `DATA_VER = 4` |
+| Fonctions JS | **277+** |
+| Sections CSS | **43** |
 
 ---
 
@@ -26,284 +29,343 @@ Go.Flow est une **SPA (Single Page Application) statique mono-fichier** dévelop
 
 ```
 Go-Flow/
-├── index.html                          ← Toute l'application (1 501 lignes)
+├── index.html                          ← Toute l'application (5 782 lignes)
 ├── README.md
-├── CONTEXTE_PROJET_GOGROUP_DEVIS.md    ← Contexte métier & historique
+├── CONTEXTE_PROJET_GOGROUP_DEVIS.md
 ├── ARCHITECTURE.md                     ← Ce document
 └── assets/
-    ├── Products images/                ← 11 JPEG produits (1.jpeg … 11.jpeg)
-    ├── Quotes/                         ← 2 PDF devis fournisseurs
-    │   ├── Quotes_Oman Medical Beauty Manufacture.pdf
-    │   └── Quotes_Shaanxi Yateli Technology Limited.pdf
-    ├── supplier/                       ← Logos + contacts fournisseurs
-    │   ├── Logo Yateli.avif
-    │   ├── logo Oman Beauty.png
-    │   ├── Contact Oman Medical Beauty Manufac.txt
-    │   ├── Contact Shaanxi Yateli Technology L.txt
-    │   └── Oman Medical Beauty Manufacture.html  (page Alibaba sauvegardée)
-    └── supplier.zip                    ← Archive fournisseurs (23 MB)
+    ├── Products images/                ← JPEG produits (séries 1 et 2)
+    ├── Quotes/                         ← PDF devis fournisseurs
+    ├── Freight Forwarders/             ← Assets transitaires
+    └── supplier/
+        ├── Oman Medical Beauty Manufacture/
+        ├── Paine Agent/
+        └── Shaanxi Yateli Technology/
 ```
 
 ---
 
-## 3. Structure du Fichier `index.html`
+## 3. Couche de Données — Architecture Hybride
 
-Le fichier unique est découpé en trois blocs distincts :
+### 3.1 localStorage (données légères)
 
-| Bloc | Lignes | Contenu |
-|------|--------|---------|
-| `<head>` | 1–6 | Meta charset/viewport + lien Google Fonts |
-| `<style>` | 7–179 | CSS complet (variables, layout, composants) |
-| `<body>` HTML | 180–509 | Structure HTML (header, onglets, modales) |
-| `<script>` | 510–1499 | Logique JS complète (47 fonctions) |
-| Fin | 1499–1501 | Fermetures `</script>`, `</body>`, `</html>` |
+| Clé | Constante JS | Contenu |
+|-----|-------------|---------|
+| `gf_s` | `SK` | Paramètres globaux (taux change, marges, frais transfert, assurance, TVA) |
+| `gf_v` | `VK` | Version schéma (`4`) — guard de migration |
+| `gf_warn` | `BKP_WARN_K` | Timestamp du dernier rappel de sauvegarde hebdomadaire |
+
+### 3.2 IndexedDB — base `gf_store`, magasin `kv` (données volumineuses)
+
+| Clé | Constante JS | Contenu |
+|-----|-------------|---------|
+| `gf_p` | `PK` | Catalogue produits (avec photos base64) |
+| `gf_f` | `FK` | Fournisseurs |
+| `gf_t` | `TK` | Transitaires |
+| `gf_cols` | `CMK` | Visibilité colonnes (Catalogue / Simulation / Devis) |
+| `gf_win` | `WK` | Surcharges gagnant en vue groupée |
+| `gf_audit` | `AK` | Historique d'audit (max 100 entrées) |
+| `gf_d` | `DK` | Panier devis (lignes) |
+| `gf_dc` | `DCK` | Infos client devis (nom, société, pays…) |
+| `gf_dp` | `DPK` | Préférences devis (colonnes visibles, stratégie prix…) |
+| `gf_dvfilt` | `DFK` | Filtres actifs du devis |
+| `gf_devref` | `DVREFK` | Compteur de référence devis (ex. GG-2026-0042) |
+| `gf_imp` | `IMPK` | Préférences import + dernier HTML mémorisé (jusqu'à ~5 MB) |
+| `gf_exp` | `EXK` | Préférences export images (ordre champs, template…) |
+
+### 3.3 API de stockage
+
+```js
+// localStorage — petits objets
+LS_GET(k, fallback)  / LS_SET(k, v)
+
+// IndexedDB — données volumineuses (async)
+await IDB_GET(k, fallback)
+IDB_SET(k, v)         // fire-and-forget (Promise non attendue)
+await IDB_DELETE(k)
+```
+
+**Fallback automatique** : si IndexedDB est indisponible (navigation privée stricte), `IDB_GET`/`IDB_SET` basculent silencieusement sur `localStorage`.
+
+**Migration one-shot** (`migrateToIdb()`) : au premier démarrage après la mise à jour, les 12 clés listées dans `IDB_MIGRATE_KEYS` sont copiées de `localStorage` vers IndexedDB, puis supprimées de `localStorage`. Idempotent via le flag `__migrated_v1`.
+
+**Chargement en mémoire** : toutes les données IndexedDB sont chargées une seule fois dans `init()` vers des globals (`prods`, `fours`, `trans`, `auditHist`, etc.). Les lectures ne touchent plus le stockage après le démarrage ; seules les mutations persistent via `IDB_SET`.
 
 ---
 
-## 4. Couche de Données — localStorage
+## 4. Modèles de Données
 
-Toutes les données de l'application sont persistées dans le `localStorage` du navigateur via 7 clés :
-
-| Clé | Constante JS | Contenu | Type |
-|-----|-------------|---------|------|
-| `gf_s` | `SK` | Paramètres globaux (taux de change, marges, TVA, frais fret) | Object |
-| `gf_p` | `PK` | Catalogue produits | Array |
-| `gf_f` | `FK` | Fournisseurs | Array |
-| `gf_t` | `TK` | Transitaires | Array |
-| `gf_v` | `VK` | Version schéma (`3`) — guard de migration | Number |
-| `gf_win` | `WK` | Surcharges gagnant en vue groupée `{grpKey: prodId}` | Object |
-| `gf_c` | *(inline)* | Visibilité des colonnes optionnelles `{k: boolean}` | Object |
-
-**Guard de migration** : au démarrage, si `gf_v !== DATA_VER`, toutes les clés sont effacées et les données par défaut sont rechargées.
-
----
-
-## 5. Modèles de Données
-
-### 5.1 Paramètres Globaux (`DS`)
+### 4.1 Paramètres Globaux (`DS`)
 
 ```js
 {
-  tauxChange:    95,      // 1 RMB = 95 XOF
-  tarifAerien:   11000,   // XOF par kg (fret aérien)
-  tarifMaritime: 230000,  // XOF par CBM (fret maritime)
-  tauxMarge:     35,      // % marge par défaut
-  tva:           18       // % TVA par défaut
+  tauxChange:    95,       // 1 RMB = 95 XOF
+  tarifAerien:   11000,    // XOF par kg (fret aérien)
+  tarifMaritime: 230000,   // XOF par CBM (fret maritime)
+  tauxMarge:     35,       // % marge par défaut
+  tvaInterne:    18,       // % TVA (clients assujettis uniquement)
+  trf: {                   // Frais de transfert de fonds
+    mode: 'pct',           // 'pct' | 'fixe'
+    val: 0
+  },
+  assu: {                  // Assurance marchandises
+    on:   false,
+    mode: 'pct',
+    val:  1.5
+  }
 }
 ```
 
-### 5.2 Produit
+### 4.2 Produit
 
 ```js
 {
-  id,       // 'P0001'–'P0019' (défauts) | timestamp-based (nouveaux)
-  ref,      // e.g. 'HYD-001-001' (Catégorie-Seq-Seq)
-  nom,      // Désignation commerciale
-  cat,      // 'Hydrafacial' | 'Picolaser/Tatouage' | 'Analyse de peau' | 'RF Microneedling' | 'HIFU'
-  grp,      // Clé de groupement e.g. 'hydrafacial-14en1'
-  fid,      // ID fournisseur lié (FK)
-  fn,       // Nom fournisseur (dénormalisé)
-  prix,     // Prix EXW (dans la devise `dev`)
-  prach,    // Frais pré-embarquement XOF
-  dev,      // Devise : 'RMB' | 'USD' | 'EUR' | 'XOF'
-  l, la, h, // Dimensions colis en cm (longueur, largeur, hauteur)
-  kg,       // Poids en kg
-  tr,       // Transport par défaut : 'Maritime' | 'Aérien'
-  marge,    // % marge individuelle ('' = utiliser global)
-  rem,      // % remise commerciale
-  conc,     // Prix concurrent marché XOF
-  moq,      // Quantité minimale commande
-  desc,     // Description libre
-  specs,    // Spécifications techniques (chaîne formatée)
-  photos,   // [] URLs ou base64, max 3
-  glink     // Lien recherche Google produit
+  id,        // 'P0001'–'P00NN' (défauts) | timestamp-based (nouveaux)
+  ref,       // ex. 'HYD-001-001'
+  nom, cat, grp,
+  fid, fn,   // ID + nom fournisseur (fn dénormalisé)
+  prix,      // Prix EXW (dans devise `dev`)
+  prach,     // Frais pré-embarquement (fret local)
+  dev,       // 'RMB' | 'USD' | 'EUR' | 'XOF'
+  dimU,      // Unité dimensions : 'cm' | 'm'
+  l, la, h,  // Dimensions
+  kg,        // Poids
+  tr,        // 'Maritime' | 'Aérien'
+  marge,     // % individuel ('' = global)
+  rem,       // % remise
+  conc,      // Prix concurrent marché XOF
+  moq,       // Quantité minimale
+  desc, specs, glink,
+  photos     // [] URLs ou base64, max 3
 }
 ```
 
-### 5.3 Fournisseur
+### 4.3 Ligne de Devis
 
 ```js
 {
-  id,       // 'F001' | 'F002' | 'F' + timestamp
-  nom,      // Raison sociale
-  contact,  // Nom du contact principal
-  email,
-  pays,     // Pays d'origine
-  wa,       // WhatsApp
-  wc,       // WeChat
-  dom,      // Domaine d'activité
-  an,       // Année de création
-  eval,     // Évaluation /5
-  ali,      // Statut Alibaba : 'Vérifié' | 'Non vérifié' | 'Non disponible'
-  ali_url,  // URL boutique Alibaba
-  lang,     // Langues parlées
-  mkt,      // Marchés principaux
-  desc,     // Description
-  com,      // Commentaires internes
-  logo,     // URL ou base64
-  devis     // URL PDF devis
+  cid,        // ID unique ligne
+  pid,        // ID produit source
+  nom,        // Désignation (éditable)
+  cat, grp, fid,
+  exw,        // Prix EXW négocié (éditable)
+  prach,      // Fret local négocié
+  dev,
+  l, la, h, dimU, kg,  // Dimensions (éditables)
+  moq,        // MOQ négocié
+  tr,         // Transport
+  marge,
+  rem,
+  qty,        // Quantité commandée
+  photos,
+  comment,    // Commentaire ligne devis
+  _nego: {    // Valeurs négociées (substitution au produit catalogue)
+    prix, prach, kg, moq, l, la, h
+  }
 }
 ```
 
-**Fournisseurs par défaut** : `F001` = Shaanxi Yateli Technology Limited (Bailey), `F002` = Oman Medical Beauty Manufacture (Clara Xiang)
+### 4.4 Fournisseur & Transitaire
 
-### 5.4 Transitaire
-
-```js
-{
-  id,       // 'T' + timestamp
-  nom,      // Nom société transitaire
-  dep,      // Pays de départ
-  arr,      // Pays d'arrivée
-  contact,
-  wa,       // WhatsApp
-  tel,      // Téléphone
-  type,     // 'Maritime' | 'Aérien' | 'Routier' | 'Multimodale'
-  ent,      // Durée de stockage en jours
-  mar,      // Tarif maritime XOF/CBM
-  mard,     // Délai maritime en jours
-  aer,      // Tarif aérien XOF/kg
-  aerd,     // Délai aérien en jours
-  ass,      // Taux assurance % : '0' | '1' | '1.5' | '2'
-  logo      // URL ou base64
-}
-```
+Schémas inchangés depuis v3 (voir commits précédents) avec ajout du 3e fournisseur `F003` — Paine Agent Sourcing.
 
 ---
 
-## 6. Moteur de Calcul (`calc()`)
+## 5. Moteur de Calcul
 
-Fonction centrale retournant toutes les métriques de prix d'un produit.
+Le calcul est désormais séparé en deux couches :
+
+### 5.1 `calcEngine(i)` — moteur pur (sans état global)
+
+Prend un objet `i` avec toutes les valeurs explicites, retourne un objet de résultats complet.
 
 ```js
-function calc(p, o = {}) {
-  const S   = o.S   || state.S;           // Paramètres globaux
-  const dev = o.dev || p.dev || 'RMB';
-  const tr  = o.tr  || p.tr  || 'Maritime';
-  const mg  = (parseFloat(o.marge ?? p.marge) || S.tauxMarge) / 100;
-  const rem = parseFloat(o.rem  ?? p.rem)  || 0;
-  const tva = parseFloat(o.tva  ?? S.tva)  || 0;
-  const fm  = parseFloat(o.fm   || (state.T[0]?.mar  ?? S.tarifMaritime));
-  const fa  = parseFloat(o.fa   || (state.T[0]?.aer  ?? S.tarifAerien));
+// Étape 1 — Coût de revient (devise source)
+coutAchat   = exw × qty + fretLocal
+fTrf        = fraisCfg(transfert, coutAchat)    // % ou fixe
+fAss        = assurance.on ? fraisCfg(assu, coutAchat) : 0
+coutRevient = coutAchat + fTrf + fAss            // ✅ base marge correcte
 
-  const pa      = toXOF(p.prix, dev);                   // EXW → XOF
-  const prach   = toXOF(parseFloat(p.prach) || 0, dev); // Frais pré-embarquement
-  const cbm     = (p.l * p.la * p.h) / 1e6;             // Volume en m³
-  const fret    = tr === 'Aérien' ? p.kg * fa : cbm * fm; // Coût fret
-  const marge_xof = pa * mg;                            // ⚠️ Marge sur EXW seul
-  const pvh     = pa + marge_xof;                       // Prix de vente HT (avant remise)
-  const remM    = pvh * (rem / 100);                    // Montant remise
-  const pnh     = pvh - remM;                           // Prix net HT
-  const prix_ht = pnh + prach + fret;                   // Prix total HT
-  const cout    = pa + prach + fret;                    // Coût de revient total
-  const mn      = prix_ht - cout;                       // Marge nette XOF
-  const ttc     = prix_ht * (1 + tva / 100);            // Prix TTC
+// Étape 2 — Conversion et marge (en XOF)
+coutRevientUX = coutRevientU × tauxChange
+margeU        = coutRevientUX × margePct / 100   // ✅ marge sur coût de revient
+pvuBrut       = coutRevientUX + margeU
+remU          = pvuBrut × remisePct / 100
+pvuHT         = pvuBrut − remU
 
-  return { pa, prach, cbm, fret, marge_xof, pvh, remM, pnh, prix_ht, cout, mn, ttc };
-}
+// Étape 3 — Frais logistiques tout-compris (transitaire forfait)
+fraisLog      = mode='Aérien' ? kg × qty × tarifAerien
+                               : cbm × qty × tarifMaritime
+pvuTTC        = pvuHT + fraisLogU                // Frais logistiques inclus dans prix client
+tvaM          = assujetti ? pvtHT × tvaInterne / 100 : 0  // TVA séparée uniquement si assujetti
 ```
 
-**Objet retourné** :
-| Clé | Signification |
-|-----|---------------|
-| `pa` | Prix EXW en XOF |
-| `prach` | Frais pré-embarquement en XOF |
-| `cbm` | Volume en m³ |
-| `fret` | Coût fret (maritime ou aérien) |
-| `marge_xof` | Montant marge en XOF |
-| `pvh` | Prix de vente HT avant remise |
-| `remM` | Montant de la remise |
-| `pnh` | Prix net HT après remise |
-| `prix_ht` | Prix total HT (incl. fret + frais) |
-| `cout` | Coût de revient total |
-| `mn` | Marge nette en XOF |
-| `ttc` | Prix TTC |
+**Valeurs retournées** : `{qty, dev, coutAchat, coutRevient, coutRevientUX, margeU, margeTot, pvuHT, pvtHT, fraisLog, fraisLogU, pvuTTC, pvtTTC, tvaM, totalAvecTVA, cbm, cbmTot, …}`
 
-**Taux de conversion** (`toXOF`) :
-- RMB → XOF : `× tauxChange` (défaut 95)
-- USD → XOF : `× tauxChange × 6.5`
-- EUR → XOF : `× 655.957` (taux fixe FCFA)
-- XOF : inchangé
+### 5.2 `calc(p, o={})` — adaptateur produit → moteur
+
+Adapte un objet produit du catalogue (avec les valeurs globales de `S`) vers `calcEngine()`.
 
 ---
 
-## 7. Architecture CSS
+## 6. Architecture CSS
 
-### Variables CSS (`:root`)
+### 6.1 Variables CSS (`:root`)
 
 ```css
---rouge:  #FF2244;   --orange: #FF6600;   --jaune:  #FFB300;
---vert:   #00CC77;   --bleu:   #0099FF;   --violet: #7C3AED;
---blanc:  #FFFFFF;   --nuit:   #1A1A2E;   --nuit2:  #16213E;
---nuit3:  #0F3460;   --gris:   #8892A4;   --border: #2A2D3E;
---text:   #E8EAF6;   --muted:  #6B7280;
+/* Palette Go Group */
+--rouge: #FF2244;  --orange: #FF6600;  --jaune: #FFB300;
+--vert:  #00CC77;  --bleu:   #0099FF;  --violet: #7C3AED;
+--blanc: #FFFFFF;  --nuit:   #1A1A2E;  --nuit2:  #16213E;
+--nuit3: #0F3460;  --gris:   #8892A4;  --border: #2A2D3E;
+--text:  #E8EAF6;  --muted:  #6B7280;
 --grad: linear-gradient(135deg, #0099FF, #00CC77);
+
+/* Système */
+--sidebar-w: 220px;  --top-h: 56px;
+--card-r: 12px;      --modal-r: 16px;
+--trans: .18s ease;
 ```
 
-### Sections CSS (par commentaires)
+### 6.2 43 Sections CSS (commentaires `/* ===== … =====*/`)
 
-| Lignes | Section |
+| Groupe | Sections |
 |--------|---------|
-| 7–114 | Core layout (reset, header, tabs, grid, cards, table, modal, form, toast) |
-| 115–122 | Supplier card (`.four-logo`, `.four-card-hdr`, `.four-info`) |
-| 123–124 | Import Alibaba box (`.ali-import-box`) |
-| 125–142 | Print media query (`@media print`) |
-| 143–144 | Competitive price row (`.comp-row`) |
-| 145–159 | Grouped view (`.grp-count-badge`, `.alt-panel`, `.alt-card`, `.winner-tag`) |
-| 160–163 | Table accordion rows (`.tbl-alt-row`, `.expand-cell`) |
-| 164–166 | Grouped toolbar (`.grp-btn`) |
-| 167–179 | Column picker (`.col-picker-wrap`, `.col-picker-drop`, `.cp-grid`) |
+| Layout SaaS | ICON SYSTEM, SHELL, TOPBAR, SIDEBAR, LAYOUT, BUTTONS |
+| Composants UI | TOOLBAR, KPI STATS, GRID & CARDS, TABLES, SETTINGS PANEL, MODALS, FORMS |
+| Sections | SECTION HEADERS, SIMULATION, TOAST, EMPTY STATES, CALC PREVIEW |
+| Entités | SUPPLIER CARD, GROUPED VIEW, COLUMN PICKER |
+| Devis | ÉDITION INLINE DEVIS, DEVIS |
+| Import/Export | IMPORT EN MASSE, EXPORT IMAGES DESIGN |
+| Utilitaires | SCROLLBAR, PRINT HEADER, PRINT, PRINT — DEVIS PDF |
+| Responsive / A11y | RESPONSIVE, ACCESSIBILITÉ |
 
 ---
 
-## 8. Architecture JS — Fonctions
+## 7. Architecture JS — Modules Fonctionnels
 
-### Sections commentées dans le script
+### 7.1 Couche stockage (lignes 1265–1366)
 
-| Section | Fonctions clés |
-|---------|---------------|
-| Initialisation | `init()`, `buildProds()`, `save()`, `loadS()`, `saveSettings()`, `toggleSettings()` |
-| Utilitaires calcul | `toXOF()`, `calc()`, `N()`, `Nd()` |
-| Navigation | `tab()`, `setView()` |
-| **Catalogue** | `renderCat()` |
-| **Groupement** | `toggleGrouped()`, `setStratPrix()`, `groupList()`, `selectWinner()`, `setWinner()`, `toggleAccordion()`, `prodGroupCard()`, `prodGroupTable()`, `toggleGroupTblRow()` |
-| Rendu produits | `fourLabel()`, `fourBadgeClass()`, `prodCard()`, `prodTable()` |
-| **Modale produit** | `openProdModal()`, `genRef()`, `updateSLink()`, `calcPrev()`, `saveProd()`, `delProd()` |
-| **Photos** | `addPics()`, `renderThumbs()`, `addLogo()` |
-| **Import Alibaba** | `parseAlibabaUrl()`, `previewLogoUrl()` |
-| **Fournisseurs** | `renderFour()`, `openFourModal()`, `saveFour()`, `delFour()` |
-| **Transitaires** | `renderTrans()`, `openTransModal()`, `saveTrans()`, `delTrans()` |
-| **Simulation** | `popSim()`, `setSimTrans()`, `simSelProd()`, `simCalc()`, `qsim()` |
-| **Export CSV** | `exportCSV()` |
-| **Utils** | `closeMod()`, `toast()` |
-| Colonnes | `initCols()`, `toggleCol()`, `setAllCols()`, `toggleColPicker()` |
+`LS_GET`, `LS_SET`, `idbDb`, `idbGetRaw`, `idbSetRaw`, `idbDeleteRaw`, `idbAllEntries`, `idbAvailable`, `IDB_GET`, `IDB_SET`, `IDB_DELETE`, `migrateToIdb`
 
-**Total : 47 fonctions** — toutes dans le scope global `window`.
+### 7.2 Gestion universelle des colonnes (lignes 1502–1705)
+
+`cmLoad`, `cmMigrateLegacy`, `cmSerialize`, `cmSave`, `cmVisible`, `cmToggle`, `cmShowAll`, `cmReset`, `cmMount`, `cmRefresh`, `cmRefreshCount`, `cmOpen`
+- Gère 3 vues : `catalogue`, `simulation`, `devis`
+- Persiste dans IndexedDB (`gf_cols`)
+
+### 7.3 Initialisation & paramètres (lignes 1708–1830)
+
+`init` (async), `buildProds`, `save`, `loadS`, `saveSettings`, `toggleSettings`, `userMenuToggle`, `userMenuClose`
+
+### 7.4 Moteur de calcul (lignes 1834–1901)
+
+`xofRate`, `toXOF`, `cbmOf`, `fraisCfg`, `calcEngine`, `calc`
+
+### 7.5 Historique audit (lignes 1902–1940)
+
+`auditLoad`, `auditLog`, `auditToCSV`, `exportAudit`
+
+### 7.6 Catalogue & groupement (lignes 1943–2440)
+
+`tab`, `setView`, `renderCat`, `toggleGrouped`, `setStratPrix`, `groupList`, `selectWinner`, `setWinner`, `toggleAccordion`, `cardPriceRows`, `toggleCostDetail`, `cardGallery`, `swapCardImg`, `prodGroupCard`, `prodGroupTable`, `toggleGroupTblRow`, `escH`, `truncTxt`, `catInfoRows`, `cardTopStrip`, `prodDelai`, `openDetails`, `showProdDetails`
+
+### 7.7 Édition inline devis (lignes 2281–2440)
+
+`dvFlash`, `dvPreserveScroll`, `refreshDevisAfterEdit`, `dvEditSimple`, `dvEditNego`, `dvToggleSource`, `dvModalQty`, `dvEditRow`, `dvNegoRow`, `showDevisDetails`
+
+### 7.8 Catalogue — rendu & CRUD produit (lignes 2441–2800)
+
+`fourLabel`, `fourBadgeClass`, `prodCard`, `prodTable`, `openProdModal`, `genRef`, `updateSLink`, `calcPrev`, `saveProd`, `delProd`, `addPics`, `renderThumbs`, `addLogo`, `previewLogoUrl`, `parseAlibabaUrl`
+
+### 7.9 Fournisseurs (lignes ~2800–3000)
+
+`renderFour`, `openFourModal`, `saveFour`, `delFour`
+
+### 7.10 Transitaires (lignes ~3000–3070)
+
+`renderTrans`, `openTransModal`, `saveTrans`, `delTrans`
+
+### 7.11 Module Devis (lignes 3071–3900)
+
+**Panier & client**
+`loadDevis`, `saveDevisItems`, `addToDevis`, `removeFromDevis`, `updateDevisQty`, `renderDevisCart`, `saveDevisClient`, `renderDevisClient`, `onDevisAssuToggle`, `devisFilterChips`, `devisApplyFilters`, `devisTotalBar`
+
+**Stratégies de prix**
+`devisStratUI`, `devisStratApply`, `devisStratCalc`, `devisPersoInputs`, `devisApplyStrat`
+
+**Signature & référence**
+`devisSignature`, `devisRef`, `devRefLoad`
+
+**PDF multilingue** (FR/EN/ZH)
+`generateDevisPDF`, `pdfT`, `trF`, `trCat` — génération canvas/print inline
+
+### 7.12 Simulation (lignes ~3900–4100)
+
+`popSim`, `setSimTrans`, `simSelProd`, `simCalc`, `qsim`
+
+### 7.13 Import en masse (lignes 4109–4980)
+
+`impLoadPrefs`, `impPrefs`, `impPrefsSave`, `impResolveImg`, `ensureLib`, `ensurePDF`, `openImportModal`, `impBack`, `impTypeChange`, `impUpdTools`, `impLoading`, `impFileInput`, `impHandleFile`, `parseCSVText`, `pdfToLines`, `impExtractRows`, `impAbsUrl`, `impRichParse`, `impAutoImgs`, `impFromHTML`, `impSaveLastHtml`, `impRenderLastHtml`, `impReparseLast`, `impSetTabular`, `impSetExtracted`, `impShowStep2`, `impRenderMap`, `impMapping`, `impRenderPrev`, `impDelRow`, `impExistingKeys`, `impCat`, `impBuild`, `impRun`, `impFinish`, `impExtractFiche`, `impSetFiche`, `impRenderFiche`, `impFicheSetLogo`, `impFicheLogoPrev`, `impFichePrev`, `impRunFiche`, `impRichRef`, `impRichSet`, `impRichDel`, `impRichAdd`, `impRenderRich`, `impRichUseImg`, `impImgsZip`, `impFileToDataURL`, `impEnsureImgCol`, `impBulkImgs`
+
+**Formats supportés** : CSV, Excel (.xlsx via SheetJS chargé à la demande), PDF (via pdf.js), HTML Alibaba/fiche produit
+
+### 7.14 Export images design (lignes 4987–5440)
+
+`expLoadPrefs`, `expInfoState`, `expInfoSave`, `expInfoToggle`, `expInfoMove`, `expInfoMoveTo`, `expSyncCat`, `expRenderInfos`, `expBox`, `expToggle`, `expToggleMode`, `expBarUpdate`, `expSelectAll`, `openExportModal`, `expRenderTpls`, `expSetTpl`, `expPrefChange`, `expNav`, `expPreview`, `expLoadImg`, `expRRect`, `expCover`, `expGrad`, `expWrap`, `expFitFont`, `expLogo`, `expInfoRows`, `expFitText`, `expRowsH`, `expRowsBlock`, `expDraw`, `expSlug`, `expSaveBlob`, `expDownload`, `zipCRC`, `zipStore`
+
+**Templates** : 3 templates visuels (grille 2×3, portrait, carré), export ZIP de toutes les images, drag-and-drop des champs info
+
+### 7.15 Sauvegarde & stockage (lignes 5440–5782)
+
+`openMod`, `closeMod`, `bkpCounts`, `bkpSnapshot`, `storBytes`, `storFmt`, `storBreakdown`, `renderStoragePanel`, `storClearAudit`, `storClearLastHtml`, `bkpIdb`, `bkpDirGet`, `bkpDirSet`, `bkpDirPerm`, `bkpChooseDir`, `bkpRemoveDir`, `bkpDirUI`, `bkpTrySaveToDir`, `exportBackup`, `importBackup`, `handleBackupFile`, `bkpWeeklyWarn`, `toast`
+
+**File System Access API** — sauvegarde automatique dans un dossier local choisi par l'utilisateur
 
 ---
 
-## 9. Structure HTML — Onglets & Modales
+## 8. Structure HTML — Onglets & Modules
 
-### Onglets (navigation principale)
+### Onglets (navigation latérale — `sidebar`)
 
-| ID | Onglet | Contenu |
-|----|--------|---------|
-| `t-catalogue` | Catalogue | Stats, filtres, vue grille/liste/groupée, sélecteur colonnes |
-| `t-fournisseurs` | Fournisseurs | Grille des fournisseurs avec logos et évaluations |
-| `t-transitaires` | Transitaires | Liste des transitaires avec tarifs fret |
-| `t-simulation` | Simulateur | Calcul de commande multi-produit avec résultat détaillé |
+| ID | Onglet | Fonctionnalités clés |
+|----|--------|---------------------|
+| `t-catalogue` | Catalogue | Vue grille/liste/groupée, filtres, KPI stats, sélecteur colonnes, export CSV, import |
+| `t-fournisseurs` | Fournisseurs | 3 fournisseurs (Yateli, Oman, Paine Agent), CRUD, import Alibaba |
+| `t-transitaires` | Transitaires | CRUD, tarifs tout-compris, logos |
+| `t-simulation` | Simulateur | Calcul commande unitaire avec breakdown complet |
+| `t-devis` | Devis | Panier multi-produits, stratégies prix, PDF FR/EN/ZH, filtres/tri |
 
 ### Modales
 
-| ID | Modale | Champs principaux |
-|----|--------|-------------------|
-| `prod-modal` | Ajout/édition produit | 20+ champs : ref, nom, cat, fournisseur, prix, dimensions, marge, remise, photos, specs… |
-| `four-modal` | Ajout/édition fournisseur | 18 champs : nom, contact, pays, email, WhatsApp, WeChat, Alibaba, logo, devis PDF… |
-| `trans-modal` | Ajout/édition transitaire | 14 champs : nom, départ/arrivée, tarifs maritime/aérien, assurance, logo… |
+| ID | Modale |
+|----|--------|
+| `prod-modal` | Ajout/édition produit (CRUD complet + calcul temps réel) |
+| `four-modal` | Ajout/édition fournisseur |
+| `trans-modal` | Ajout/édition transitaire |
+| `imp-modal` | Import en masse (CSV/Excel/PDF/HTML — wizard 2 étapes) |
+| `exp-modal` | Export images design produits |
+| `det-modal` | Détails produit (lecture seule) |
+| `dv-det-modal` | Détails ligne devis |
+| `dv-qty-modal` | Saisie quantité devis |
+| `settings` (overlay) | Paramètres globaux + sauvegarde auto + panneau stockage |
 
-### Panneau Paramètres (`#spanel`)
+---
 
-Accessible via bouton ⚙️ — overlay latéral contenant les paramètres globaux (taux change, marges, TVA, tarifs fret).
+## 9. Catégories Produits
+
+```js
+const CATS = {
+  'Hydrafacial':           'HYD',
+  'Picolaser/Tatouage':    'PCL',
+  'Analyse de peau':       'ADP',
+  'RF Microneedling':      'RFM',
+  'HIFU':                  'HIF',
+  'Dentaire':              'DEN',     // Ajouté v4
+  'Photothérapie LED':     'PDT',     // Ajouté v4
+  'Équipement & Accessoires': 'EQP', // Ajouté v4
+}
+```
 
 ---
 
@@ -311,37 +373,53 @@ Accessible via bouton ⚙️ — overlay latéral contenant les paramètres glob
 
 | Module | Fonctionnalité | Statut |
 |--------|---------------|--------|
-| **Catalogue** | Vue grille + liste des produits | ✅ Implémenté |
-| | Vue groupée par famille (avec gagnant) | ✅ Implémenté |
-| | Filtres : catégorie, fournisseur, recherche texte | ✅ Implémenté |
-| | Sélecteur de colonnes optionnelles | ✅ Implémenté |
-| | Stats globales (nb produits, valeur catalogue) | ✅ Implémenté |
-| | Export CSV | ✅ Implémenté |
-| | Impression catalogue | ✅ Implémenté (print CSS) |
-| **Produit** | Fiche produit complète (CRUD) | ✅ Implémenté |
-| | Calcul temps réel dans la fiche | ✅ Implémenté |
-| | Photos (max 3, base64) | ✅ Implémenté |
-| | Génération automatique de référence | ✅ Implémenté |
-| | Lien recherche Google | ✅ Implémenté |
-| | Quick Simulate (raccourci → onglet simulateur) | ✅ Implémenté |
-| **Fournisseur** | Fiche fournisseur complète (CRUD) | ✅ Implémenté |
-| | Import données depuis URL Alibaba | ✅ Implémenté |
-| | Logo fournisseur (URL ou upload) | ✅ Implémenté |
-| | Évaluation /5 | ✅ Implémenté |
-| **Transitaire** | Fiche transitaire complète (CRUD) | ✅ Implémenté |
-| | Tarifs maritime (XOF/CBM) et aérien (XOF/kg) | ✅ Implémenté |
-| | Logo transitaire | ✅ Implémenté |
-| **Simulateur** | Calcul commande (produit × fournisseur × transitaire) | ✅ Implémenté |
-| | Bascule Maritime / Aérien | ✅ Implémenté |
-| | Remise, TVA, assurance (champs) | ⚠️ Partiellement (assurance non calculée) |
-| **Paramètres** | Taux de change, marge globale, TVA, tarifs fret | ✅ Implémenté |
-| **Modèle calcul** | Marge sur coût de revient complet | ❌ Non — marge sur EXW seul |
-| | Frais de transfert dans base marge | ❌ Non implémenté |
-| | Forfait transitaire tout-compris | ❌ Non implémenté |
-| **Devis/Commandes** | Génération de devis clients | ❌ Non implémenté |
+| **Catalogue** | Vue grille / liste / groupée | ✅ |
+| | Filtres, recherche, sélecteur colonnes | ✅ |
+| | KPI stats (nb, valeur, CBM) | ✅ |
+| | Export CSV | ✅ |
+| | Import CSV / Excel / PDF / HTML Alibaba | ✅ |
+| | Import HTML fiche produit/fournisseur | ✅ |
+| | Import images en masse + ZIP | ✅ |
+| **Produit** | CRUD complet + calcul temps réel | ✅ |
+| | Photos base64 (max 3) | ✅ |
+| | Galerie avec swipe | ✅ |
+| | Quick simulate (→ onglet Simulation) | ✅ |
+| | Add to devis (→ panier) | ✅ |
+| | Détail produit (lecture seule) | ✅ |
+| **Fournisseurs** | CRUD + import Alibaba URL | ✅ |
+| | 3 fournisseurs (Yateli, Oman, Paine Agent) | ✅ |
+| **Transitaires** | CRUD + tarifs tout-compris | ✅ |
+| **Simulation** | Calcul commande unitaire complet | ✅ |
+| | Frais de transfert + assurance | ✅ |
+| | TVA interne conditionnelle (assujettis) | ✅ |
+| **Devis** | Panier multi-produits | ✅ |
+| | Édition inline prix/qtés/dims négociés | ✅ |
+| | Stratégies de prix (Prix bas, Meilleure qualité, Rapport qualité-prix, Personnalisé) | ✅ |
+| | Filtres et tri du panier | ✅ |
+| | Assurance sur le devis | ✅ |
+| | Export PDF FR / EN / ZH | ✅ |
+| | Référence devis auto (GG-YYYY-NNN) | ✅ |
+| | Infos client sur devis | ✅ |
+| **Export images** | Cartes produits design (3 templates) | ✅ |
+| | Export ZIP multi-produits | ✅ |
+| | Champs info drag-and-drop | ✅ |
+| **Sauvegarde** | Export/import JSON complet | ✅ |
+| | Sauvegarde auto dans dossier local (FSA API) | ✅ |
+| | Rappel hebdomadaire | ✅ |
+| **Stockage** | Panel monitoring IndexedDB / localStorage | ✅ |
+| | Nettoyage historique / HTML mémorisé | ✅ |
+| **Moteur calcul** | Marge sur coût de revient complet | ✅ (corrigé v4) |
+| | Frais de transfert (% ou fixe) | ✅ |
+| | Assurance marchandises (% du coût) | ✅ |
+| | Transitaire forfait tout-compris | ✅ |
+| | TVA séparée (assujettis uniquement) | ✅ |
+| | Taux de change multi-devises (RMB/USD/EUR/XOF) | ✅ |
+| **Accessibilité** | ARIA labels, focus management, keyboard nav | ✅ (PR #17) |
+| **Responsive** | Media queries mobile | ⚠️ Partiel (PR #17, amélioration continue) |
 | **Clients** | Fiche client (3 types) | ❌ Non implémenté |
 | **Dashboard** | Tableau de bord global | ❌ Non implémenté |
+| **Commandes** | Suivi commandes / statuts | ❌ Non implémenté |
 
 ---
 
-*Document généré automatiquement — synchroniser lors de chaque évolution majeure de `index.html`.*
+*Synchroniser ce document lors de chaque PR majeure modifiant `index.html`.*
