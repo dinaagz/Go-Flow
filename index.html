@@ -849,7 +849,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <div id="strat-assu-row" style="display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 14px;background:var(--gris);border-radius:8px;flex-wrap:wrap">
       <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer">
         <input type="checkbox" id="dv-assu-on" onchange="onDevisAssuToggle()">
-        Assurance Produit <span style="font-weight:400;color:var(--muted)">(optionnelle, appliquée sur le Sous Total HT)</span>
+        Assurance Produit <span style="font-weight:400;color:var(--muted)">(optionnelle, appliquée sur le Montant Total HT)</span>
       </label>
       <div id="dv-assu-val-wrap" style="display:none;align-items:center;gap:6px">
         <input type="number" id="dv-assu-val" class="fc" style="width:76px;margin:0" min="0" max="100" step="0.1" oninput="onDevisAssuValChange()">
@@ -1114,6 +1114,12 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
           <option value="zh">中文（简体）</option>
         </select>
         <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">Ce choix ne concerne que ce PDF — l'interface de l'application reste en français.</div>
+      </div>
+      <div class="fgrp" style="margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600">
+          <input type="checkbox" id="pdf-cgv" checked onchange="devisPrefs.pdfCgv=this.checked;saveDevisPrefs()">
+          Inclure les conditions générales
+        </label>
       </div>
       <div class="col-picker-wrap" id="cm-pdf"></div>
       <div class="fact">
@@ -2280,15 +2286,34 @@ function dvFlash(el){
   el.classList.remove('dv-flash');void el.offsetWidth;el.classList.add('dv-flash');
 }
 
+// Édition d'un champ du devis (onchange sur un input/select) : le champ édité perd le focus au
+// moment où son conteneur est réécrit (innerHTML), ce qui fait remonter le focus au <body> et,
+// avec lui, le défilement de la page/modale — on capture donc la position de scroll avant le
+// rendu et on la restaure juste après (et au frame suivant, une fois la mise en page recalculée).
+function dvPreserveScroll(fn){
+  const winY=window.scrollY;
+  const modal=document.querySelector('.overlay.open .modal');
+  const modalY=modal?modal.scrollTop:null;
+  const restore=()=>{
+    if(window.scrollY!==winY)window.scrollTo(0,winY);
+    if(modal&&document.body.contains(modal)&&modal.scrollTop!==modalY)modal.scrollTop=modalY;
+  };
+  fn();
+  restore();
+  requestAnimationFrame(restore);
+}
+
 function refreshDevisAfterEdit(item,field){
-  const list=getFilteredDevisCart();
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
-  renderDevisTotal(list);
-  const dm=document.getElementById('detail-modal');
-  if(dm.classList.contains('open')){
-    showDevisDetails(item.cid);
-    if(field){const row=document.querySelector(`#detail-body [data-dv-field="${field}"]`);if(row)dvFlash(row);}
-  }
+  dvPreserveScroll(()=>{
+    const list=getFilteredDevisCart();
+    document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+    renderDevisTotal(list);
+    const dm=document.getElementById('detail-modal');
+    if(dm.classList.contains('open')){
+      showDevisDetails(item.cid);
+      if(field){const row=document.querySelector(`#detail-body [data-dv-field="${field}"]`);if(row)dvFlash(row);}
+    }
+  });
 }
 
 // Champ simple (texte / select / description) — ce devis uniquement, jamais répercuté au catalogue
@@ -3053,8 +3078,8 @@ let pdfLang='fr'; // langue du PDF en cours de génération uniquement — n'aff
 
 // Les colonnes du devis (aperçu ET export PDF) sont gérées par le gestionnaire universel (CM_DEFS.devis)
 // assurance : Assurance Produit optionnelle du devis (distincte de la Trade Assurance globale des paramètres) —
-// appliquée sur le Sous Total HT du devis, taux transitaire par défaut ou 2 %
-const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35,assurance:{on:false,val:null}};
+// appliquée sur le Montant Total HT du devis, taux transitaire par défaut ou 2 %
+const DV_PREFS_DEFAULT={strategy:'marge_fixe',margeFixe:35,margePerso:35,assurance:{on:false,val:null},pdfCgv:true};
 
 /* ---- CHARGEMENT / PERSISTANCE ---- */
 async function loadDevis(){
@@ -3308,8 +3333,10 @@ function dvComment(cid,val){
 function dvClearComment(cid){
   const item=devisCart.find(x=>x.cid===cid);if(!item)return;
   item.comment='';saveDevisCartLS();
-  const list=getFilteredDevisCart();
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+  dvPreserveScroll(()=>{
+    const list=getFilteredDevisCart();
+    document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+  });
 }
 // Auto-resize du textarea commentaire : hauteur adaptée au contenu, plafonnée à 120px (scroll au-delà)
 function dvNoteGrow(el){
@@ -3451,7 +3478,7 @@ function setStrategy(s){
   renderDevisCart();
 }
 
-/* ---- ASSURANCE PRODUIT DU DEVIS (optionnelle, sur le Sous Total HT) ---- */
+/* ---- ASSURANCE PRODUIT DU DEVIS (optionnelle, sur le Montant Total HT) ---- */
 // Taux par défaut : celui du transitaire (champ "Assurance incluse", t.ass) sinon 2 %
 function devisAssuDefaultRate(){
   const t0=trans&&trans.length?trans[0]:null;
@@ -3665,23 +3692,27 @@ function buildDevisTable(list){
 
 function dvQty(cid,qty){
   updateCartQty(cid,qty);
-  const list=getFilteredDevisCart();
-  document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
-  renderDevisTotal(list);
+  dvPreserveScroll(()=>{
+    const list=getFilteredDevisCart();
+    document.getElementById('dv-cart-cont').innerHTML=devisView==='grid'?buildDevisGrid(list):buildDevisTable(list);
+    renderDevisTotal(list);
+  });
 }
 
 /* ---- RÉCAPITULATIF DU DEVIS ----
-   1. Sous Total HT       = somme des Prix total HT de tous les items
-   2. Frais logistiques   = somme des frais logistiques estimés de tous les items
-   3. Frais Assurance     = Sous Total HT × (taux assurance / 100), si activée
-   4. Montant Total       = Sous Total HT + Frais logistiques (+ Assurance) (+ TVA interne si assujetti)
-                             libellé "HT" si assurance désactivée, "TTC" si activée */
+   1. Coût Total HT       = somme des coûts de revient totaux de tous les items, en devise de vente
+                             (affiché uniquement quand une colonne coût est cochée — usage "fiche de coût")
+   2. Montant Total HT    = somme des Prix total HT de tous les items
+   3. Frais logistiques   = somme des frais logistiques estimés de tous les items
+   4. Frais Assurance     = Montant Total HT × (taux assurance / 100), si activée
+   5. Montant Total TTC   = Montant Total HT + Frais logistiques (+ Assurance) (+ TVA interne si assujetti) */
 function renderDevisTotal(list){
   list=list||getFilteredDevisCart();
   if(!list.length){document.getElementById('dv-total-bar').innerHTML='';return;}
   const cs=list.map(calcDevis);
   const totQty=list.reduce((s,i)=>s+i.qty,0);
   const totMarge=cs.reduce((s,c)=>s+c.margeTot,0);
+  const totCout=cs.reduce((s,c)=>s+c.coutRevientX,0);
   const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
   const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
   const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
@@ -3690,15 +3721,18 @@ function renderDevisTotal(list){
   const totAssurance=assuOn?r2(totHT*assuRate/100):0;
   const montantFinal=totHT+totLog+totAssurance+totTVA;
   const devLabel=devisFX.dev!=='XOF'?` (${devisFX.dev})`:'';
+  const SH=cmVisible('devis');
+  const ficheCout=!!(SH.cout_total||SH.cr_unitaire); // colonnes coût cochées = devis utilisé comme fiche de coût
   document.getElementById('dv-total-bar').innerHTML=`
     <div class="devis-total-bar">
       <div class="devis-total-item"><div class="val">${totQty}</div><div class="lbl">Unités</div></div>
       <div class="devis-total-item"><div class="val" style="color:var(--vert)">${N(totMarge)}</div><div class="lbl">Marge (XOF)</div></div>
-      <div class="devis-total-item"><div class="val">${Ndv(totHT)}</div><div class="lbl">Sous Total HT${devLabel}</div></div>
+      ${ficheCout?`<div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totCout)}</div><div class="lbl">Coût Total HT${devLabel}</div></div>`:''}
+      <div class="devis-total-item"><div class="val">${Ndv(totHT)}</div><div class="lbl">Montant Total HT${devLabel}</div></div>
       <div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totLog)}</div><div class="lbl">Frais logistiques Estimé${devLabel}</div></div>
       ${assuOn?`<div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totAssurance)}</div><div class="lbl">Assurance Produit (${Nd(assuRate,1)}%)${devLabel}</div></div>`:''}
       ${devisClient.assujetti?`<div class="devis-total-item"><div class="val" style="font-size:14px;color:rgba(255,255,255,.65)">${Ndv(totTVA)}</div><div class="lbl">TVA interne (${S.tvaInterne}%)${devLabel}</div></div>`:''}
-      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${Ndv(montantFinal)}</div><div class="lbl">MONTANT TOTAL ${assuOn?'TTC':'HT'}${devLabel}</div></div>
+      <div class="devis-total-item"><div class="val" style="color:var(--jaune);font-size:22px">${Ndv(montantFinal)}</div><div class="lbl">MONTANT TOTAL TTC${devLabel}</div></div>
     </div>`;
 }
 
@@ -3708,6 +3742,8 @@ function openPdfConfig(){
   cmRefresh('devis');
   const langSel=document.getElementById('pdf-lang');
   if(langSel)langSel.value=pdfLang;
+  const cgvChk=document.getElementById('pdf-cgv');
+  if(cgvChk)cgvChk.checked=devisPrefs.pdfCgv!==false;
   openMod('pdf-modal');
 }
 /* ---- Référence devis : DV_[INITIALES].[NNN + lettre].[YYMMDD] ----
@@ -3762,19 +3798,19 @@ const PDF_I18N={
     client:{email:'Email : ',tel:'Tél : ',adr:'Adresse : ',assujetti:'Client assujetti à la TVA',aucune:'Aucune information client'},
     hdr:{devisNum:'DEVIS N° ',date:'Date : ',valable:'Valable 30 jours',destinataire:'Destinataire'},
     mode:{aerien:'Aérien',maritime:'Maritime'},
-    foot:{sousTotalHT:'Sous Total HT',fraisLog:'Frais logistiques Estimé* — tout-compris',
+    foot:{coutTotalHT:'Coût Total HT',sousTotalHT:'Montant Total HT',fraisLog:'Frais logistiques Estimé* — tout-compris',
       tva:pct=>`TVA interne (${pct}%) — sur le montant HT`,
-      assurance:rate=>`Assurance Produit (${Nd(rate,1)}%) — sur le Sous Total HT`,
-      montantTotal:ttc=>ttc?'MONTANT TOTAL TTC':'MONTANT TOTAL HT'},
+      assurance:rate=>`Assurance Produit (${Nd(rate,1)}%) — sur le Montant Total HT`,
+      montantTotal:()=>'MONTANT TOTAL TTC'},
     cgv:{
       titre:'Conditions générales :',
       devise:dev=>dev==='XOF'?'Francs CFA (XOF)':dev+' — convertis depuis XOF',
       taux:(dev,taux)=>dev!=='XOF'?`<strong>Taux de change appliqué : 1 ${dev} = ${Nd(taux,4)} XOF</strong> (taux indicatif) — `:'<strong>Taux de change du jour appliqué</strong> — ',
       intro:(devisePhrase,tauxPhrase)=>`Ce devis est établi par Go Group et est valable 30 jours à compter de sa date d'émission. Les prix sont exprimés en ${devisePhrase}. ${tauxPhrase}de légères variations peuvent être constatées au moment de la commande.<br>`,
       fraisLog:'<strong>Frais logistiques (*) :</strong> Tarif transitaire <strong>tout-compris (fret + douane + taxes)</strong> — aucune TVA ni taxe supplémentaire ne s\'ajoute aux frais logistiques. Les montants indiqués sont des estimations ; le montant définitif pourra différer légèrement.<br>',
-      assurance:rate=>`<strong>Assurance Produit :</strong> Protection optionnelle au taux de ${Nd(rate,1)}%, calculée sur le Sous Total HT et incluse dans le montant total ci-dessus.<br>`,
+      assurance:rate=>`<strong>Assurance Produit :</strong> Protection optionnelle au taux de ${Nd(rate,1)}%, calculée sur le Montant Total HT et incluse dans le montant total ci-dessus.<br>`,
       tva:pct=>`<strong>TVA :</strong> Client assujetti — la TVA interne (${pct}%) est calculée sur le montant HT des marchandises et affichée séparément ci-dessus.<br>`,
-      validation:assuOn=>`<strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant ${assuOn?'TTC':'HT'}</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>`,
+      validation:()=>`<strong>Validation de commande :</strong> Pour confirmer la commande, le client doit régler la <strong>totalité du montant TTC</strong> indiqué ci-dessus. Aucune commande ne sera lancée avant réception du paiement intégral.<br>`,
       post:'<strong>Post-acheminement :</strong> Les frais de livraison locale (post-acheminement) sont également à la charge du client et ne sont pas inclus dans ce devis.<br>',
       delais:'<strong>Délais :</strong> Les délais de livraison indiqués sont estimatifs et peuvent varier selon le mode de transport et les conditions douanières.<br><br>',
       footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promis. Livré.</em>'
@@ -3788,19 +3824,19 @@ const PDF_I18N={
     client:{email:'Email: ',tel:'Phone: ',adr:'Address: ',assujetti:'VAT-registered client',aucune:'No client information'},
     hdr:{devisNum:'QUOTE NO. ',date:'Date: ',valable:'Valid for 30 days',destinataire:'Recipient'},
     mode:{aerien:'Air',maritime:'Sea'},
-    foot:{sousTotalHT:'Subtotal excl. tax',fraisLog:'Estimated freight costs* — all-inclusive',
+    foot:{coutTotalHT:'Total Cost excl. tax',sousTotalHT:'Total Amount excl. tax',fraisLog:'Estimated freight costs* — all-inclusive',
       tva:pct=>`Local VAT (${pct}%) — on amount excl. tax`,
-      assurance:rate=>`Product Insurance (${Nd(rate,1)}%) — on Subtotal excl. tax`,
-      montantTotal:ttc=>ttc?'TOTAL AMOUNT incl. tax':'TOTAL AMOUNT excl. tax'},
+      assurance:rate=>`Product Insurance (${Nd(rate,1)}%) — on Total Amount excl. tax`,
+      montantTotal:()=>'TOTAL AMOUNT incl. tax'},
     cgv:{
       titre:'Terms and conditions:',
       devise:dev=>dev==='XOF'?'CFA Francs (XOF)':dev+' — converted from XOF',
       taux:(dev,taux)=>dev!=='XOF'?`<strong>Exchange rate applied: 1 ${dev} = ${Nd(taux,4)} XOF</strong> (indicative rate) — `:'<strong>Current day\'s exchange rate applied</strong> — ',
       intro:(devisePhrase,tauxPhrase)=>`This quote is issued by Go Group and is valid for 30 days from its issue date. Prices are expressed in ${devisePhrase}. ${tauxPhrase}slight variations may occur at order time.<br>`,
       fraisLog:'<strong>Freight costs (*):</strong> Forwarder rate <strong>all-inclusive (freight + customs + taxes)</strong> — no VAT or additional tax is added on top of freight costs. Amounts shown are estimates; the final amount may differ slightly.<br>',
-      assurance:rate=>`<strong>Product Insurance:</strong> Optional protection at a rate of ${Nd(rate,1)}%, calculated on the Subtotal excl. tax and included in the total amount above.<br>`,
+      assurance:rate=>`<strong>Product Insurance:</strong> Optional protection at a rate of ${Nd(rate,1)}%, calculated on the Total Amount excl. tax and included in the total amount above.<br>`,
       tva:pct=>`<strong>VAT:</strong> VAT-registered client — local VAT (${pct}%) is calculated on the merchandise amount excl. tax and shown separately above.<br>`,
-      validation:assuOn=>`<strong>Order confirmation:</strong> To confirm the order, the client must pay the <strong>full amount ${assuOn?'incl. tax':'excl. tax'}</strong> shown above. No order will be placed before full payment is received.<br>`,
+      validation:()=>`<strong>Order confirmation:</strong> To confirm the order, the client must pay the <strong>full amount incl. tax</strong> shown above. No order will be placed before full payment is received.<br>`,
       post:'<strong>Last-mile delivery:</strong> Local delivery costs (last-mile) are also the client\'s responsibility and are not included in this quote.<br>',
       delais:'<strong>Lead times:</strong> The delivery lead times shown are estimates and may vary depending on the mode of transport and customs conditions.<br><br>',
       footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>Promised. Delivered.</em>'
@@ -3814,19 +3850,19 @@ const PDF_I18N={
     client:{email:'邮箱：',tel:'电话：',adr:'地址：',assujetti:'需缴纳增值税客户',aucune:'无客户信息'},
     hdr:{devisNum:'报价单编号 ',date:'日期：',valable:'有效期30天',destinataire:'客户'},
     mode:{aerien:'空运',maritime:'海运'},
-    foot:{sousTotalHT:'不含税小计',fraisLog:'预估物流费*（全包价）',
+    foot:{coutTotalHT:'不含税总成本',sousTotalHT:'不含税总金额',fraisLog:'预估物流费*（全包价）',
       tva:pct=>`内部增值税 (${pct}%) — 基于不含税金额`,
-      assurance:rate=>`产品保险 (${Nd(rate,1)}%) — 基于不含税小计`,
-      montantTotal:ttc=>ttc?'总金额（含税）':'总金额（不含税）'},
+      assurance:rate=>`产品保险 (${Nd(rate,1)}%) — 基于不含税总金额`,
+      montantTotal:()=>'总金额（含税）'},
     cgv:{
       titre:'一般条款：',
       devise:dev=>dev==='XOF'?'非洲法郎 (XOF)':dev+' — 由XOF换算',
       taux:(dev,taux)=>dev!=='XOF'?`<strong>已应用汇率：1 ${dev} = ${Nd(taux,4)} XOF</strong>（参考汇率）— `:'<strong>已应用当日汇率</strong> — ',
       intro:(devisePhrase,tauxPhrase)=>`本报价单由Go Group出具，自开具之日起30天内有效。价格以${devisePhrase}计。${tauxPhrase}下单时可能出现小幅波动。<br>`,
       fraisLog:'<strong>物流费用 (*)：</strong>货运代理费用为<strong>全包价（运费+关税+税费）</strong>——物流费用之外不再另收增值税或其他税费。所示金额为估算，最终金额可能略有不同。<br>',
-      assurance:rate=>`<strong>产品保险：</strong>可选保护，费率为不含税小计的${Nd(rate,1)}%，已包含在上方总金额中。<br>`,
+      assurance:rate=>`<strong>产品保险：</strong>可选保护，费率为不含税总金额的${Nd(rate,1)}%，已包含在上方总金额中。<br>`,
       tva:pct=>`<strong>增值税：</strong>客户需缴纳增值税——内部增值税 (${pct}%) 按不含税货值计算，并在上方单独列出。<br>`,
-      validation:assuOn=>`<strong>订单确认：</strong>为确认订单，客户须支付上述<strong>全部${assuOn?'含税':'不含税'}金额</strong>。在收到全额付款前，订单不会启动。<br>`,
+      validation:()=>`<strong>订单确认：</strong>为确认订单，客户须支付上述<strong>全部含税金额</strong>。在收到全额付款前，订单不会启动。<br>`,
       post:'<strong>末端运输：</strong>本地配送费用（末端运输）由客户自行承担，不包含在本报价单中。<br>',
       delais:'<strong>交货期：</strong>所示交货期为估算值，可能因运输方式及清关情况而有所变化。<br><br>',
       footer:'<strong>Go Group</strong> · globalgo.tg@gmail.com · +228 96 02 39 03 · Lomé, Togo · <em>承诺。交付。</em>'
@@ -3937,6 +3973,7 @@ function generateDevisPDF(){
     </tr>`;
   }).join('');
   const cs=dvList.map(calcDevis);
+  const totCout=cs.reduce((s,c)=>s+c.coutRevientX,0);
   const totHT=cs.reduce((s,c)=>s+c.pvtHT,0);
   const totLog=cs.reduce((s,c)=>s+c.fraisLog,0);
   const totTVA=cs.reduce((s,c)=>s+c.tvaM,0);
@@ -3947,6 +3984,8 @@ function generateDevisPDF(){
   // Le récapitulatif suit lui aussi la sélection : pas de ligne totaux si aucune colonne prix n'est cochée
   const anyHT=SH.prix_ht||SH.total_ht,anyTTC=SH.prix_ttc;
   const anyTot=anyHT||anyTTC;
+  const ficheCout=!!(SH.cout_total||SH.cr_unitaire); // colonnes coût cochées = devis utilisé comme fiche de coût
+  const includeCgv=devisPrefs.pdfCgv!==false; // option du modal PDF, activée par défaut
   // Injecter dans la zone d'impression
   document.body.classList.add('printing-devis');
   document.getElementById('devis-print-area').innerHTML=`
@@ -3970,6 +4009,12 @@ function generateDevisPDF(){
       <thead><tr>${colH}</tr></thead>
       <tbody>${rowsHtml}</tbody>
       <tfoot>
+        ${ficheCout&&anyTot?`
+        <tr>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${T.foot.coutTotalHT}${devL}</td>
+          <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Ndv(totCout)}</td>
+        </tr>
+        `:''}
         ${anyTot?`
         <tr style="background:#f5f5f7">
           <td colspan="${spanLbl}" style="text-align:right;font-weight:600;font-size:12px">${T.foot.sousTotalHT}${devL}</td>
@@ -3996,23 +4041,23 @@ function generateDevisPDF(){
         `:''}
         ${anyTot?`
         <tr style="background:#1A1A2E;color:#fff">
-          <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">${T.foot.montantTotal(assuOn)}${devL}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">${T.foot.montantTotal()}${devL}</td>
           <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${Ndv(montantFinal)}</td>
         </tr>
         `:''}
       </tfoot>
     </table>
-    <div class="dv-cgs">
+    ${includeCgv?`<div class="dv-cgs">
       <strong>${T.cgv.titre}</strong><br>
       ${T.cgv.intro(T.cgv.devise(devisFX.dev),T.cgv.taux(devisFX.dev,devisFX.taux))}
       ${T.cgv.fraisLog}
       ${assuOn?T.cgv.assurance(assuRate):''}
       ${cl.assujetti?T.cgv.tva(S.tvaInterne):''}
-      ${T.cgv.validation(assuOn)}
+      ${T.cgv.validation()}
       ${T.cgv.post}
       ${T.cgv.delais}
       ${T.cgv.footer}
-    </div>`;
+    </div>`:''}`;
   auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,lang,
     strategie:devisPrefs.strategy,parametres:{...S},
     lignes:dvList.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
