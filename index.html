@@ -177,7 +177,10 @@ select.filt:hover{border-color:#C3CADC}
    la taille varie légitimement d'un site à l'autre (densité du contexte) — jamais la police, le poids ou la
    couleur. `.ttc-hero`/`.ttc-hero-total` sont attachables directement en HTML pour les sites générés en JS
    (cellules de tableau, aperçu de calcul) qui n'ont pas de classe dédiée ; `.pr-ttc.pr-val`, `.detail-row-hero`
-   et `.sim-total` (déjà des classes existantes) rejoignent la même déclaration sans changer leur nom. */
+   et `.sim-total` (déjà des classes existantes) rejoignent la même déclaration sans changer leur nom.
+   Ne couvre PAS le module d'export image (canvas) : `expFitFont(...,'Montserrat,sans-serif',800,...)` autour
+   de la ligne 5411/5486 réimplique le même motif à la main (un <canvas> ne peut pas lire de classe CSS) — à
+   mettre à jour manuellement si cette règle change un jour. */
 .ttc-hero,.pr-ttc.pr-val,.detail-row-hero span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--bleu-t)}
 .ttc-hero-total,.sim-total span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--jaune)}
 .pr-ttc.pr-val{font-size:16px}
