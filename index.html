@@ -302,7 +302,6 @@ textarea.fc{resize:vertical;min-height:70px}
 .alt-panel.open{grid-template-rows:1fr}
 .alt-panel-inner{min-height:0;overflow:hidden;padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
 .alt-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--gris);font-size:12px}
-.alt-card.is-winner{border-color:var(--vert-t);background:#F0FDF7}
 .alt-card-img{width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0}
 .alt-card-info{flex:1;min-width:0}
 .alt-card-nom{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2550,7 +2549,7 @@ function showDevisDetails(cid){
     `<div class="detail-row"><span>Prix total HT</span><span>${Ndv(c.pvtHT)}</span></div>`+
     `<div class="detail-row"><span>Frais logistiques Estimé</span><span>${Ndv(c.fraisLog)}</span></div>`+
     (c.tvaM?`<div class="detail-row"><span>TVA interne</span><span>${Ndv(c.tvaM)}</span></div>`:'')+
-    `<div class="detail-row"><span>Prix TTC Estimé</span><span>${Ndv(c.pvtTTC)}</span></div>`+
+    `<div class="detail-row detail-row-hero"><span>Prix TTC Estimé</span><span>${Ndv(c.pvtTTC)}</span></div>`+
     `<div class="detail-row"><span>Fournisseur</span><span>${esc(p.fn)||'—'}</span></div>`+
     `<div class="detail-row"><span>Transitaire</span><span>${esc(p.trans_nom)||'—'}</span></div>`+
     `<div class="detail-row"><span>Délai estimé</span><span>${p.trans_delai?p.trans_delai+' j':'—'}</span></div>`;
