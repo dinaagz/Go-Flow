@@ -171,7 +171,16 @@ select.filt:hover{border-color:#C3CADC}
 /* Le prix TTC mène la pile de prix : jumelle du chiffre à la devis-total-bar (valeur en Montserrat, forte,
    étiquette assourdie) — la hiérarchie vient de l'écart entre les deux, pas d'une couleur seule */
 .pr-ttc.pr-lbl{color:var(--muted);font-weight:600;font-size:11px}
-.pr-ttc.pr-val{font-family:'Montserrat',sans-serif;color:var(--bleu-t);font-weight:800;font-size:16px}
+/* ===== VALEUR HÉROS =====
+   Un seul point de vérité pour le family+weight+couleur du "chiffre qui répond à la question du produit" :
+   bleu pour un prix unitaire (carte, tableau, modale), or pour un total général (simulation, panier). Seule
+   la taille varie légitimement d'un site à l'autre (densité du contexte) — jamais la police, le poids ou la
+   couleur. `.ttc-hero`/`.ttc-hero-total` sont attachables directement en HTML pour les sites générés en JS
+   (cellules de tableau, aperçu de calcul) qui n'ont pas de classe dédiée ; `.pr-ttc.pr-val`, `.detail-row-hero`
+   et `.sim-total` (déjà des classes existantes) rejoignent la même déclaration sans changer leur nom. */
+.ttc-hero,.pr-ttc.pr-val,.detail-row-hero span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--bleu-t)}
+.ttc-hero-total,.sim-total span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--jaune)}
+.pr-ttc.pr-val{font-size:16px}
 .pr-strong .pr-lbl{color:var(--text);font-weight:700}.pr-strong .pr-val{font-weight:800}
 .pr-click{cursor:pointer;border-radius:6px}
 .pr-click:hover .pr-lbl{color:var(--bleu-t)}
@@ -257,7 +266,7 @@ textarea.fc{resize:vertical;min-height:70px}
    dominante en or) plutôt que de rester une simple ligne .sim-row à peine plus grosse que les autres */
 .sim-row.sim-total{padding-top:14px;margin-top:4px;border-top:2px solid rgba(255,255,255,.08);border-bottom:none;align-items:center}
 .sim-total span:first-child{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.65)}
-.sim-total span:last-child{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--jaune)}
+.sim-total span:last-child{font-size:24px}
 .sim-marge{color:var(--vert)}
 .prod-prev{display:flex;gap:14px;background:var(--gris);border-radius:12px;padding:14px;margin-bottom:16px;align-items:flex-start;border:1px solid var(--border)}
 .prev-icon{width:70px;height:70px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid var(--border)}
@@ -339,7 +348,7 @@ textarea.fc{resize:vertical;min-height:70px}
    rester le plus lisible de la modale, y compris dans cette vue de repli listant tous les champs à plat */
 .detail-row-hero{border-bottom:none;border-top:2px solid var(--border2);padding-top:10px;margin-top:2px}
 .detail-row-hero span:first-child{font-size:11px;text-transform:uppercase;letter-spacing:.4px}
-.detail-row-hero span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--bleu-t);text-align:right}
+.detail-row-hero span:last-child{font-size:16px;text-align:right}
 .detail-sec{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 4px;padding-top:8px;border-top:1px solid var(--border)}
 .detail-sec:first-child{margin-top:0;border-top:none;padding-top:0}
 /* ---- ÉDITION INLINE DES CHAMPS DEVIS ---- */
@@ -2283,7 +2292,7 @@ function prodGroupTable(groups){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(w)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
@@ -2646,7 +2655,7 @@ function prodTable(list){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px;position:relative">
@@ -2778,7 +2787,7 @@ function calcPrev(){
     <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.margeU)}</b></div>
     <div>Prix de Vente HT: <b>${N(c.pvuHT)}</b></div>
     <div>Frais logistiques: <b>${N(c.fraisLogU)}</b></div>
-    <div style="grid-column:1/-1;border-top:1px solid var(--border2);padding-top:8px;margin-top:4px">Prix de Vente TTC: <b style="color:var(--bleu-t);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px">${N(c.pvuTTC)}</b></div>`;
+    <div style="grid-column:1/-1;border-top:1px solid var(--border2);padding-top:8px;margin-top:4px">Prix de Vente TTC: <b class="ttc-hero" style="font-size:14px">${N(c.pvuTTC)}</b></div>`;
 }
 
 function saveProd(){
@@ -3837,7 +3846,7 @@ function buildDevisTable(list){
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="font-size:11px">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td class="ttc-hero" style="font-size:13px">${Ndv(c.pvtTTC)}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
@@ -4127,7 +4136,7 @@ function generateDevisPDF(){
       ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px;white-space:nowrap;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td class="ttc-hero" style="font-size:13px;white-space:nowrap">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
   const cs=dvList.map(calcDevis);
@@ -4162,10 +4171,12 @@ function generateDevisPDF(){
           <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${lbl}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${val}</td>
         </tr>`;
+  // Bandeau de total imprimé (fond sombre, texte blanc) : même famille/graisse que la valeur héros
+  // (La Règle du Montant), mais la couleur reste blanche ici — inversion de contexte légitime, pas une dérive.
   const finalRow=(lbl,val)=>`
         <tr style="background:#1A1A2E;color:#fff">
           <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">${lbl}</td>
-          <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${val}</td>
+          <td colspan="${spanVal}" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;white-space:nowrap">${val}</td>
         </tr>`;
   let recapRows='';
   if(anyTot){
