@@ -418,6 +418,8 @@ textarea.fc{resize:vertical;min-height:70px}
 .prog-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
 /* ===== EXPORT IMAGES DESIGN ===== */
 .btn-sec[aria-pressed="true"]{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t)}
+.user-menu-item[aria-pressed="true"]{background:#EDF6FF;color:var(--bleu-t)}
+.user-menu-item[aria-pressed="true"] .ic{color:var(--bleu-t)}
 .exp-check{position:absolute;top:10px;right:10px;z-index:5;background:rgba(255,255,255,.94);border-radius:9px;padding:6px;display:inline-flex;box-shadow:var(--sh-sm);cursor:pointer}
 .exp-check input{width:17px;height:17px;accent-color:var(--bleu-t);cursor:pointer}
 td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertical-align:middle;margin-right:4px}
@@ -5658,7 +5660,10 @@ document.addEventListener('keydown',e=>{
     tab(next);document.getElementById('tab-'+next).focus();
   }
 });
-document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{
+  if(e.target!==el)return;
+  el.id==='confirm-modal'?cfmCancel():el.classList.remove('open');
+}));
 /* ===== SAUVEGARDE & RESTAURATION (backup JSON — localStorage pour gf_s/gf_v, IndexedDB pour le reste) ===== */
 // Clés incluses dans le backup (voir bkpSnapshot) : gf_s/gf_v restent en localStorage (réglages légers),
 // gf_p/gf_f/gf_t/gf_win/gf_audit/gf_d/gf_dc/gf_dp/gf_cols/gf_imp/gf_exp vivent en IndexedDB
@@ -5979,6 +5984,10 @@ function toastUndo(msg,undoFn,ms=6000){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(!done)t.classList.remove('show');},ms);
 }
 
+// Sur Mac, « Ctrl » n'est pas la touche réellement utilisée (Cmd) — le raccourci accepte déjà les deux (ctrlKey||metaKey), seul le libellé doit s'adapter
+if(/Mac|iPhone|iPad|iPod/.test(navigator.platform||navigator.userAgent)){
+  document.querySelectorAll('#shortcuts-modal kbd').forEach(k=>{if(k.textContent==='Ctrl')k.textContent='⌘';});
+}
 init();
 bkpDirUI();
 </script>

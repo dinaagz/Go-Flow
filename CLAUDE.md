@@ -167,7 +167,7 @@ Série 2 (quotes 7.6/7.7): 1-3+41=détartreur compact, 42+1=détartreur tactile,
 
 - **Gradient** (`--grad`): Rouge `#FF2244` → Orange `#FF6600` → Jaune `#FFD700` → Vert `#00CC77` → Bleu `#0099FF` → Violet `#7733FF` — order never reverses
 - **Fonts**: Montserrat (headings/numbers, weight 700–900) + Poppins (body, weight 300–600)
-- **Supplier badge colors**: Yateli = `rgba(0,153,255,.85)` (blue), Oman = `rgba(119,51,255,.85)` (violet)
+- **Supplier badge colors**: Yateli = `rgba(0,106,204,.92)` (`.b-yateli`, text-safe blue), Oman = `rgba(99,32,230,.92)` (`.b-oman`, text-safe violet), any other supplier = `rgba(194,80,10,.92)` (`.b-other`, text-safe orange) — matched by name in `fourBadgeClass()`
 - Print: `.no-print { display: none !important }` hides Actions column from PDF
 
 ## Assets structure
