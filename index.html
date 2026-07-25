@@ -407,7 +407,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .imp-summary.ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-brd)}
 .imp-summary.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-brd)}
 .progress{height:8px;background:var(--gris);border:1px solid var(--border);border-radius:99px;overflow:hidden}
-.progress-fill{height:100%;width:0%;background:var(--grad);border-radius:99px;transition:width .15s linear}
+.progress-fill{height:100%;width:100%;transform-origin:left;transform:scaleX(0);background:var(--grad);border-radius:99px;transition:transform .15s linear}
 .prog-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
 /* ===== EXPORT IMAGES DESIGN ===== */
 .btn-sec[aria-pressed="true"]{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t)}
@@ -703,7 +703,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
     <div class="tb-group" role="group" aria-label="Recherche et filtres">
-      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCat()"></div>
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCatDeb()"></div>
       <select class="filt" id="f-cat" onchange="renderCat()" aria-label="Filtrer par catégorie">
         <option value="">Toutes catégories</option>
         <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
@@ -744,7 +744,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <!-- FOURNISSEURS -->
 <div id="t-fournisseurs" role="tabpanel" aria-labelledby="tab-fournisseurs" style="display:none">
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFour()"></div>
+    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFourDeb()"></div>
     <button class="btn btn-sec" onclick="openImportModal('fournisseurs')" title="Importer des fournisseurs en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openFourModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Fournisseur</button>
   </div>
@@ -754,7 +754,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <!-- TRANSITAIRES -->
 <div id="t-transitaires" role="tabpanel" aria-labelledby="tab-transitaires" style="display:none">
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTrans()"></div>
+    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTransDeb()"></div>
     <button class="btn btn-sec" onclick="openImportModal('transitaires')" title="Importer des transitaires en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openTransModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Transitaire</button>
   </div>
@@ -1192,7 +1192,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
           <b>Glissez-déposez votre fichier ici</b><br>ou cliquez pour le sélectionner
         </div>
         <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
-        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="width:100%"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="transform:scaleX(1)"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
         <div id="imp-last-html" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
       <div id="imp-step2" style="display:none">
@@ -2827,7 +2827,7 @@ function renderFour(){
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const ev=parseInt(f.eval)||0;const stars=Array.from({length:5},(_,i)=>ICO('star','star'+(i<ev?' on':''))).join('');
-    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${String(f.nom||'').replace(/"/g,'&quot;')}" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
+    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${String(f.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
     return`<div class="card">
       <div class="card-body">
         <div class="four-card-hdr">
@@ -2936,7 +2936,7 @@ function renderTrans(){
   const c=document.getElementById('trans-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">'+ICO('ship')+'</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
-    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:PH_SM}</div>
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="" loading="lazy">`:PH_SM}</div>
     <div class="card-body">
       <div class="card-title">${t.nom}</div>
       <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
@@ -4698,7 +4698,7 @@ function impRun(){
   document.getElementById('imp-errs').innerHTML='';
   const prog=document.getElementById('imp-prog');prog.style.display='block';
   const fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  fill.style.width='0%';
+  setProgress(fill,0);
   let i=0;
   const CH=25,hdrOff=impState.mode==='map'?2:1;
   (function step(){
@@ -4709,7 +4709,7 @@ function impRun(){
       if(r.err)errs.push({n:i+hdrOff,msg:r.err});
       else{added.push(r.ent);if(r.warn)warns.push({n:i+hdrOff,msg:r.warn});}
     }
-    fill.style.width=Math.round(i/rows.length*100)+'%';
+    setProgress(fill,Math.round(i/rows.length*100));
     lbl.textContent=`${i}/${rows.length} lignes traitées…`;
     if(i<rows.length){setTimeout(step,0);return;}
     impFinish(type,added,errs,warns);
@@ -4721,7 +4721,7 @@ function impFinish(type,added,errs,warns=[]){
     if(type==='fournisseurs'){fours=fours.concat(added);save('f');renderFour();renderCat();popSim();}
     if(type==='transitaires'){trans=trans.concat(added);save('t');renderTrans();popSim();}
   }
-  document.getElementById('imp-prog-fill').style.width='100%';
+  setProgress(document.getElementById('imp-prog-fill'),100);
   document.getElementById('imp-prog-lbl').textContent='Terminé';
   const errHtml=errs.length?`<div class="imp-summary warn"><b>${errs.length} ligne${errs.length>1?'s':''} ignorée${errs.length>1?'s':''} :</b><br>${errs.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${errs.length>8?'<br>… et '+(errs.length-8)+' autres':''}</div>`:'';
   const warnHtml=warns.length?`<div class="imp-summary warn"><b>${warns.length} avertissement${warns.length>1?'s':''} (lignes importées) :</b><br>${warns.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${warns.length>8?'<br>… et '+(warns.length-8)+' autres':''}</div>`:'';
@@ -4959,7 +4959,7 @@ async function impImgsZip(kind){
   if(!list.length){toast('Aucune image téléchargeable',true);return;}
   const dir=kind==='supplier'?'assets/supplier/':'assets/Products images/';
   const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  prog.style.display='block';fill.style.width='0%';
+  prog.style.display='block';setProgress(fill,0);
   const files=[];let fail=0;const used=new Set();
   const uniq=n=>{let b=n,i=2;while(used.has(b)){b=n.replace(/(\.[^.]+)$/,`-${i}$1`);i++;}used.add(b);return b;};
   for(let i=0;i<list.length;i++){
@@ -4973,7 +4973,7 @@ async function impImgsZip(kind){
       if(!impImgExt.test(name))name+='.jpg';
       files.push({name:dir+uniq(name.replace(/[^\w .()À-ſ-]/g,'_')),blob});
     }catch(_){fail++;}
-    fill.style.width=Math.round((i+1)/list.length*100)+'%';
+    setProgress(fill,Math.round((i+1)/list.length*100));
   }
   prog.style.display='none';
   if(!files.length){toast('Téléchargement impossible — le site source bloque l\'accès (CORS)',true);return;}
@@ -5025,7 +5025,7 @@ async function impBulkImgs(inp){
   if(!impState||document.getElementById('imp-type').value!=='produits')return;
   if(!files.length){toast('Aucune image dans la sélection',true);return;}
   const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  prog.style.display='block';fill.style.width='0%';lbl.textContent='Lecture des images…';
+  prog.style.display='block';setProgress(fill,0);lbl.textContent='Lecture des images…';
   const col=impEnsureImgCol();
   const nomCol=impMapping('produits').nom??0;
   const keyOf=n=>impNorm(String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/,''));
@@ -5033,7 +5033,7 @@ async function impBulkImgs(inp){
   for(let i=0;i<files.length;i++){
     const d=await impFileToDataURL(files[i]);
     if(d)items.push({key:keyOf(files[i].name),data:d});
-    fill.style.width=Math.round((i+1)/files.length*100)+'%';
+    setProgress(fill,Math.round((i+1)/files.length*100));
     lbl.textContent=`Lecture des images… ${i+1}/${files.length}`;
   }
   let hits=0;
@@ -5464,7 +5464,7 @@ async function expDownload(zip){
   if(!ids.length)return;
   const prog=document.getElementById('exp-prog'),fill=document.getElementById('exp-prog-fill'),lbl=document.getElementById('exp-prog-lbl');
   const b1=document.getElementById('exp-dl-one'),b2=document.getElementById('exp-dl-zip');
-  prog.style.display='block';fill.style.width='0%';
+  prog.style.display='block';setProgress(fill,0);
   b1.disabled=b2.disabled=true;
   try{
     await document.fonts.ready;
@@ -5481,7 +5481,7 @@ async function expDownload(zip){
       const name='GoFlow_'+expSlug(p.ref+'_'+p.nom)+'.png';
       if(zip)files.push({name,blob});
       else{expSaveBlob(blob,name);await new Promise(r=>setTimeout(r,350));}
-      fill.style.width=Math.round((i+1)/ids.length*100)+'%';
+      setProgress(fill,Math.round((i+1)/ids.length*100));
     }
     if(zip){
       lbl.textContent='Assemblage du ZIP…';
@@ -5530,6 +5530,11 @@ async function zipStore(files){
 /* ===== FIN MODULE EXPORT IMAGES ===== */
 
 /* ---- UTILS ---- */
+// Anime les barres de progression via transform (composite GPU) plutôt que width (déclenche un reflow à chaque tick de chunk)
+function setProgress(el,pct){el.style.transform=`scaleX(${pct/100})`;}
+// Limite les recalculs coûteux (filtrage + reconstruction complète du DOM) déclenchés à chaque frappe dans un champ de recherche
+function debounce(fn,ms=180){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+const renderCatDeb=debounce(renderCat),renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans);
 let modReturnFocus=null;
 function openMod(id){
   modReturnFocus=document.activeElement;
