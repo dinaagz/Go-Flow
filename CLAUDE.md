@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Go.Flow is a single-file static web app (`index.html`) for **Go Group** (Lomé, Togo) — an import management console for professional aesthetic equipment sourced from China. No build step, no dependencies, no backend. Deploy by serving `index.html` directly.
+Go.Flow is a modular static web app (`index.html` + `css/` + `js/`) for **Go Group** (Lomé, Togo) — an import management console for professional aesthetic equipment sourced from China. No build step, no bundler, no dependencies, no backend: plain classic `<script src>` tags sharing the global scope, loaded in dependency order. Deploy by serving the folder directly (`index.html` at the root).
 
 **Live**: https://go-flow-phi.vercel.app  
 **Repo**: https://github.com/dinaagz/Go-Flow
@@ -21,17 +21,34 @@ open index.html
 python3 -m http.server 8080
 ```
 
-To validate JS syntax (extract script block first):
+To validate JS syntax:
 
 ```bash
-sed -n '/<script>/,/<\/script>/p' index.html | grep -v '<script>' | grep -v '</script>' > /tmp/test.js && node --check /tmp/test.js
+for f in js/*.js; do node --check "$f" || echo "FAIL: $f"; done
 ```
 
-**Always run the syntax check before committing** — a stray comma in a template literal will blank the page.
+**Always run the syntax check before committing** — a stray comma in a template literal will blank the page. Since all `js/*.js` files are classic (non-module) scripts sharing one global scope, run the check per-file — it catches the same syntax errors as checking the old inline block did.
 
 ## Architecture
 
-Everything lives in `index.html` — CSS, HTML, and JS in one file (~4400 lines). No framework.
+`index.html` is a thin shell: `<head>` links `css/styles.css`; `<body>` holds the SVG icon sprite + all view/modal markup, followed by 11 `<script src="js/...">` tags loaded in dependency order (last one, `js/app-main.js`, calls `init()`). No framework, no build step — files are plain classic scripts, not ES modules, so functions/`let`/`const` declared in one file are visible as globals to every file loaded after it (and, once `init()` runs at the very bottom, to all of them). Total code is the same ~4500 lines as the old single-file version, just split by concern:
+
+| File | Contents |
+|------|----------|
+| `css/styles.css` | All CSS (design tokens, shell, components, responsive, print) |
+| `js/data-store.js` | Storage layer: `LS_GET`/`LS_SET`, IndexedDB primitives (`IDB_GET`/`IDB_SET`/`IDB_DELETE`), `migrateToIdb()` — the single interface between the app and browser storage |
+| `js/seed-data.js` | `DATA_VER`, default settings (`DS`), categories (`CATS`), icon/image helpers, seed data (`DF`, `DP`, `DT`) |
+| `js/column-manager.js` | Universal ColumnManager (`CM_DEFS`, `cmMount`, `cmVisible`, etc.) |
+| `js/app-shell.js` | Global state (`S`, `prods`, `fours`, `trans`, `view`, `cols`, `grouped`…), `init()` bootstrap, settings load/save, user menu, tab navigation (`tab()`, `setView()`) |
+| `js/calc-engine.js` | `calcEngine()` and adapters (`calc`, `xofRate`, `toXOF`) — the pricing single source of truth |
+| `js/catalogue.js` | Audit trail, Catalogue/Fournisseurs/Transitaires rendering + CRUD, Simulation, CSV export |
+| `js/devis.js` | Devis cart, pricing strategy, PDF generation |
+| `js/import-module.js` | Bulk import (CSV/Excel/PDF/HTML) |
+| `js/export-module.js` | Image export (canvas templates, ZIP) |
+| `js/modals-backup.js` | Generic modal open/close + backup/restore, storage usage panel |
+| `js/app-main.js` | `toast()` + the `init(); bkpDirUI();` calls that boot the app once every other file is loaded |
+
+The section markers referenced below (e.g. `===== MOTEUR DE CALCUL`) still exist verbatim inside their respective files.
 
 ### App shell (premium SaaS layout)
 
