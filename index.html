@@ -255,7 +255,6 @@ textarea.fc{resize:vertical;min-height:70px}
 /* ===== SECTION HEADERS ===== */
 .sec-hdr{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:9px;color:var(--nuit)}
 .sec-hdr .ic{width:17px;height:17px;color:var(--bleu-t)}
-.cnt-badge{background:var(--bleu-t);color:#fff;border-radius:999px;padding:2px 8px;font-size:10px;font-family:'Poppins',sans-serif;font-weight:500}
 /* ===== SIMULATION ===== */
 .sim-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.sim-wrap{grid-template-columns:1fr}}
@@ -320,7 +319,6 @@ textarea.fc{resize:vertical;min-height:70px}
 .alt-card-prix{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .alt-promote-btn{padding:5px 11px;border:1px solid var(--bleu-t);border-radius:8px;background:#fff;color:var(--bleu-t);cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:all .18s}
 .alt-promote-btn:hover{background:var(--bleu-t);color:#fff}
-.winner-tag{font-size:9px;font-weight:700;color:var(--vert-t);text-transform:uppercase;letter-spacing:.5px}
 /* ===== COLUMN PICKER ===== */
 .col-picker-wrap{position:relative}
 .col-picker-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;background:var(--surface);cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:var(--sh-xs);transition:all .18s;color:var(--text)}
@@ -493,7 +491,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 /* ===== PRINT ===== */
 @media print{
   body{background:#fff}
-  .grad-bar,.hdr,.sidebar,.toolbar,.card-acts,.btn,.overlay,.toast,.settings-panel,.hdr-right,.no-print{display:none!important}
+  .grad-bar,.hdr,.sidebar,.toolbar,.card-acts,.btn,.overlay,.toast,.hdr-right,.no-print{display:none!important}
   .shell{display:block}
   .ph{display:block!important}
   .wrap{padding:0;max-width:100%}
@@ -591,6 +589,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
 <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
 <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+<symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
 <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
 <symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></symbol>
 <symbol id="i-ship" viewBox="0 0 24 24"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M12 10v4"/><path d="M12 2v3"/></symbol>
@@ -736,7 +735,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <div class="fgrp"><label class="flbl" for="s_tvi">TVA interne (%) — clients assujettis uniquement</label><input type="number" class="fc" id="s_tvi" step="0.5"></div>
   </div>
   <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Les tarifs transitaire sont <b>tout-compris</b> (fret + douane + taxes) : la TVA n'est jamais ajoutée en plus des frais logistiques. La TVA interne n'apparaît séparément que pour les clients professionnels assujettis.</div>
-  <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;padding:8px 10px;border:1px solid rgba(255,140,0,.35);border-radius:8px;background:rgba(255,140,0,.06)">⚠️ Vos données sont stockées localement dans votre navigateur. Pensez à exporter régulièrement vos données pour éviter toute perte en cas de vidage du cache ou de changement d'appareil.</div>
+  <div style="font-size:11px;color:var(--warn);margin-top:8px;line-height:1.6;padding:8px 10px;border:1px solid var(--warn-brd);border-radius:8px;background:var(--warn-bg);display:flex;gap:7px;align-items:flex-start"><svg class="ic" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><span>Vos données sont stockées localement dans votre navigateur. Pensez à exporter régulièrement vos données pour éviter toute perte en cas de vidage du cache ou de changement d'appareil.</span></div>
   <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid rgba(0,153,255,.3);border-radius:8px;background:rgba(0,153,255,.05)">
     <div style="font-weight:700;color:var(--text);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> Sauvegarde automatique</div>
     <div id="bkp-dir-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -746,7 +745,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     <div id="bkp-dir-status" style="margin-top:6px"></div>
     <div id="bkp-dir-hint" style="margin-top:4px"></div>
   </div>
-  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid rgba(0,204,119,.3);border-radius:8px;background:rgba(0,204,119,.05)">
+  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid var(--ok-brd);border-radius:8px;background:var(--ok-bg)">
     <div style="font-weight:700;color:var(--text);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg> Stockage local</div>
     <div id="stor-panel">Calcul en cours…</div>
   </div>
@@ -1050,7 +1049,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
           </select>
         </div>
         <div class="fgrp"><label class="flbl" for="p-four">Fournisseur</label><select class="fc" id="p-four"></select></div>
-        <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" required aria-required="true" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-prach">Fret local (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — transport fournisseur → transitaire" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-dev">Devise</label>
           <select class="fc" id="p-dev" onchange="calcPrev()">
@@ -1375,7 +1374,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
 // Stockage résilient : données corrompues → valeur de repli ; quota plein → toast au lieu d'un crash silencieux
 function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
-function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);}}
+function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);}}
 
 /* ===== STOCKAGE LOCAL VOLUMINEUX (IndexedDB) =====
    localStorage (gf_s réglages, gf_v version, gf_warn rappel) reste en place pour les
@@ -1445,7 +1444,7 @@ function IDB_SET(k,v){
     if(!ok){LS_SET(k,v);return;}
     return idbSetRaw(k,v).catch(e=>{
       console.warn('Échec écriture IndexedDB:',k,e);
-      toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);
+      toast('Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);
     });
   });
 }
@@ -2796,10 +2795,12 @@ function calcPrev(){
 function saveProd(){
   const nom=document.getElementById('p-nom').value.trim();
   const cat=document.getElementById('p-cat').value;
+  const prixVal=parseFloat(document.getElementById('p-prix').value);
   if(!nom||!cat){toast('Nom et catégorie requis',true);return;}
+  if(!prixVal){toast('Prix EXW requis',true);return;}
   const fid=document.getElementById('p-four').value;
   const f=fours.find(x=>x.id===fid);
-  let d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
+  let d={nom,cat,fid,fn:f?f.nom:'',prix:prixVal,
     prach:parseFloat(document.getElementById('p-prach').value)||0,
     dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
     la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
@@ -5646,7 +5647,7 @@ function isTypingTarget(el){
   return el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.isContentEditable;
 }
 const KB_NEW_MODAL={catalogue:openProdModal,fournisseurs:openFourModal,transitaires:openTransModal};
-const KB_SEARCH_ID={catalogue:'cat-search',fournisseurs:'four-search',transitaires:'tr-search'};
+const KB_SEARCH_ID={catalogue:'cat-search',fournisseurs:'four-search',transitaires:'tr-search',devis:'dv-search'};
 const KB_SAVE_FOR_MODAL={'prod-modal':saveProd,'four-modal':saveFour,'trans-modal':saveTrans};
 function currentTabName(){
   const b=document.querySelector('.tab.active');
@@ -5919,7 +5920,7 @@ async function bkpTrySaveToDir(fname,content){
       :(e&&e.name==='NotAllowedError')
         ?'Permission d\'écriture refusée — re-sélectionnez le dossier dans Paramètres.'
         :'Écriture impossible dans le dossier de sauvegarde.';
-    toast(`⚠️ ${msg} Téléchargement classique utilisé.`,true);
+    toast(`${msg} Téléchargement classique utilisé.`,true);
     return null;
   }
 }
@@ -5970,7 +5971,7 @@ function handleBackupFile(input){
     const when=j.date?new Date(j.date).toLocaleDateString('fr-FR'):'date inconnue';
     const ok=await askConfirm(`Restaurer la sauvegarde du ${when} ?\n\n`+
       `• ${c.produits} produits\n• ${c.fournisseurs} fournisseurs\n• ${c.transitaires} transitaires\n• ${c.devis} articles au panier devis\n\n`+
-      `⚠️ Toutes les données actuelles seront remplacées.`,{title:'Restaurer la sauvegarde',okLabel:'Restaurer'});
+      `Toutes les données actuelles seront remplacées.`,{title:'Restaurer la sauvegarde',okLabel:'Restaurer'});
     if(!ok)return;
     try{
       for(const k of Object.keys(j.data)){
@@ -5988,7 +5989,7 @@ function handleBackupFile(input){
       toast('Sauvegarde restaurée ✓ — rechargement…');
       setTimeout(()=>location.reload(),800);
     }catch(e){
-      toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données et supprimer les éléments inutiles.',true);
+      toast('Espace de stockage saturé. Veuillez exporter vos données et supprimer les éléments inutiles.',true);
     }
   };
   rd.readAsText(file);
@@ -5999,7 +6000,7 @@ function bkpWeeklyWarn(){
   const last=parseInt(localStorage.getItem(BKP_WARN_K)||'0');
   if(Date.now()-last<7*864e5)return;
   try{localStorage.setItem(BKP_WARN_K,String(Date.now()));}catch(e){return;}
-  setTimeout(()=>toast('⚠️ Données stockées localement — pensez à « Exporter mes données » (Paramètres)',true),1500);
+  setTimeout(()=>toast('Données stockées localement — pensez à « Exporter mes données » (Paramètres)',true),1500);
 }
 /* ===== FIN SAUVEGARDE & RESTAURATION ===== */
 
