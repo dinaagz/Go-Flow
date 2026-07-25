@@ -4064,7 +4064,7 @@ function generateDevisPDF(){
       ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td style="font-weight:700;white-space:nowrap;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
   const cs=dvList.map(calcDevis);
@@ -5545,6 +5545,7 @@ function closeMod(id){
 // Confirmation maison (remplace confirm() natif) : nomme l'élément, cohérente avec le reste du système de modales.
 let cfmResolve=null;
 function askConfirm(message,{title='Confirmer',okLabel='Supprimer'}={}){
+  if(cfmResolve){const r=cfmResolve;cfmResolve=null;r(false);} // une confirmation en attente est annulée par la suivante (modales exclusives)
   document.getElementById('cfm-title').textContent=title;
   document.getElementById('cfm-msg').textContent=message;
   document.getElementById('cfm-ok').textContent=okLabel;
@@ -5557,7 +5558,7 @@ function cfmConfirm(){const r=cfmResolve;cfmResolve=null;closeMod('confirm-modal
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     const ov=document.querySelector('.overlay.open');
-    if(ov){closeMod(ov.id);return;}
+    if(ov){ov.id==='confirm-modal'?cfmCancel():closeMod(ov.id);return;}
     document.querySelectorAll('.col-picker-drop.open').forEach(d=>{
       d.classList.remove('open');
       const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
@@ -5665,12 +5666,15 @@ async function renderStoragePanel(){
 function storClearAudit(){
   if(!(auditHist||[]).length)return;
   const n=auditHist.length;
-  askConfirm(`Vider les ${n} entrée${n>1?'s':''} de l'historique des calculs ? Cette action est irréversible.`,{title:"Vider l'historique",okLabel:'Vider'}).then(ok=>{
+  askConfirm(`Vider les ${n} entrée${n>1?'s':''} de l'historique des calculs ?`,{title:"Vider l'historique",okLabel:'Vider'}).then(ok=>{
     if(!ok)return;
+    const prev=auditHist;
     auditHist=[];
     IDB_SET(AK,auditHist);
-    toast('Historique des calculs vidé ✓');
     renderStoragePanel();
+    toastUndo(`Historique des calculs vidé (${n} entrée${n>1?'s':''})`,()=>{
+      auditHist=prev;IDB_SET(AK,auditHist);renderStoragePanel();toast('Suppression annulée');
+    });
   });
 }
 function storClearLastHtml(){
