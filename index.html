@@ -129,7 +129,7 @@ select.filt:hover{border-color:#C3CADC}
 .grp-btn.active{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t)}
 /* ===== KPI STATS ===== */
 .stats{display:grid;grid-template-columns:1.7fr repeat(3,1fr);gap:14px;margin-bottom:20px}
-@media(max-width:960px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-money,.stat-cat{grid-column:1/-1}}
+@media(max-width:960px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-money,.stat-cat{grid-column:1/-1}.stat-cat{justify-content:center}}
 .stat{background:var(--surface);border-radius:14px;padding:16px 18px;border:1px solid var(--border);box-shadow:var(--sh-xs);display:flex;align-items:center;gap:13px;transition:all .18s var(--ease)}
 .stat:hover{box-shadow:var(--sh-md);transform:translateY(-1px)}
 .stat-ico{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(0,153,255,.1);color:var(--bleu-t)}
@@ -2778,7 +2778,7 @@ function calcPrev(){
     <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.margeU)}</b></div>
     <div>Prix de Vente HT: <b>${N(c.pvuHT)}</b></div>
     <div>Frais logistiques: <b>${N(c.fraisLogU)}</b></div>
-    <div style="border-top:1px solid var(--border2);padding-top:8px;margin-top:4px">Prix de Vente TTC: <b style="color:var(--bleu-t);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px">${N(c.pvuTTC)}</b></div>`;
+    <div style="grid-column:1/-1;border-top:1px solid var(--border2);padding-top:8px;margin-top:4px">Prix de Vente TTC: <b style="color:var(--bleu-t);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px">${N(c.pvuTTC)}</b></div>`;
 }
 
 function saveProd(){
