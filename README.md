@@ -19,7 +19,7 @@ Go.Flow est une console d'import statique (single-page HTML, ~4 400 lignes, sans
 - L'**import en masse** (CSV, Excel, PDF, HTML) et l'**export d'images produit** design
 - La **sauvegarde et restauration** des données, avec dossier de sauvegarde automatique
 
-Aucun serveur, aucune base de données — tout fonctionne en `localStorage`/`IndexedDB` (navigateur) et s'exporte en PDF, CSV, JSON, PNG ou ZIP.
+Aucun serveur, aucune base de données partagée — tout fonctionne en `localStorage`/`IndexedDB`, propre à chaque navigateur, et s'exporte en PDF, CSV, JSON, PNG ou ZIP. Le catalogue grandit avec l'usage (produits ajoutés depuis l'app) : le compte de produits ci-dessous est celui du **catalogue de démarrage** fourni avec le code, pas la taille du catalogue réel d'un utilisateur donné — pensez à exporter régulièrement vos données (voir « Sauvegarde, stockage & restauration »).
 
 ---
 
@@ -34,12 +34,12 @@ L'interface adopte un layout SaaS : sidebar fixe sur desktop (nav horizontale su
 ## Fonctionnalités
 
 ### 📦 Catalogue
-- **37 produits pré-chargés** dans 8 catégories : Hydrafacial, Picolaser/Tatouage, Analyse de peau, RF Microneedling, HIFU, Photothérapie LED, Équipement & Accessoires, Dentaire
+- **34 produits dans le catalogue de démarrage** (Yateli + Oman) répartis sur 8 catégories : Hydrafacial, Picolaser/Tatouage, Analyse de peau, RF Microneedling, HIFU, Photothérapie LED, Équipement & Accessoires, Dentaire — le catalogue réel s'enrichit ensuite avec l'usage (ex. import Paine Agent Sourcing) et vit dans le navigateur de chaque utilisateur, pas dans le code
 - Galeries photos (jusqu'à 3 images cliquables par produit, servies depuis le CDN raw GitHub)
 - Vue **grille** et vue **tableau**, filtres texte / catégorie / fournisseur
 - Colonnes disponibles au choix : Photo · Référence · Désignation · Catégorie · Fournisseur · MOQ · Spécificités · Description · CBM · Poids · Achat EXW · Fret local · Coût de revient · Frais logistiques · Marge · Vente HT/TTC · Délai · Prix marché
 - **Sélecteur de colonnes universel** (voir plus bas) + bouton « Voir détails » (œil) ouvrant une fiche complète — pratique sur mobile où les colonnes secondaires sont masquées par défaut
-- **Mode Groupé** : les 37 produits se regroupent en **13 groupes** (clé `grp`) pour comparer les fournisseurs d'un même équipement
+- **Mode Groupé** : les produits identiques de plusieurs fournisseurs se regroupent (clé `grp`, 13 groupes dans le catalogue de démarrage) pour comparer les fournisseurs d'un même équipement
 - Bouton **Dupliquer** sur chaque produit (pré-remplit la fiche d'ajout à partir d'un produit existant)
 - **Import** en masse et **Export image** directement depuis la toolbar
 
