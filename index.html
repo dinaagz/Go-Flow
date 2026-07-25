@@ -13,7 +13,7 @@
 --blanc:#FFFFFF;--nuit:#1A1A2E;--nuit2:#252540;--nuit3:#2E2E50;
 --gris:#F4F6FA;--surface:#FFFFFF;--border:#E5E8F1;--border2:#D5DBE8;
 --text:#1A1D33;--muted:#66708A;
---bleu-t:#006ACC;--vert-t:#00794A;--orange-t:#C2500A;--rouge-t:#D6103A;
+--bleu-t:#006ACC;--vert-t:#00794A;--orange-t:#C2500A;--rouge-t:#D6103A;--violet-t:#5B21B6;
 --ok:#065F46;--ok-bg:#E3F7EE;--ok-brd:#A9E8CC;
 --err:#B91C1C;--err-bg:#FDEBED;--err-bg2:#FAD4D9;--err-solid:#DC2626;
 --warn:#7A5905;--warn-bg:#FFF6DC;--warn-brd:#F0C838;
@@ -101,6 +101,11 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .btn-in-cart{background:var(--ok-bg)!important;color:var(--ok)!important;border:1px solid var(--ok-brd)!important}
 /* ===== TOOLBAR ===== */
 .toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.tb-group{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tb-sep{width:1px;align-self:stretch;min-height:34px;background:var(--border);flex-shrink:0}
+@media(max-width:767px){.tb-sep{display:none}}
+.tb-more-wrap{position:relative}
+.tb-more-drop{min-width:230px}
 .search{flex:1;min-width:200px;position:relative}
 .search .search-ic{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
 .search input{width:100%;padding:10px 14px 10px 38px;border:1px solid var(--border2);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;background:var(--surface);transition:all .18s;box-shadow:var(--sh-xs)}
@@ -122,7 +127,7 @@ select.filt:hover{border-color:#C3CADC}
 .stat:hover{box-shadow:var(--sh-md);transform:translateY(-1px)}
 .stat-ico{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(0,153,255,.1);color:var(--bleu-t)}
 .stat-ico .ic{width:18px;height:18px}
-.stat:nth-child(2) .stat-ico{background:rgba(119,51,255,.09);color:var(--violet)}
+.stat:nth-child(2) .stat-ico{background:rgba(119,51,255,.09);color:var(--violet-t)}
 .stat:nth-child(3) .stat-ico{background:rgba(255,102,0,.1);color:var(--orange-t)}
 .stat:nth-child(4) .stat-ico{background:rgba(0,204,119,.11);color:var(--vert-t)}
 .stat-txt{min-width:0}
@@ -143,7 +148,7 @@ select.filt:hover{border-color:#C3CADC}
 .b-yateli{background:rgba(0,106,204,.92)}.b-oman{background:rgba(99,32,230,.92)}.b-other{background:rgba(194,80,10,.92)}
 .card-body{padding:15px}
 .card-ref{font-size:10px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-bottom:4px;letter-spacing:.3px}
-.card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:4px;line-height:1.35;color:var(--nuit)}
+.card-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:4px;line-height:1.35;color:var(--nuit);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-cat{font-size:11px;color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 .card-cat .ic{width:12px;height:12px;stroke-width:1.75}
 .card-prices{border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:4px}
@@ -244,6 +249,10 @@ textarea.fc{resize:vertical;min-height:70px}
 .toast{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));right:20px;background:var(--surface);color:var(--text);padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:300;transform:translateY(100px);opacity:0;transition:all .3s var(--ease);border:1px solid var(--border);box-shadow:var(--sh-lg);display:flex;align-items:center;gap:10px;max-width:min(92vw,420px)}
 .toast::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--toast-dot,var(--vert));flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--toast-dot,var(--vert)) 18%,transparent)}
 .toast.show{transform:translateY(0);opacity:1}
+.toast-msg{flex:1}
+.toast-undo-btn{background:none;border:none;color:var(--bleu-t);font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 8px;border-radius:6px;flex-shrink:0;min-height:32px}
+.toast-undo-btn:hover{background:var(--gris)}
+.toast-undo-btn:focus-visible{outline:2px solid var(--bleu);outline-offset:1px}
 /* ===== EMPTY STATES ===== */
 .empty{text-align:center;padding:64px 20px;color:var(--muted)}
 .empty-ico{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#EDF4FF,#F5EFFF);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -272,7 +281,7 @@ textarea.fc{resize:vertical;min-height:70px}
 .alt-panel.open{grid-template-rows:1fr}
 .alt-panel-inner{min-height:0;overflow:hidden;padding:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
 .alt-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--gris);font-size:12px}
-.alt-card.is-winner{border-color:var(--vert);background:#F0FDF7}
+.alt-card.is-winner{border-color:var(--vert-t);background:#F0FDF7}
 .alt-card-img{width:38px;height:38px;border-radius:8px;object-fit:cover;flex-shrink:0}
 .alt-card-info{flex:1;min-width:0}
 .alt-card-nom{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -557,6 +566,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
 <symbol id="i-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
 <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
 <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
@@ -692,28 +702,41 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 <div id="t-catalogue" role="tabpanel" aria-labelledby="tab-catalogue">
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCat()"></div>
-    <select class="filt" id="f-cat" onchange="renderCat()">
-      <option value="">Toutes catégories</option>
-      <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
-      <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
-      <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
-    </select>
-    <select class="filt" id="f-four" onchange="renderCat()"><option value="">Tous fournisseurs</option></select>
-    <div class="view-tog">
-      <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
-      <button class="view-btn" id="vl" onclick="setView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
+    <div class="tb-group" role="group" aria-label="Recherche et filtres">
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCat()"></div>
+      <select class="filt" id="f-cat" onchange="renderCat()" aria-label="Filtrer par catégorie">
+        <option value="">Toutes catégories</option>
+        <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
+        <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+        <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
+      </select>
+      <select class="filt" id="f-four" onchange="renderCat()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
     </div>
-    <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg> Grouper</button>
-    <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" style="display:none">
-      <option value="prix_bas">Prix bas</option>
-      <option value="meilleure_qualite">Meilleure qualité</option>
-      <option value="meilleur_rapport">Meilleur rapport</option>
-    </select>
-    <div class="col-picker-wrap" id="cm-catalogue"></div>
-    <button class="btn btn-sec" onclick="openImportModal('produits')" title="Importer des produits en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
-    <button class="btn btn-sec" id="exp-mode-btn" onclick="expToggleMode()" title="Exporter des produits en images design" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Export image</button>
-    <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
+    <div class="tb-sep" aria-hidden="true"></div>
+    <div class="tb-group" role="group" aria-label="Affichage et organisation">
+      <div class="view-tog">
+        <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
+        <button class="view-btn" id="vl" onclick="setView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
+      </div>
+      <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg> Grouper</button>
+      <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" aria-label="Stratégie de sélection du produit gagnant" style="display:none">
+        <option value="prix_bas">Prix bas</option>
+        <option value="meilleure_qualite">Meilleure qualité</option>
+        <option value="meilleur_rapport">Meilleur rapport</option>
+      </select>
+      <div class="col-picker-wrap" id="cm-catalogue"></div>
+    </div>
+    <div class="tb-sep" aria-hidden="true"></div>
+    <div class="tb-group" role="group" aria-label="Actions sur le catalogue">
+      <div class="tb-more-wrap">
+        <button class="btn btn-sec tb-more-btn" id="cat-more-btn" onclick="tbMoreToggle(this)" aria-haspopup="true" aria-expanded="false" aria-controls="cat-more-drop" title="Plus d'actions"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg> Plus</button>
+        <div class="user-menu tb-more-drop" id="cat-more-drop" role="menu">
+          <button class="user-menu-item" role="menuitem" onclick="tbMoreCloseAll();openImportModal('produits')" title="Importer des produits en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
+          <button class="user-menu-item" role="menuitem" id="exp-mode-btn" onclick="tbMoreCloseAll();expToggleMode()" title="Exporter des produits en images design" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Export image</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
+    </div>
   </div>
   <div id="cat-cont"></div>
 </div>
@@ -1258,6 +1281,23 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
   <button class="btn btn-ghost btn-sm" onclick="expToggleMode()"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg> Annuler</button>
 </div>
 
+<!-- Modale de confirmation (remplace confirm() natif — nomme l'élément concerné) -->
+<div class="overlay" id="confirm-modal">
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cfm-title" aria-describedby="cfm-msg" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="cfm-title">Confirmer</h2>
+      <button class="modal-x" onclick="cfmCancel()" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p id="cfm-msg" style="font-size:13px;line-height:1.55;white-space:pre-line"></p>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="cfmCancel()">Annuler</button>
+        <button class="btn btn-danger" id="cfm-ok" onclick="cfmConfirm()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1507,43 +1547,43 @@ const DT=[{
 const CMK='gf_cols';
 const CM_DEFS={
   catalogue:[
-    {k:'photos', lbl:'Photo',                           def:true},
-    {k:'ref',    lbl:'Référence',                       def:true},
-    {k:'nom',    lbl:'Désignation',                     def:true},
-    {k:'cat',    lbl:'Catégorie',                       def:true, mob:false},
-    {k:'four',   lbl:'Fournisseur',                     def:true},
-    {k:'moq',    lbl:'MOQ',                             def:false,mob:false},
-    {k:'specs',  lbl:'Spécificités',                    def:false,mob:false},
-    {k:'desc',   lbl:'Description',                     def:false,mob:false},
-    {k:'cbm',    lbl:'CBM',                             def:false,mob:false},
-    {k:'poids',  lbl:'Poids',                           def:false,mob:false},
-    {k:'achat',  lbl:'Achat EXW',                       def:false,mob:false},
-    {k:'prach',  lbl:'Fret local',                      def:false,mob:false},
-    {k:'revient',lbl:'Coût de Revient HT',              def:true, mob:false},
-    {k:'fret',   lbl:'Frais logistiques (Transitaire)', def:true, mob:false},
-    {k:'marge',  lbl:'Marge',                           def:true},
-    {k:'vente',  lbl:'Prix de Vente HT',                def:true},
-    {k:'ttc',    lbl:'Prix de Vente TTC',               def:true},
-    {k:'delai',  lbl:'Délai livraison',                 def:false,mob:false},
-    {k:'marche', lbl:'Prix marché',                     def:false,mob:false},
+    {k:'photos', g:'Produit',    lbl:'Photo',                           def:true},
+    {k:'ref',    g:'Produit',    lbl:'Référence',                       def:true},
+    {k:'nom',    g:'Produit',    lbl:'Désignation',                     def:true},
+    {k:'cat',    g:'Produit',    lbl:'Catégorie',                       def:true, mob:false},
+    {k:'four',   g:'Produit',    lbl:'Fournisseur',                     def:true},
+    {k:'moq',    g:'Produit',    lbl:'MOQ',                             def:false,mob:false},
+    {k:'specs',  g:'Produit',    lbl:'Spécificités',                    def:false,mob:false},
+    {k:'desc',   g:'Produit',    lbl:'Description',                     def:false,mob:false},
+    {k:'cbm',    g:'Logistique', lbl:'CBM',                             def:false,mob:false},
+    {k:'poids',  g:'Logistique', lbl:'Poids',                           def:false,mob:false},
+    {k:'delai',  g:'Logistique', lbl:'Délai livraison',                 def:false,mob:false},
+    {k:'achat',  g:'Sourcing',   lbl:'Achat EXW',                       def:false,mob:false},
+    {k:'prach',  g:'Sourcing',   lbl:'Fret local',                      def:false,mob:false},
+    {k:'revient',g:'Vente',      lbl:'Coût de Revient HT',              def:true, mob:false},
+    {k:'fret',   g:'Vente',      lbl:'Frais logistiques (Transitaire)', def:true, mob:false},
+    {k:'marge',  g:'Vente',      lbl:'Marge',                           def:true},
+    {k:'vente',  g:'Vente',      lbl:'Prix de Vente HT',                def:true},
+    {k:'ttc',    g:'Vente',      lbl:'Prix de Vente TTC',               def:true},
+    {k:'marche', g:'Vente',      lbl:'Prix marché',                     def:false,mob:false},
   ],
   simulation:[
-    {k:'produit',  lbl:'Produit',                          def:true},
-    {k:'ref',      lbl:'Référence',                        def:false,mob:false},
-    {k:'four',     lbl:'Fournisseur',                      def:true, mob:false},
-    {k:'moq',      lbl:'MOQ',                              def:false,mob:false},
-    {k:'specs',    lbl:'Spécificités',                     def:false,mob:false},
-    {k:'desc',     lbl:'Description',                      def:false,mob:false},
-    {k:'qte',      lbl:'Quantité',                         def:true},
-    {k:'transport',lbl:'Transport / CBM / Poids',          def:true, mob:false},
-    {k:'achat',    lbl:'Coût d\'achat + frais (étape 1)',  def:true, mob:false},
-    {k:'revient_u',lbl:'Coût de revient unitaire',         def:true},
-    {k:'taux',     lbl:'Taux de change',                   def:true, mob:false},
-    {k:'marge',    lbl:'Marge unitaire (%)',               def:true},
-    {k:'marge_tot',lbl:'Marge totale',                     def:true, mob:false},
-    {k:'vente_ht', lbl:'Prix de Vente HT',                 def:true},
-    {k:'fret',     lbl:'Frais logistiques (Transitaire)',  def:true},
-    {k:'vente_ttc',lbl:'Prix de Vente TTC unitaire',       def:true},
+    {k:'produit',  g:'Produit', lbl:'Produit',                          def:true},
+    {k:'ref',      g:'Produit', lbl:'Référence',                        def:false,mob:false},
+    {k:'four',     g:'Produit', lbl:'Fournisseur',                      def:true, mob:false},
+    {k:'moq',      g:'Produit', lbl:'MOQ',                              def:false,mob:false},
+    {k:'specs',    g:'Produit', lbl:'Spécificités',                     def:false,mob:false},
+    {k:'desc',     g:'Produit', lbl:'Description',                      def:false,mob:false},
+    {k:'qte',      g:'Calcul',  lbl:'Quantité',                         def:true},
+    {k:'transport',g:'Calcul',  lbl:'Transport / CBM / Poids',          def:true, mob:false},
+    {k:'achat',    g:'Calcul',  lbl:'Coût d\'achat + frais (étape 1)',  def:true, mob:false},
+    {k:'revient_u',g:'Calcul',  lbl:'Coût de revient unitaire',         def:true},
+    {k:'taux',     g:'Calcul',  lbl:'Taux de change',                   def:true, mob:false},
+    {k:'marge',    g:'Résultat',lbl:'Marge unitaire (%)',               def:true},
+    {k:'marge_tot',g:'Résultat',lbl:'Marge totale',                     def:true, mob:false},
+    {k:'vente_ht', g:'Résultat',lbl:'Prix de Vente HT',                 def:true},
+    {k:'fret',     g:'Résultat',lbl:'Frais logistiques (Transitaire)',  def:true},
+    {k:'vente_ttc',g:'Résultat',lbl:'Prix de Vente TTC unitaire',       def:true},
   ],
   devis:[
     // SECTION PRODUIT — informations de base (indépendantes de toute devise)
@@ -1826,6 +1866,29 @@ function userMenuToggle(){
 function userMenuClose(){
   document.getElementById('user-menu').classList.remove('open');
   document.getElementById('user-avatar-btn').setAttribute('aria-expanded','false');
+}
+// Menu "Plus d'actions" de la barre d'outils catalogue (regroupe les actions rares : import, export image)
+function tbMoreToggle(btn){
+  const wrap=btn.closest('.tb-more-wrap'),drop=wrap.querySelector('.tb-more-drop');
+  const open=!drop.classList.contains('open');
+  tbMoreCloseAll();
+  drop.classList.toggle('open',open);
+  btn.setAttribute('aria-expanded',open);
+  if(open){
+    const close=e=>{
+      if(wrap.contains(e.target))return;
+      tbMoreCloseAll();
+      document.removeEventListener('click',close);
+    };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+}
+function tbMoreCloseAll(){
+  document.querySelectorAll('.tb-more-drop.open').forEach(d=>{
+    d.classList.remove('open');
+    const b=d.closest('.tb-more-wrap').querySelector('.tb-more-btn');
+    if(b)b.setAttribute('aria-expanded','false');
+  });
 }
 
 function xofRate(dev){
@@ -2686,11 +2749,22 @@ function saveProd(){
 }
 
 function delProd(id){
-  if(!confirm('Supprimer ce produit ?'))return;
-  prods=prods.filter(p=>p.id!==id);save('p');
-  // Retirer aussi du panier de devis pour garder les deux vues synchronisées
-  if(devisCart.some(x=>x.pid===id)){devisCart=devisCart.filter(x=>x.pid!==id);saveDevisCartLS();}
-  renderCat();popSim();toast('Supprimé');
+  const idx=prods.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  const p=prods[idx];
+  askConfirm(`Supprimer « ${p.nom} » ? Cette fiche produit sera retirée du catalogue.`,{title:'Supprimer ce produit',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    prods=prods.filter(x=>x.id!==id);save('p');
+    // Retirer aussi du panier de devis pour garder les deux vues synchronisées
+    const cartRemoved=devisCart.filter(x=>x.pid===id);
+    if(cartRemoved.length){devisCart=devisCart.filter(x=>x.pid!==id);saveDevisCartLS();}
+    renderCat();popSim();
+    toastUndo(`« ${p.nom} » supprimé`,()=>{
+      prods.splice(idx,0,p);
+      if(cartRemoved.length){devisCart.push(...cartRemoved);saveDevisCartLS();}
+      save('p');renderCat();popSim();renderDevisCart();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- PHOTOS ---- */
@@ -2770,7 +2844,7 @@ function renderFour(){
         ${f.wc?`<div class="info-row">${ICO('msg')} WeChat : ${f.wc}</div>`:''}
         ${f.dom?`<div class="info-row" style="margin-top:4px">${ICO('factory')} ${f.dom}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'#fef3c7'};color:${f.ali==='Vérifié'?'var(--ok)':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
+          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'var(--warn-bg)'};color:${f.ali==='Vérifié'?'var(--ok)':'var(--warn)'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
           ${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
           ${f.devis?`<a href="${f.devis}" target="_blank" class="devis-btn">${ICO('file')} Devis PDF</a>`:''}
         </div>
@@ -2843,8 +2917,16 @@ function saveFour(){
 }
 
 function delFour(id){
-  if(!confirm('Supprimer ce fournisseur ?'))return;
-  fours=fours.filter(f=>f.id!==id);save('f');renderFour();toast('Supprimé');
+  const idx=fours.findIndex(f=>f.id===id);
+  if(idx<0)return;
+  const f=fours[idx];
+  askConfirm(`Supprimer « ${f.nom} » ? Sa fiche fournisseur sera définitivement retirée.`,{title:'Supprimer ce fournisseur',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    fours=fours.filter(x=>x.id!==id);save('f');renderFour();
+    toastUndo(`« ${f.nom} » supprimé`,()=>{
+      fours.splice(idx,0,f);save('f');renderFour();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- TRANSITAIRES ---- */
@@ -2908,8 +2990,16 @@ function saveTrans(){
 }
 
 function delTrans(id){
-  if(!confirm('Supprimer ?'))return;
-  trans=trans.filter(t=>t.id!==id);save('t');renderTrans();popSim();toast('Supprimé');
+  const idx=trans.findIndex(t=>t.id===id);
+  if(idx<0)return;
+  const t=trans[idx];
+  askConfirm(`Supprimer « ${t.nom} » ? Cette fiche transitaire sera définitivement retirée.`,{title:'Supprimer ce transitaire',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    trans=trans.filter(x=>x.id!==id);save('t');renderTrans();popSim();
+    toastUndo(`« ${t.nom} » supprimé`,()=>{
+      trans.splice(idx,0,t);save('t');renderTrans();popSim();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- SIMULATION ---- */
@@ -3006,7 +3096,7 @@ function simCalc(){
     ${V.taux||V.marge||V.vente_ht||V.revient_u?`<div class="sim-sec">Étape 2 · Prix de Vente HT (XOF)</div>`:''}
     ${V.taux?`<div class="sim-row"><span>Taux de change</span><span>1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</span></div>`:''}
     ${V.revient_u?`<div class="sim-row"><span>Coût de revient unitaire (XOF)</span><span>${N(c.coutRevientUX)}</span></div>`:''}
-    ${V.marge?`<div class="sim-row"><span>Marge unitaire</span><span style="color:#4ade80">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
+    ${V.marge?`<div class="sim-row"><span>Marge unitaire</span><span style="color:var(--vert)">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
     ${rem>0?`<div class="sim-row"><span>Remise (${rem}%)</span><span>incluse</span></div>`:''}`:''}
     ${V.vente_ht?`
     <div class="sim-row"><span>Prix de Vente unitaire HT</span><span style="font-weight:600">${N(c.pvuHT)}</span></div>
@@ -3227,7 +3317,7 @@ async function onDevisDevChange(){
     const hm=new Date(fxCache.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
     msg.innerHTML=`<span style="color:var(--vert-t)">✓ Taux marché (${hm}) — modifiable librement</span>`;
   }else{
-    msg.innerHTML=`<span style="color:#b45309">API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
+    msg.innerHTML=`<span style="color:var(--warn)">API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
   }
   renderDevisCart();saveDevisPrefs();
 }
@@ -3359,8 +3449,15 @@ function dvNoteField(item,fs){
 
 function clearCart(){
   if(!devisCart.length)return;
-  if(!confirm('Vider entièrement le panier de devis ?'))return;
-  devisCart=[];saveDevisCartLS();renderDevisCart();renderCat();toast('Panier vidé');
+  const n=devisCart.length;
+  askConfirm(`Vider les ${n} article${n>1?'s':''} du panier de devis ?`,{title:'Vider le panier',okLabel:'Vider'}).then(ok=>{
+    if(!ok)return;
+    const prev=devisCart;
+    devisCart=[];saveDevisCartLS();renderDevisCart();renderCat();
+    toastUndo('Panier de devis vidé',()=>{
+      devisCart=prev;saveDevisCartLS();renderDevisCart();renderCat();toast('Suppression annulée');
+    });
+  });
 }
 
 function isInCart(pid){return devisCart.some(x=>x.pid===pid);}
@@ -5445,6 +5542,17 @@ function closeMod(id){
   document.getElementById(id).classList.remove('open');
   if(modReturnFocus&&document.contains(modReturnFocus)){modReturnFocus.focus();modReturnFocus=null;}
 }
+// Confirmation maison (remplace confirm() natif) : nomme l'élément, cohérente avec le reste du système de modales.
+let cfmResolve=null;
+function askConfirm(message,{title='Confirmer',okLabel='Supprimer'}={}){
+  document.getElementById('cfm-title').textContent=title;
+  document.getElementById('cfm-msg').textContent=message;
+  document.getElementById('cfm-ok').textContent=okLabel;
+  openMod('confirm-modal');
+  return new Promise(res=>{cfmResolve=res;});
+}
+function cfmCancel(){const r=cfmResolve;cfmResolve=null;closeMod('confirm-modal');if(r)r(false);}
+function cfmConfirm(){const r=cfmResolve;cfmResolve=null;closeMod('confirm-modal');if(r)r(true);}
 // Clavier : Échap ferme modales et menus ; Tab reste piégé dans la modale ouverte ; flèches sur les onglets
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
@@ -5455,6 +5563,7 @@ document.addEventListener('keydown',e=>{
       const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
       if(b)b.setAttribute('aria-expanded','false');
     });
+    tbMoreCloseAll();
     userMenuClose();
     return;
   }
@@ -5555,11 +5664,14 @@ async function renderStoragePanel(){
 }
 function storClearAudit(){
   if(!(auditHist||[]).length)return;
-  if(!confirm('Vider tout l\'historique des calculs ? Cette action est irréversible.'))return;
-  auditHist=[];
-  IDB_SET(AK,auditHist);
-  toast('Historique des calculs vidé ✓');
-  renderStoragePanel();
+  const n=auditHist.length;
+  askConfirm(`Vider les ${n} entrée${n>1?'s':''} de l'historique des calculs ? Cette action est irréversible.`,{title:"Vider l'historique",okLabel:'Vider'}).then(ok=>{
+    if(!ok)return;
+    auditHist=[];
+    IDB_SET(AK,auditHist);
+    toast('Historique des calculs vidé ✓');
+    renderStoragePanel();
+  });
 }
 function storClearLastHtml(){
   const p=impPrefs();
@@ -5732,9 +5844,10 @@ function handleBackupFile(input){
     }
     const c=bkpCounts(j.data);
     const when=j.date?new Date(j.date).toLocaleDateString('fr-FR'):'date inconnue';
-    if(!confirm(`Restaurer la sauvegarde du ${when} ?\n\n`+
+    const ok=await askConfirm(`Restaurer la sauvegarde du ${when} ?\n\n`+
       `• ${c.produits} produits\n• ${c.fournisseurs} fournisseurs\n• ${c.transitaires} transitaires\n• ${c.devis} articles au panier devis\n\n`+
-      `⚠️ Toutes les données actuelles seront remplacées.`))return;
+      `⚠️ Toutes les données actuelles seront remplacées.`,{title:'Restaurer la sauvegarde',okLabel:'Restaurer'});
+    if(!ok)return;
     try{
       for(const k of Object.keys(j.data)){
         if(k.indexOf('gf_')!==0||typeof j.data[k]!=='string')continue;
@@ -5766,10 +5879,29 @@ function bkpWeeklyWarn(){
 }
 /* ===== FIN SAUVEGARDE & RESTAURATION ===== */
 
+let toastTimer=null;
 function toast(msg,err=false){
-  const t=document.getElementById('toast');t.textContent=msg;
+  const t=document.getElementById('toast');
+  t.innerHTML='<span class="toast-msg"></span>';
+  t.querySelector('.toast-msg').textContent=msg;
   t.style.setProperty('--toast-dot',err?'var(--rouge)':'var(--vert)');
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+  t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+// Toast avec "Annuler" — délai de grâce avant que l'action destructive soit définitive.
+function toastUndo(msg,undoFn,ms=6000){
+  const t=document.getElementById('toast');
+  t.innerHTML='<span class="toast-msg"></span><button class="toast-undo-btn">Annuler</button>';
+  t.querySelector('.toast-msg').textContent=msg;
+  t.style.setProperty('--toast-dot','var(--vert)');
+  let done=false;
+  t.querySelector('.toast-undo-btn').onclick=()=>{
+    if(done)return;done=true;
+    t.classList.remove('show');clearTimeout(toastTimer);
+    undoFn();
+  };
+  t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{if(!done)t.classList.remove('show');},ms);
 }
 
 init();

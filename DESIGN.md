@@ -140,9 +140,13 @@ Une palette à deux étages : six teintes de marque vives pour la signature et l
 - **Sémantiques** : `--ok` / `--err` / `--warn`, chacun avec sa paire de fonds pastel — jamais de couleur d'état inline.
 
 ### Named Rules
-**La Règle du Spectre (v2 — quatre emplacements).** Le dégradé six couleurs apparaît en intégralité et dans l'ordre rouge → violet, à quatre emplacements signés et pas un de plus : la bande de marque, la bordure du CTA de livraison, le logo, et la devise « Promis. Livré. » sous le logo — son extension naturelle. Jamais tronqué, jamais inversé, jamais en fond de section, jamais sur un cinquième élément sans mise à jour de cette règle.
+**La Règle du Spectre (v3 — quatre emplacements signés + accents premium documentés).** Le dégradé six couleurs apparaît en intégralité et dans l'ordre rouge → violet à quatre **emplacements signés**, qui portent l'identité et ne bougent jamais : la bande de marque (`.grad-bar`), la bordure du CTA de livraison (`.btn-grad`), le logo (`.logo`), et la devise « Promis. Livré. » sous le logo (`.sb-tag`) — seuls ces deux derniers ont le droit au dégradé *en texte* (`background-clip:text`), le reste de l'interface n'écrit jamais de texte en dégradé.
 
-**La Règle de la Jumelle.** Toute teinte de marque posée en texte sur fond clair passe par sa jumelle « -t » (#006ACC, #00794A, #C2500A, #D6103A). La version vive est décorative ou réservée aux fonds nuit. Test : si un chiffre est sous 4,5:1, c'est la mauvaise jumelle.
+Une seconde catégorie, plus large mais tout aussi intentionnelle, existe depuis la refonte cockpit : les **accents premium** — un filet fin (2-4px) ou une bordure qui marque un moment de progression ou de paiement plutôt que la marque elle-même. Liste fermée : la barre d'accent du panneau simulation (`.sim-result::before`), celle de la barre de total devis (`.devis-total-bar::before`), le remplissage des barres de progression (`.progress-fill`), l'anneau de l'avatar utilisateur (`.user-avatar-btn`), la bordure de l'espace réservé image catalogue (`.ph`), et le liseré actif de la sidebar (`.tab.active::before`, détaillé dans la section Navigation). Ces six accents restent fidèles à la règle (dégradé complet, jamais tronqué, jamais inversé) mais ne consomment pas le budget des quatre emplacements signés : ils signalent « ceci est actif / en cours / total », pas « ceci est le logo ».
+
+Jamais un usage au-delà de cette liste fermée (4 signés + 6 accents premium) sans mise à jour explicite de cette règle ; jamais en fond de section pleine ; jamais en texte de contenu hors `.logo`/`.sb-tag`.
+
+**La Règle de la Jumelle.** Toute teinte de marque posée en texte ou en icône sur fond clair passe par sa jumelle « -t » (#006ACC, #00794A, #C2500A, #D6103A, et #5B21B6 pour le violet). La version vive est décorative ou réservée aux fonds nuit. Test : si un chiffre est sous 4,5:1, c'est la mauvaise jumelle.
 
 **La Règle du Vert.** Le vert veut dire marge, profit, gagnant — rien d'autre.
 
@@ -177,7 +181,7 @@ Système à double langage depuis la refonte : l'ancien modèle plat-par-défaut
 - **xl** (`0 24px 70px -14px rgba(18,22,48,.3)`) : modales.
 
 ### Named Rules
-**La Règle du Verre Fonctionnel.** `backdrop-filter: blur()` est réservé aux surfaces `position: sticky` ou `fixed` qui se superposent à du contenu défilant (en-tête, en-tête de modale, sidebar mobile, badges sur photo). Jamais de glassmorphism sur une carte ou un panneau statique — ce serait la dérive décorative interdite par le socle du skill.
+**La Règle du Verre Fonctionnel.** `backdrop-filter: blur()` est réservé à deux catégories, toutes deux fonctionnelles et jamais décoratives : (1) les surfaces `position: sticky` ou `fixed` qui se superposent à du contenu défilant (en-tête, en-tête de modale, sidebar mobile) ; (2) les pastilles `position: absolute` posées sur une photo produit (`.badge`, `.grp-count-badge`) — le blur y assure la lisibilité du texte contre un fond image imprévisible, pas contre du contenu qui défile, mais reste fonctionnel et non décoratif. Jamais de glassmorphism sur une carte ou un panneau de contenu statique (texte sur fond uni) — ce serait la dérive décorative interdite par le socle du skill.
 
 **La Règle de l'Échelle Z.** Les z-index suivent une échelle ascendante sans valeur arbitraire : 2 (en-tête de tableau) < 5 (en-tête de modale, coche d'export) < 10 (badge panier) < 99 (sidebar mobile) < 100 (sidebar) < 120 (en-tête) < 130 (bande de marque) < 150 (dropdown) < 180 (barre d'export) < 200 (voile modal) < 300 (menu utilisateur, toast) < 400 (skip-link). Un 999 est toujours une erreur.
 
