@@ -129,7 +129,7 @@ select.filt:hover{border-color:#C3CADC}
 .grp-btn.active{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t)}
 /* ===== KPI STATS ===== */
 .stats{display:grid;grid-template-columns:1.7fr repeat(3,1fr);gap:14px;margin-bottom:20px}
-@media(max-width:960px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:960px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-money{grid-column:1/-1}}
 .stat{background:var(--surface);border-radius:14px;padding:16px 18px;border:1px solid var(--border);box-shadow:var(--sh-xs);display:flex;align-items:center;gap:13px;transition:all .18s var(--ease)}
 .stat:hover{box-shadow:var(--sh-md);transform:translateY(-1px)}
 .stat-ico{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(0,153,255,.1);color:var(--bleu-t)}
@@ -137,7 +137,7 @@ select.filt:hover{border-color:#C3CADC}
 /* Le chiffre qui compte (l'argent) mène la rangée : tuile plus large, icône et valeur amplifiées.
    Les trois autres sont volontairement plus discrets — la hiérarchie vient du contraste, pas du volume. */
 .stat-money{border-color:var(--border2)}
-.stat-money .stat-ico{width:48px;height:48px;border-radius:13px}
+.stat-money .stat-ico{width:48px;height:48px;border-radius:12px}
 .stat-money .stat-ico .ic{width:21px;height:21px}
 .stat-money .stat-val{font-size:26px}
 .stat-prod .stat-ico{background:rgba(119,51,255,.09);color:var(--violet-t)}
@@ -255,8 +255,8 @@ textarea.fc{resize:vertical;min-height:70px}
 .sim-row:last-child{border-bottom:none}
 /* Le total final reprend le motif déjà établi par la devis-total-bar (étiquette assourdie, valeur
    dominante en or) plutôt que de rester une simple ligne .sim-row à peine plus grosse que les autres */
-.sim-row.sim-total{padding-top:14px;margin-top:4px;border-top:2px solid rgba(255,255,255,.14);border-bottom:none;align-items:center}
-.sim-total span:first-child{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.sim-row.sim-total{padding-top:14px;margin-top:4px;border-top:2px solid rgba(255,255,255,.08);border-bottom:none;align-items:center}
+.sim-total span:first-child{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.65)}
 .sim-total span:last-child{font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;color:var(--jaune)}
 .sim-marge{color:var(--vert)}
 .prod-prev{display:flex;gap:14px;background:var(--gris);border-radius:12px;padding:14px;margin-bottom:16px;align-items:flex-start;border:1px solid var(--border)}
@@ -336,6 +336,11 @@ textarea.fc{resize:vertical;min-height:70px}
 .detail-row{display:flex;justify-content:space-between;gap:14px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border)}
 .detail-row span:first-child{color:var(--muted)}
 .detail-row span:last-child{font-weight:600;text-align:right}
+/* Même motif « valeur-héros » que .pr-ttc/.sim-total : le prix qui répond à la question du produit doit
+   rester le plus lisible de la modale, y compris dans cette vue de repli listant tous les champs à plat */
+.detail-row-hero{border-bottom:none;border-top:2px solid var(--border2);padding-top:10px;margin-top:2px}
+.detail-row-hero span:first-child{font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.detail-row-hero span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--bleu-t);text-align:right}
 .detail-sec{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 4px;padding-top:8px;border-top:1px solid var(--border)}
 .detail-sec:first-child{margin-top:0;border-top:none;padding-top:0}
 /* ---- ÉDITION INLINE DES CHAMPS DEVIS ---- */
@@ -2279,7 +2284,7 @@ function prodGroupTable(groups){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(w)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
@@ -2365,7 +2370,7 @@ function openDetails(title,rows,img){
   document.getElementById('detail-title').textContent=title;
   document.getElementById('detail-body').innerHTML=
     (img?`<img src="${img}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px" onerror="this.style.display='none'">`:'')+
-    rows.map(([l,v])=>`<div class="detail-row"><span>${l}</span><span>${v}</span></div>`).join('');
+    rows.map(([l,v,hero])=>`<div class="detail-row${hero?' detail-row-hero':''}"><span>${l}</span><span>${v}</span></div>`).join('');
   openMod('detail-modal');
 }
 function showProdDetails(id){
@@ -2381,7 +2386,7 @@ function showProdDetails(id){
     ['Achat EXW (XOF)',N(c.exwUX)],['Coût de Revient HT',N(c.coutRevientUX)],
     ['Frais logistiques (Transitaire)',N(c.fraisLogU)],
     ['Marge',`${N(c.margeU)} (${Nd(c.margePct,1)}%)`],
-    ['Prix de Vente HT',N(c.pvuHT)],['Prix de Vente TTC',N(c.pvuTTC)],
+    ['Prix de Vente HT',N(c.pvuHT)],['Prix de Vente TTC',N(c.pvuTTC),'hero'],
     ['Prix marché',p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'],
   ],p.photos&&p.photos[0]);
 }
@@ -2640,7 +2645,7 @@ function prodTable(list){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px;position:relative">
@@ -3721,6 +3726,9 @@ function buildDevisGrid(list){
   const SH=cmVisible('devis');
   // ligne d'info « label / valeur » — une par colonne cochée
   const row=(lbl,val)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-top:2px"><span style="color:var(--muted)">${lbl}</span><span style="font-weight:600;text-align:right">${val}</span></div>`;
+  // Le TTC du panier reprend le traitement .pr-ttc de la carte catalogue plutôt que la ligne row() générique :
+  // c'est le même chiffre, sur l'écran à plus fort enjeu (devis client) — il ne doit pas être plus discret ailleurs.
+  const rowTTC=(lbl,val)=>`<div class="pr" style="margin-top:6px"><span class="pr-lbl pr-ttc">${lbl}</span><span class="pr-val pr-ttc">${val}</span></div>`;
   return`<div class="grid">${list.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
@@ -3765,7 +3773,7 @@ function buildDevisGrid(list){
         </div>`:''}
         ${SH.total_ht?row('Prix total HT',Ndv(c.pvtHT)):''}
         ${SH.frais_log?row('Frais logistiques Estimé',Ndv(c.fraisLog)):''}
-        ${SH.prix_ttc?row('Prix TTC Estimé',`<span style="color:var(--bleu-t)">${Ndv(c.pvtTTC)}</span>`):''}
+        ${SH.prix_ttc?rowTTC('Prix TTC Estimé',Ndv(c.pvtTTC)):''}
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
       </div></div>`;
   }).join('')}</div>`;
@@ -3828,7 +3836,7 @@ function buildDevisTable(list){
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="font-size:11px">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:800;font-family:'Montserrat',sans-serif;font-size:13px">${Ndv(c.pvtTTC)}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
@@ -4118,7 +4126,7 @@ function generateDevisPDF(){
       ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:700;white-space:nowrap;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td style="font-weight:800;font-family:'Montserrat',sans-serif;white-space:nowrap;color:var(--bleu-t)">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
   const cs=dvList.map(calcDevis);
