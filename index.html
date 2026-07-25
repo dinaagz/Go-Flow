@@ -523,6 +523,9 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
     position:fixed;left:12px;right:12px;top:auto;bottom:12px;
     min-width:0;max-width:none;max-height:min(70vh,520px);overflow-y:auto;
   }
+  /* Voile derrière la feuille : sans lui, un panneau fixe plein-largeur se confond avec le
+     contenu au-dessus au lieu de se lire comme une couche temporaire à congédier */
+  .col-picker-drop.open,.user-menu.open{box-shadow:0 0 0 100vmax rgba(15,17,34,.45),var(--sh-lg)}
 }
 /* Cibles tactiles ≥44px sans alourdir la densité souris */
 @media(pointer:coarse){
@@ -959,7 +962,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
       </div>
     </div>
     <div class="toolbar" id="dv-toolbar" style="display:none;margin-bottom:8px">
-      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher (nom, réf, fournisseur)..." aria-label="Rechercher dans le devis" id="dv-search" oninput="dvFilterChange()"></div>
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher (nom, réf, fournisseur)..." aria-label="Rechercher dans le devis" id="dv-search" oninput="dvFilterChangeDeb()"></div>
       <select class="filt" id="dv-f-cat" onchange="dvFilterChange()" aria-label="Filtrer par catégorie"><option value="">Toutes catégories</option></select>
       <select class="filt" id="dv-f-four" onchange="dvFilterChange()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
       <select class="filt" id="dv-f-trans" onchange="dvFilterChange()" aria-label="Filtrer par transitaire"><option value="">Tous transitaires</option></select>
@@ -1229,7 +1232,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
           <b>Glissez-déposez votre fichier ici</b><br>ou cliquez pour le sélectionner
         </div>
         <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
-        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="transform:scaleX(1)"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Lecture du fichier"><div class="progress-fill" style="transform:scaleX(1)"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
         <div id="imp-last-html" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
       <div id="imp-step2" style="display:none">
@@ -1250,7 +1253,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
         <div id="imp-fiche-sec" style="display:none"></div>
         <div id="imp-rich-sec" style="display:none"></div>
         <div id="imp-errs" aria-live="polite"></div>
-        <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
+        <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="imp-prog-bar" aria-label="Progression de l'import"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
         <div class="fact" style="margin-top:0">
           <button class="btn btn-sec" onclick="impBack()">← Autre fichier</button>
           <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> <span id="imp-go-lbl">Valider l'import</span></button>
@@ -1300,7 +1303,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
           </div>
         </div>
       </div>
-      <div id="exp-prog" style="display:none;margin-top:14px"><div class="progress"><div class="progress-fill" id="exp-prog-fill"></div></div><div class="prog-lbl" id="exp-prog-lbl"></div></div>
+      <div id="exp-prog" style="display:none;margin-top:14px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="exp-prog-bar" aria-label="Progression de l'export"><div class="progress-fill" id="exp-prog-fill"></div></div><div class="prog-lbl" id="exp-prog-lbl"></div></div>
       <div class="fact">
         <button class="btn btn-sec" onclick="closeMod('export-modal')">Annuler</button>
         <button class="btn btn-sec" id="exp-dl-one" onclick="expDownload(false)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> PNG séparés</button>
@@ -5568,10 +5571,14 @@ async function zipStore(files){
 
 /* ---- UTILS ---- */
 // Anime les barres de progression via transform (composite GPU) plutôt que width (déclenche un reflow à chaque tick de chunk)
-function setProgress(el,pct){el.style.transform=`scaleX(${pct/100})`;}
+function setProgress(el,pct){
+  el.style.transform=`scaleX(${pct/100})`;
+  const bar=el.closest('.progress');
+  if(bar)bar.setAttribute('aria-valuenow',Math.round(pct));
+}
 // Limite les recalculs coûteux (filtrage + reconstruction complète du DOM) déclenchés à chaque frappe dans un champ de recherche
 function debounce(fn,ms=180){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
-const renderCatDeb=debounce(renderCat),renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans);
+const renderCatDeb=debounce(renderCat),renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans),dvFilterChangeDeb=debounce(dvFilterChange);
 let modReturnFocus=null;
 function openMod(id){
   modReturnFocus=document.activeElement;
@@ -5616,7 +5623,7 @@ document.addEventListener('keydown',e=>{
     if(fn){e.preventDefault();fn();}
     return;
   }
-  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open')){
+  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.col-picker-drop.open,.user-menu.open')){
     if(e.key==='/'){
       const id=KB_SEARCH_ID[currentTabName()];
       if(id){e.preventDefault();document.getElementById(id).focus();}
