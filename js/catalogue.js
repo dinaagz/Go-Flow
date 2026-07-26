@@ -189,9 +189,9 @@ function prodGroupCard(g){
     ${cols.photos?cardGallery(w):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
-      <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -253,9 +253,9 @@ function prodGroupTable(groups){
       ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
-        <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -557,9 +557,9 @@ function prodCard(p){
     ${cols.photos?cardGallery(p):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
-      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -617,9 +617,9 @@ function prodTable(list){
       <td class="no-print"><div style="display:flex;gap:4px;position:relative">
         ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
-        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -877,7 +877,7 @@ function renderFour(){
         </div>
         <div class="card-acts">
           <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">${ICO('pencil')} Modifier</button>
-          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">${ICO('trash')}</button>
+          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')" title="Supprimer" aria-label="Supprimer ${String(f.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
         </div>
       </div></div>`;
   }).join('')}</div>`;
@@ -973,8 +973,8 @@ function renderTrans(){
         ${t.wa?`<span>${ICO('phone')} ${t.wa}</span>`:''}
       </div>
       <div class="card-acts">
-        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')">${ICO('pencil')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')">${ICO('trash')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')" title="Modifier" aria-label="Modifier ${String(t.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')" title="Supprimer" aria-label="Supprimer ${String(t.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
       </div>
     </div></div>`).join('')}</div>`;
 }

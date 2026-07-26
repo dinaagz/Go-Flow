@@ -35,6 +35,8 @@ colors:
   warn: "#7A5905"
   warn-bg: "#FFF6DC"
   warn-brd: "#F0C838"
+  info-bg: "rgba(0,153,255,.05)"
+  info-brd: "rgba(0,153,255,.3)"
 typography:
   display:
     fontFamily: "Montserrat, sans-serif"
