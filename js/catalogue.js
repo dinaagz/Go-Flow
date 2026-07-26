@@ -126,7 +126,7 @@ function cardPriceRows(p,c){
   return[
     cols.achat  ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.exwUX)}</span></div>`:'',
     cols.prach&&c.fretLocalX?`<div class="pr"><span class="pr-lbl">Fret local</span><span class="pr-val">${N(c.fretLocalX)}</span></div>`:'',
-    cols.revient?`<div class="pr pr-click" id="cdt-${p.id}" onclick="toggleCostDetail('${p.id}',event)" title="Voir le détail du coût de revient"><span class="pr-lbl">Coût de Revient HT ${ICO('chev')}</span><span class="pr-val">${N(c.coutRevientUX)}</span></div>${detail}`:'',
+    cols.revient?`<div class="pr pr-click" id="cdt-${p.id}" role="button" tabindex="0" aria-label="Voir le détail du coût de revient" onclick="toggleCostDetail('${p.id}',event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCostDetail('${p.id}',event)}" title="Voir le détail du coût de revient"><span class="pr-lbl">Coût de Revient HT ${ICO('chev')}</span><span class="pr-val">${N(c.coutRevientUX)}</span></div>${detail}`:'',
     cols.fret   ?`<div class="pr"><span class="pr-lbl">Frais logistiques <small>(${c.mode})</small></span><span class="pr-val">${N(c.fraisLogU)}</span></div>`:'',
     cols.marge  ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.margeU)} <small>(${Nd(c.margePct,1)}%)</small></span></div>`:'',
     cols.vente  ?`<div class="pr pr-strong"><span class="pr-lbl">Prix de Vente HT</span><span class="pr-val">${N(c.pvuHT)}</span></div>`:'',
@@ -144,7 +144,7 @@ function toggleCostDetail(id,ev){
 /* Galerie d'images sur la carte : miniatures cliquables qui remplacent l'image principale */
 function cardGallery(p){
   if(!p.photos||p.photos.length<2)return'';
-  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${String(p.nom||'').replace(/"/g,'&quot;')}" onerror="this.remove()" onclick="swapCardImg(this)">`).join('')}</div>`;
+  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${String(p.nom||'').replace(/"/g,'&quot;')}" role="button" tabindex="0" onerror="this.remove()" onclick="swapCardImg(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();swapCardImg(this)}">`).join('')}</div>`;
 }
 function swapCardImg(t){
   const card=t.closest('.card');if(!card)return;

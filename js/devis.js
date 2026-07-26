@@ -860,7 +860,7 @@ function generateDevisPDF(){
     cl.adr?`${T.client.adr}${cl.adr}`:'',
     cl.ville||'',
     cl.assujetti?`<em>${T.client.assujetti}</em>`:''
-  ].filter(Boolean).join('<br>')||`<span style="color:#999;font-style:italic">${T.client.aucune}</span>`;
+  ].filter(Boolean).join('<br>')||`<span style="color:var(--muted);font-style:italic">${T.client.aucune}</span>`;
   // En-têtes : toutes les colonnes suivent la sélection de l'aperçu — aucune colonne forcée.
   const devL=devisFX.dev!=='XOF'?' ('+devisFX.dev+')':'';
   const colH=[
@@ -946,7 +946,7 @@ function generateDevisPDF(){
         </tr>`;
   const plainRow=(lbl,val)=>`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${lbl}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:var(--muted)">${lbl}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${val}</td>
         </tr>`;
   // Bandeau de total imprimé (fond sombre, texte blanc) : même famille/graisse que la valeur héros
@@ -987,17 +987,17 @@ function generateDevisPDF(){
     <div class="dv-hdr">
       <div>
         <div class="dv-logo">Go<span style="color:#0099FF">.</span>Group</div>
-        <div style="font-size:11px;color:#555;margin-top:4px">Go Group · Lomé, Togo</div>
-        <div style="font-size:11px;color:#555">globalgo.tg@gmail.com · +228 96 02 39 03</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Go Group · Lomé, Togo</div>
+        <div style="font-size:11px;color:var(--muted)">globalgo.tg@gmail.com · +228 96 02 39 03</div>
       </div>
       <div class="dv-meta">
         <div class="dv-num" style="font-size:16px;font-weight:800;color:#1A1A2E">${T.hdr.devisNum}${ref}</div>
         <div>${T.hdr.date}${dateFr}</div>
-        <div style="margin-top:6px;font-size:10px;color:#aaa">${T.hdr.valable}</div>
+        <div style="margin-top:6px;font-size:10px;color:var(--muted)">${T.hdr.valable}</div>
       </div>
     </div>
     <div class="dv-client-box">
-      <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${T.hdr.destinataire}</div>
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${T.hdr.destinataire}</div>
       ${clientHtml}
     </div>
     <table class="dv-table">
@@ -1006,7 +1006,7 @@ function generateDevisPDF(){
       <tfoot>
         ${ficheCout?Object.keys(coutRevientParDev).map(dev=>`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${T.foot.coutRevientTotal}${Object.keys(coutRevientParDev).length>1?' ('+dev+')':''}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:var(--muted)">${T.foot.coutRevientTotal}${Object.keys(coutRevientParDev).length>1?' ('+dev+')':''}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Nd(coutRevientParDev[dev],2)} ${{RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[dev]||dev}</td>
         </tr>
         `).join(''):''}

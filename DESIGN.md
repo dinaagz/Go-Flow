@@ -17,6 +17,10 @@ colors:
   bordure-2: "#D5DBE8"
   encre: "#1A1D33"
   sourdine: "#66708A"
+  texte-secondaire: "#4A5065"
+  icone-sourdine: "#8B94AC"
+  entete-tableau: "#525C74"
+  bordure-survol: "#C3CADC"
   bleu-canal: "#006ACC"
   vert-marge: "#00794A"
   orange-terre: "#C2500A"
@@ -137,7 +141,12 @@ Une palette à deux étages : six teintes de marque vives pour la signature et l
 - **Surface** (#FFFFFF) : cartes, panneaux, modales.
 - **Bordure / Bordure 2** (#E5E8F1 / #D5DBE8) : filets 1px au repos / au survol.
 - **Sourdine** (#66708A) : libellés secondaires (4,9:1 sur blanc).
+- **Texte secondaire** (#4A5065) : onglets inactifs, boutons ghost, code inline — plus foncé que Sourdine, jamais utilisé pour un texte d'état.
+- **Icône sourdine** (#8B94AC) : icônes secondaires (onglet inactif), jamais pour du texte.
+- **En-tête tableau** (#525C74) : libellés `<thead>`.
+- **Bordure survol** (#C3CADC) : `border-color` au `:hover` des champs/boutons secondaires — jamais au repos.
 - **Sémantiques** : `--ok` / `--err` / `--warn`, chacun avec sa paire de fonds pastel — jamais de couleur d'état inline.
+- **Info** : `--info-bg` / `--info-brd` (bleu très dilué) — encadré informatif neutre (ex. « Sauvegarde automatique »), distinct de `--ok` (succès) et `--warn` (avertissement).
 
 ### Named Rules
 **La Règle du Spectre (v3 — quatre emplacements signés + accents premium documentés).** Le dégradé six couleurs apparaît en intégralité et dans l'ordre rouge → violet à quatre **emplacements signés**, qui portent l'identité et ne bougent jamais : la bande de marque (`.grad-bar`), la bordure du CTA de livraison (`.btn-grad`), le logo (`.logo`), et la devise « Promis. Livré. » sous le logo (`.sb-tag`) — seuls ces deux derniers ont le droit au dégradé *en texte* (`background-clip:text`), le reste de l'interface n'écrit jamais de texte en dégradé.
