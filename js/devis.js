@@ -164,7 +164,7 @@ async function onDevisDevChange(){
     const hm=new Date(fxCache.ts).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
     msg.innerHTML=`<span style="color:var(--vert-t)">✓ Taux marché (${hm}) — modifiable librement</span>`;
   }else{
-    msg.innerHTML=`<span style="color:#b45309">API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
+    msg.innerHTML=`<span style="color:var(--warn)">API indisponible — taux de secours utilisé. Saisissez le bon taux si besoin.</span>`;
   }
   renderDevisCart();saveDevisPrefs();
 }
@@ -296,8 +296,15 @@ function dvNoteField(item,fs){
 
 function clearCart(){
   if(!devisCart.length)return;
-  if(!confirm('Vider entièrement le panier de devis ?'))return;
-  devisCart=[];saveDevisCartLS();renderDevisCart();renderCat();toast('Panier vidé');
+  const n=devisCart.length;
+  askConfirm(`Vider les ${n} article${n>1?'s':''} du panier de devis ?`,{title:'Vider le panier',okLabel:'Vider'}).then(ok=>{
+    if(!ok)return;
+    const prev=devisCart;
+    devisCart=[];saveDevisCartLS();renderDevisCart();renderCat();
+    toastUndo('Panier de devis vidé',()=>{
+      devisCart=prev;saveDevisCartLS();renderDevisCart();renderCat();toast('Suppression annulée');
+    });
+  });
 }
 
 function isInCart(pid){return devisCart.some(x=>x.pid===pid);}
@@ -507,6 +514,9 @@ function buildDevisGrid(list){
   const SH=cmVisible('devis');
   // ligne d'info « label / valeur » — une par colonne cochée
   const row=(lbl,val)=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:10px;margin-top:2px"><span style="color:var(--muted)">${lbl}</span><span style="font-weight:600;text-align:right">${val}</span></div>`;
+  // Le TTC du panier reprend le traitement .pr-ttc de la carte catalogue plutôt que la ligne row() générique :
+  // c'est le même chiffre, sur l'écran à plus fort enjeu (devis client) — il ne doit pas être plus discret ailleurs.
+  const rowTTC=(lbl,val)=>`<div class="pr" style="margin-top:6px"><span class="pr-lbl pr-ttc">${lbl}</span><span class="pr-val pr-ttc">${val}</span></div>`;
   return`<div class="grid">${list.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
@@ -551,7 +561,7 @@ function buildDevisGrid(list){
         </div>`:''}
         ${SH.total_ht?row('Prix total HT',Ndv(c.pvtHT)):''}
         ${SH.frais_log?row('Frais logistiques Estimé',Ndv(c.fraisLog)):''}
-        ${SH.prix_ttc?row('Prix TTC Estimé',`<span style="color:var(--bleu-t)">${Ndv(c.pvtTTC)}</span>`):''}
+        ${SH.prix_ttc?rowTTC('Prix TTC Estimé',Ndv(c.pvtTTC)):''}
         <button class="btn btn-danger btn-sm" style="margin-top:8px;width:100%" onclick="removeFromCart('${item.cid}')">${ICO('trash')} Retirer du devis</button>
       </div></div>`;
   }).join('')}</div>`;
@@ -614,7 +624,7 @@ function buildDevisTable(list){
       ${SH.prix_ht?`<td style="font-weight:600">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="font-size:11px">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="color:var(--bleu-t);font-weight:600">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td class="ttc-hero" style="font-size:13px">${Ndv(c.pvtTTC)}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
@@ -850,7 +860,7 @@ function generateDevisPDF(){
     cl.adr?`${T.client.adr}${cl.adr}`:'',
     cl.ville||'',
     cl.assujetti?`<em>${T.client.assujetti}</em>`:''
-  ].filter(Boolean).join('<br>')||`<span style="color:#999;font-style:italic">${T.client.aucune}</span>`;
+  ].filter(Boolean).join('<br>')||`<span style="color:var(--muted);font-style:italic">${T.client.aucune}</span>`;
   // En-têtes : toutes les colonnes suivent la sélection de l'aperçu — aucune colonne forcée.
   const devL=devisFX.dev!=='XOF'?' ('+devisFX.dev+')':'';
   const colH=[
@@ -904,7 +914,7 @@ function generateDevisPDF(){
       ${SH.prix_ht?`<td style="font-weight:600;white-space:nowrap">${Ndv(c.pvuHT)}</td>`:''}
       ${SH.total_ht?`<td style="font-weight:700;white-space:nowrap">${Ndv(c.pvtHT)}</td>`:''}
       ${SH.frais_log?`<td style="white-space:nowrap">${Ndv(c.fraisLog)}</td>`:''}
-      ${SH.prix_ttc?`<td style="font-weight:700;white-space:nowrap;color:#0066cc">${Ndv(c.pvtTTC)}</td>`:''}
+      ${SH.prix_ttc?`<td class="ttc-hero" style="font-size:13px;white-space:nowrap">${Ndv(c.pvtTTC)}</td>`:''}
     </tr>`;
   }).join('');
   const cs=dvList.map(calcDevis);
@@ -936,13 +946,15 @@ function generateDevisPDF(){
         </tr>`;
   const plainRow=(lbl,val)=>`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${lbl}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:var(--muted)">${lbl}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${val}</td>
         </tr>`;
+  // Bandeau de total imprimé (fond sombre, texte blanc) : même famille/graisse que la valeur héros
+  // (La Règle du Montant), mais la couleur reste blanche ici — inversion de contexte légitime, pas une dérive.
   const finalRow=(lbl,val)=>`
         <tr style="background:#1A1A2E;color:#fff">
           <td colspan="${spanLbl}" style="text-align:right;font-weight:700;font-size:13px">${lbl}</td>
-          <td colspan="${spanVal}" style="font-weight:800;font-size:15px;white-space:nowrap">${val}</td>
+          <td colspan="${spanVal}" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;white-space:nowrap">${val}</td>
         </tr>`;
   let recapRows='';
   if(anyTot){
@@ -975,17 +987,17 @@ function generateDevisPDF(){
     <div class="dv-hdr">
       <div>
         <div class="dv-logo">Go<span style="color:#0099FF">.</span>Group</div>
-        <div style="font-size:11px;color:#555;margin-top:4px">Go Group · Lomé, Togo</div>
-        <div style="font-size:11px;color:#555">globalgo.tg@gmail.com · +228 96 02 39 03</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Go Group · Lomé, Togo</div>
+        <div style="font-size:11px;color:var(--muted)">globalgo.tg@gmail.com · +228 96 02 39 03</div>
       </div>
       <div class="dv-meta">
         <div class="dv-num" style="font-size:16px;font-weight:800;color:#1A1A2E">${T.hdr.devisNum}${ref}</div>
         <div>${T.hdr.date}${dateFr}</div>
-        <div style="margin-top:6px;font-size:10px;color:#aaa">${T.hdr.valable}</div>
+        <div style="margin-top:6px;font-size:10px;color:var(--muted)">${T.hdr.valable}</div>
       </div>
     </div>
     <div class="dv-client-box">
-      <div style="font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${T.hdr.destinataire}</div>
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${T.hdr.destinataire}</div>
       ${clientHtml}
     </div>
     <table class="dv-table">
@@ -994,7 +1006,7 @@ function generateDevisPDF(){
       <tfoot>
         ${ficheCout?Object.keys(coutRevientParDev).map(dev=>`
         <tr>
-          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:#555">${T.foot.coutRevientTotal}${Object.keys(coutRevientParDev).length>1?' ('+dev+')':''}</td>
+          <td colspan="${spanLbl}" style="text-align:right;font-size:11px;color:var(--muted)">${T.foot.coutRevientTotal}${Object.keys(coutRevientParDev).length>1?' ('+dev+')':''}</td>
           <td colspan="${spanVal}" style="font-size:12px;white-space:nowrap">${Nd(coutRevientParDev[dev],2)} ${{RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[dev]||dev}</td>
         </tr>
         `).join(''):''}

@@ -13,6 +13,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
 <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
 <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
+<symbol id="i-alert-triangle" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
 <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
 <symbol id="i-factory" viewBox="0 0 24 24"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></symbol>
 <symbol id="i-ship" viewBox="0 0 24 24"><path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.94 5.34 2.81 7.76"/><path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/><path d="M12 10v4"/><path d="M12 2v3"/></symbol>
@@ -36,6 +37,8 @@
 <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
 <symbol id="i-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+<symbol id="i-keyboard" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/><path d="M18 8h.01"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/><path d="M7 16h10"/></symbol>
 <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
 <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
 <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
@@ -99,10 +102,31 @@
     <button class="tab" id="tab-devis" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-devis" onclick="tab('devis')"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><span>Devis</span></button>
   </nav>
   <div class="sb-foot">
+    <button class="sb-kb-btn" onclick="openMod('shortcuts-modal')" aria-haspopup="dialog"><svg class="ic" aria-hidden="true"><use href="#i-keyboard"/></svg> Raccourcis clavier</button>
     <div class="sb-tag">Promis. Livré.</div>
     <div class="sb-info">Go Group · Lomé, Togo<br>globalgo.tg@gmail.com</div>
   </div>
 </aside>
+
+<!-- RACCOURCIS CLAVIER -->
+<div class="overlay" id="shortcuts-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="kbm-title" style="max-width:440px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="kbm-title">Raccourcis clavier</h2>
+      <button class="modal-x" onclick="closeMod('shortcuts-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="kb-list">
+        <div class="kb-row"><span>Rechercher dans l'onglet actif</span><kbd>/</kbd></div>
+        <div class="kb-row"><span>Nouveau (produit / fournisseur / transitaire)</span><kbd>N</kbd></div>
+        <div class="kb-row"><span>Enregistrer la fiche ouverte</span><span><kbd>Ctrl</kbd> + <kbd>Entrée</kbd></span></div>
+        <div class="kb-row"><span>Fermer la fenêtre ou le menu ouvert</span><kbd>Échap</kbd></div>
+        <div class="kb-row"><span>Changer d'onglet (une fois sur la barre d'onglets)</span><span><kbd>←</kbd> <kbd>→</kbd></span></div>
+        <div class="kb-row"><span>Afficher ces raccourcis</span><kbd>?</kbd></div>
+      </div>
+    </div>
+  </div>
+</div>
 <main class="main-area">
 <div class="wrap" id="main">
 
@@ -114,6 +138,7 @@
     <button class="modal-x" onclick="toggleSettings()" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
   </div>
   <div class="modal-body">
+  <h2 class="sec-hdr"><svg class="ic" aria-hidden="true"><use href="#i-percent"/></svg>Tarifs &amp; marges</h2>
   <div class="s-grid">
     <div class="fgrp"><label class="flbl" for="s_tc">Taux change (XOF/RMB)</label><input type="number" class="fc" id="s_tc" step="0.1"></div>
     <div class="fgrp"><label class="flbl" for="s_fa">Frais logistiques aérien (XOF/kg)</label><input type="number" class="fc" id="s_fa"></div>
@@ -128,15 +153,17 @@
     <div class="fgrp"><label class="flbl" for="s_ass_on">Trade Assurance (optionnelle)</label>
       <div style="display:flex;gap:6px">
         <select class="fc" id="s_ass_on" style="flex:1"><option value="0">Désactivée</option><option value="1">Activée</option></select>
-        <select class="fc" id="s_ass_mode" style="flex:1"><option value="pct">Taux (%)</option><option value="fixe">Fixe</option></select>
-        <input type="number" class="fc" id="s_ass_val" step="0.01" min="0" style="flex:.8">
+        <select class="fc" id="s_ass_mode" style="flex:.9"><option value="pct">Taux (%)</option><option value="fixe">Fixe</option></select>
+        <input type="number" class="fc" id="s_ass_val" step="0.01" min="0" style="flex:1.1">
       </div>
     </div>
     <div class="fgrp"><label class="flbl" for="s_tvi">TVA interne (%) — clients assujettis uniquement</label><input type="number" class="fc" id="s_tvi" step="0.5"></div>
   </div>
-  <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">Les tarifs transitaire sont <b>tout-compris</b> (fret + douane + taxes) : la TVA n'est jamais ajoutée en plus des frais logistiques. La TVA interne n'apparaît séparément que pour les clients professionnels assujettis.</div>
-  <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;padding:8px 10px;border:1px solid rgba(255,140,0,.35);border-radius:8px;background:rgba(255,140,0,.06)">⚠️ Vos données sont stockées localement dans votre navigateur. Pensez à exporter régulièrement vos données pour éviter toute perte en cas de vidage du cache ou de changement d'appareil.</div>
-  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid rgba(0,153,255,.3);border-radius:8px;background:rgba(0,153,255,.05)">
+  <div style="font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6">Les tarifs transitaire sont <b>tout-compris</b> (fret + douane + taxes) : la TVA n'est jamais ajoutée en plus des frais logistiques. La TVA interne n'apparaît séparément que pour les clients professionnels assujettis.</div>
+
+  <h2 class="sec-hdr" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg>Sauvegarde &amp; export</h2>
+  <div style="font-size:12px;color:var(--warn);line-height:1.6;padding:8px 10px;border:1px solid var(--warn-brd);border-radius:8px;background:var(--warn-bg);display:flex;gap:7px;align-items:flex-start"><svg class="ic" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><use href="#i-alert-triangle"/></svg><span>Vos données sont stockées localement dans votre navigateur. Pensez à exporter régulièrement vos données pour éviter toute perte en cas de vidage du cache ou de changement d'appareil.</span></div>
+  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid var(--info-brd);border-radius:8px;background:var(--info-bg)">
     <div style="font-weight:700;color:var(--text);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> Sauvegarde automatique</div>
     <div id="bkp-dir-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-sec" id="bkp-dir-btn" onclick="bkpChooseDir()"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg> <span id="bkp-dir-btn-lbl">Définir le dossier de sauvegarde</span></button>
@@ -145,12 +172,7 @@
     <div id="bkp-dir-status" style="margin-top:6px"></div>
     <div id="bkp-dir-hint" style="margin-top:4px"></div>
   </div>
-  <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;padding:10px 12px;border:1px solid rgba(0,204,119,.3);border-radius:8px;background:rgba(0,204,119,.05)">
-    <div style="font-weight:700;color:var(--text);font-size:12px;margin-bottom:6px;display:flex;align-items:center;gap:6px"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg> Stockage local</div>
-    <div id="stor-panel">Calcul en cours…</div>
-  </div>
-  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-sec" onclick="exportBackup()"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> Exporter mes données</button>
     <button class="btn btn-sec" onclick="importBackup()"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer mes données</button>
     <span style="display:inline-flex;gap:0;align-items:stretch">
@@ -160,6 +182,15 @@
         <option value="csv">CSV</option>
       </select>
     </span>
+  </div>
+
+  <h2 class="sec-hdr" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg>Stockage local</h2>
+  <div style="font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;border:1px solid var(--ok-brd);border-radius:8px;background:var(--ok-bg)">
+    <div id="stor-panel">Calcul en cours…</div>
+  </div>
+
+  <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
     <button class="btn btn-sec" onclick="toggleSettings()">Fermer</button>
   </div>
   <input type="file" id="bkp-file" accept=".json,application/json" style="display:none" onchange="handleBackupFile(this)">
@@ -171,28 +202,41 @@
 <div id="t-catalogue" role="tabpanel" aria-labelledby="tab-catalogue">
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCat()"></div>
-    <select class="filt" id="f-cat" onchange="renderCat()">
-      <option value="">Toutes catégories</option>
-      <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
-      <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
-      <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
-    </select>
-    <select class="filt" id="f-four" onchange="renderCat()"><option value="">Tous fournisseurs</option></select>
-    <div class="view-tog">
-      <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
-      <button class="view-btn" id="vl" onclick="setView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
+    <div class="tb-group" role="group" aria-label="Recherche et filtres">
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCatDeb()"></div>
+      <select class="filt" id="f-cat" onchange="renderCat()" aria-label="Filtrer par catégorie">
+        <option value="">Toutes catégories</option>
+        <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
+        <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
+        <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
+      </select>
+      <select class="filt" id="f-four" onchange="renderCat()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
     </div>
-    <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg> Grouper</button>
-    <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" style="display:none">
-      <option value="prix_bas">Prix bas</option>
-      <option value="meilleure_qualite">Meilleure qualité</option>
-      <option value="meilleur_rapport">Meilleur rapport</option>
-    </select>
-    <div class="col-picker-wrap" id="cm-catalogue"></div>
-    <button class="btn btn-sec" onclick="openImportModal('produits')" title="Importer des produits en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
-    <button class="btn btn-sec" id="exp-mode-btn" onclick="expToggleMode()" title="Exporter des produits en images design" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Export image</button>
-    <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
+    <div class="tb-sep" aria-hidden="true"></div>
+    <div class="tb-group" role="group" aria-label="Affichage et organisation">
+      <div class="view-tog">
+        <button class="view-btn active" id="vg" onclick="setView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
+        <button class="view-btn" id="vl" onclick="setView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
+      </div>
+      <button class="grp-btn" id="grp-btn" onclick="toggleGrouped()" title="Regrouper les produits identiques"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg> Grouper</button>
+      <select class="filt" id="strat-sel" onchange="setStratPrix(this.value)" title="Stratégie de sélection du produit gagnant" aria-label="Stratégie de sélection du produit gagnant" style="display:none">
+        <option value="prix_bas">Prix bas</option>
+        <option value="meilleure_qualite">Meilleure qualité</option>
+        <option value="meilleur_rapport">Meilleur rapport</option>
+      </select>
+      <div class="col-picker-wrap" id="cm-catalogue"></div>
+    </div>
+    <div class="tb-sep" aria-hidden="true"></div>
+    <div class="tb-group" role="group" aria-label="Actions sur le catalogue">
+      <div class="tb-more-wrap">
+        <button class="btn btn-sec tb-more-btn" id="cat-more-btn" onclick="tbMoreToggle(this)" aria-haspopup="true" aria-expanded="false" aria-controls="cat-more-drop" title="Plus d'actions"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg> Plus</button>
+        <div class="user-menu tb-more-drop" id="cat-more-drop" role="menu">
+          <button class="user-menu-item" role="menuitem" onclick="tbMoreCloseAll();openImportModal('produits')" title="Importer des produits en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
+          <button class="user-menu-item" role="menuitem" id="exp-mode-btn" onclick="tbMoreCloseAll();expToggleMode()" title="Exporter des produits en images design" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Export image</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openProdModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Produit</button>
+    </div>
   </div>
   <div id="cat-cont"></div>
 </div>
@@ -200,7 +244,7 @@
 <!-- FOURNISSEURS -->
 <div id="t-fournisseurs" role="tabpanel" aria-labelledby="tab-fournisseurs" style="display:none">
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFour()"></div>
+    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un fournisseur" id="four-search" oninput="renderFourDeb()"></div>
     <button class="btn btn-sec" onclick="openImportModal('fournisseurs')" title="Importer des fournisseurs en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openFourModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Fournisseur</button>
   </div>
@@ -210,7 +254,7 @@
 <!-- TRANSITAIRES -->
 <div id="t-transitaires" role="tabpanel" aria-labelledby="tab-transitaires" style="display:none">
   <div class="toolbar">
-    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTrans()"></div>
+    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un transitaire" id="tr-search" oninput="renderTransDeb()"></div>
     <button class="btn btn-sec" onclick="openImportModal('transitaires')" title="Importer des transitaires en masse (CSV, Excel, PDF, HTML)"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Importer</button>
     <button class="btn btn-primary" onclick="openTransModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Transitaire</button>
   </div>
@@ -378,7 +422,7 @@
       </div>
     </div>
     <div class="toolbar" id="dv-toolbar" style="display:none;margin-bottom:8px">
-      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher (nom, réf, fournisseur)..." aria-label="Rechercher dans le devis" id="dv-search" oninput="dvFilterChange()"></div>
+      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher (nom, réf, fournisseur)..." aria-label="Rechercher dans le devis" id="dv-search" oninput="dvFilterChangeDeb()"></div>
       <select class="filt" id="dv-f-cat" onchange="dvFilterChange()" aria-label="Filtrer par catégorie"><option value="">Toutes catégories</option></select>
       <select class="filt" id="dv-f-four" onchange="dvFilterChange()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
       <select class="filt" id="dv-f-trans" onchange="dvFilterChange()" aria-label="Filtrer par transitaire"><option value="">Tous transitaires</option></select>
@@ -436,7 +480,7 @@
           </select>
         </div>
         <div class="fgrp"><label class="flbl" for="p-four">Fournisseur</label><select class="fc" id="p-four"></select></div>
-        <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" oninput="calcPrev()"></div>
+        <div class="fgrp"><label class="flbl" for="p-prix">Prix EXW *</label><input type="number" class="fc" id="p-prix" step="0.01" required aria-required="true" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-prach">Fret local (même devise)</label><input type="number" class="fc" id="p-prach" step="0.01" placeholder="0 — transport fournisseur → transitaire" oninput="calcPrev()"></div>
         <div class="fgrp"><label class="flbl" for="p-dev">Devise</label>
           <select class="fc" id="p-dev" onchange="calcPrev()">
@@ -466,7 +510,9 @@
         <div class="fgrp full"><label class="flbl" for="p-desc">Description</label><textarea class="fc" id="p-desc" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl" for="p-specs">Spécificités techniques</label><textarea class="fc" id="p-specs" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl">Photos (max 3)</label>
-          <div class="upload-area" onclick="document.getElementById('p-photos-in').click()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Cliquer pour ajouter des photos (PNG, JPG, WebP)</div>
+          <div class="upload-area" role="button" tabindex="0" aria-label="Ajouter des photos (PNG, JPG, WebP)"
+            onclick="document.getElementById('p-photos-in').click()"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('p-photos-in').click()}"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Cliquer pour ajouter des photos (PNG, JPG, WebP)</div>
           <input type="file" id="p-photos-in" accept="image/*" multiple style="display:none" onchange="addPics(this)">
           <div class="thumbs" id="p-thumbs"></div>
         </div>
@@ -522,7 +568,9 @@
         <div class="fgrp full"><label class="flbl" for="f-com">Commentaire</label><textarea class="fc" id="f-com" rows="2"></textarea></div>
         <div class="fgrp full"><label class="flbl" for="f-logo-url">Logo (URL ou upload)</label>
           <input type="url" class="fc" id="f-logo-url" placeholder="https://... (URL directe du logo)" style="margin-bottom:6px" oninput="previewLogoUrl()">
-          <div class="upload-area" onclick="document.getElementById('f-logo-in').click()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Ou uploader un logo depuis votre appareil</div>
+          <div class="upload-area" role="button" tabindex="0" aria-label="Uploader un logo depuis votre appareil"
+            onclick="document.getElementById('f-logo-in').click()"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('f-logo-in').click()}"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Ou uploader un logo depuis votre appareil</div>
           <input type="file" id="f-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'f-logo-prev','f-logo-dat')">
           <div class="thumbs" id="f-logo-prev"></div>
           <input type="hidden" id="f-logo-dat">
@@ -563,7 +611,9 @@
           <select class="fc" id="t-ass"><option value="0">Non</option><option value="1">Oui — 1%</option><option value="1.5">Oui — 1.5%</option><option value="2">Oui — 2%</option></select>
         </div>
         <div class="fgrp full"><label class="flbl">Logo</label>
-          <div class="upload-area" onclick="document.getElementById('t-logo-in').click()"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Ajouter le logo</div>
+          <div class="upload-area" role="button" tabindex="0" aria-label="Ajouter le logo"
+            onclick="document.getElementById('t-logo-in').click()"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('t-logo-in').click()}"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Ajouter le logo</div>
           <input type="file" id="t-logo-in" accept="image/*" style="display:none" onchange="addLogo(this,'t-logo-prev','t-logo-dat')">
           <div class="thumbs" id="t-logo-prev"></div>
           <input type="hidden" id="t-logo-dat">
@@ -648,7 +698,7 @@
           <b>Glissez-déposez votre fichier ici</b><br>ou cliquez pour le sélectionner
         </div>
         <input type="file" id="imp-file" accept=".csv,.xlsx,.xls,.pdf,.html,.htm" style="display:none" onchange="impFileInput(this)">
-        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress"><div class="progress-fill" style="width:100%"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
+        <div id="imp-load" style="display:none;margin-top:12px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" aria-label="Lecture du fichier"><div class="progress-fill" style="transform:scaleX(1)"></div></div><div class="prog-lbl" id="imp-load-lbl">Lecture du fichier…</div></div>
         <div id="imp-last-html" style="display:none;margin-top:10px;text-align:center"></div>
       </div>
       <div id="imp-step2" style="display:none">
@@ -669,7 +719,7 @@
         <div id="imp-fiche-sec" style="display:none"></div>
         <div id="imp-rich-sec" style="display:none"></div>
         <div id="imp-errs" aria-live="polite"></div>
-        <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
+        <div id="imp-prog" style="display:none;margin-bottom:12px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="imp-prog-bar" aria-label="Progression de l'import"><div class="progress-fill" id="imp-prog-fill"></div></div><div class="prog-lbl" id="imp-prog-lbl"></div></div>
         <div class="fact" style="margin-top:0">
           <button class="btn btn-sec" onclick="impBack()">← Autre fichier</button>
           <button class="btn btn-primary" id="imp-go" onclick="impRun()"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> <span id="imp-go-lbl">Valider l'import</span></button>
@@ -719,7 +769,7 @@
           </div>
         </div>
       </div>
-      <div id="exp-prog" style="display:none;margin-top:14px"><div class="progress"><div class="progress-fill" id="exp-prog-fill"></div></div><div class="prog-lbl" id="exp-prog-lbl"></div></div>
+      <div id="exp-prog" style="display:none;margin-top:14px"><div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="exp-prog-bar" aria-label="Progression de l'export"><div class="progress-fill" id="exp-prog-fill"></div></div><div class="prog-lbl" id="exp-prog-lbl"></div></div>
       <div class="fact">
         <button class="btn btn-sec" onclick="closeMod('export-modal')">Annuler</button>
         <button class="btn btn-sec" id="exp-dl-one" onclick="expDownload(false)"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg> PNG séparés</button>
@@ -737,9 +787,28 @@
   <button class="btn btn-ghost btn-sm" onclick="expToggleMode()"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg> Annuler</button>
 </div>
 
+<!-- Modale de confirmation (remplace confirm() natif — nomme l'élément concerné) -->
+<div class="overlay" id="confirm-modal">
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="cfm-title" aria-describedby="cfm-msg" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="cfm-title">Confirmer</h2>
+      <button class="modal-x" onclick="cfmCancel()" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p id="cfm-msg" style="font-size:13px;line-height:1.55;white-space:pre-line"></p>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="cfmCancel()">Annuler</button>
+        <button class="btn btn-danger" id="cfm-ok" onclick="cfmConfirm()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- L'ordre compte : scripts classiques partageant une seule portée globale, le code de plus haut niveau
+     de chaque fichier s'exécute dans cet ordre — voir CLAUDE.md "Architecture" -->
 <script src="js/data-store.js"></script>
 <script src="js/seed-data.js"></script>
 <script src="js/column-manager.js"></script>

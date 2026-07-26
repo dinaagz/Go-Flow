@@ -145,3 +145,26 @@ function setView(v){
   document.getElementById('vl').classList.toggle('active',v==='list');
   renderCat();
 }
+// Menu "Plus d'actions" de la barre d'outils catalogue (regroupe les actions rares : import, export image)
+function tbMoreToggle(btn){
+  const wrap=btn.closest('.tb-more-wrap'),drop=wrap.querySelector('.tb-more-drop');
+  const open=!drop.classList.contains('open');
+  tbMoreCloseAll();
+  drop.classList.toggle('open',open);
+  btn.setAttribute('aria-expanded',open);
+  if(open){
+    const close=e=>{
+      if(wrap.contains(e.target))return;
+      tbMoreCloseAll();
+      document.removeEventListener('click',close);
+    };
+    setTimeout(()=>document.addEventListener('click',close),0);
+  }
+}
+function tbMoreCloseAll(){
+  document.querySelectorAll('.tb-more-drop.open').forEach(d=>{
+    d.classList.remove('open');
+    const b=d.closest('.tb-more-wrap').querySelector('.tb-more-btn');
+    if(b)b.setAttribute('aria-expanded','false');
+  });
+}
