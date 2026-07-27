@@ -8,6 +8,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+<!-- Phase 1B: Tailwind utilities layer (theme.css + utilities.css only, no
+     preflight reset) — available for new markup, does not restyle anything
+     above. Compiled by the @tailwindcss/vite plugin; requires `npm run dev`
+     or `npm run build` (see vite.config.js) — a raw file:// / http.server
+     open won't compile it, but nothing existing depends on it yet. -->
+<link rel="stylesheet" href="css/tailwind.css">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
@@ -748,6 +754,12 @@
      keeps every file executing in this exact document order, just delayed
      until after parsing (a no-op in practice since these tags are already
      at the end of <body>). -->
+<!-- Phase 1B: Alpine.js, vendored as a plain browser build (not npm-imported)
+     so it works identically raw-served or via Vite. Self-initializes on
+     DOMContentLoaded; no x-data markup exists yet, so this is a no-op until
+     future components adopt it. Loaded first so window.Alpine is available
+     to every other deferred script below. -->
+<script src="js/vendor/alpinejs.min.js" defer></script>
 <script src="js/data-store.js" defer></script>
 <script src="js/seed-data.js" defer></script>
 <script src="js/column-manager.js" defer></script>
