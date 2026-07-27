@@ -1,425 +1,380 @@
-# Go.Flow — État Actuel de l'Architecture
+# Go.Flow — État actuel de l'architecture
 
-> Mis à jour le 2026-07-24 | Version schéma données : `DATA_VER = 4`
+> Mis à jour le 2026-07-27 · Version du schéma de données : `DATA_VER = 4`
+> Toutes les métriques de ce document proviennent d'une mesure directe sur le code.
 
 ---
 
 ## 1. Vue d'ensemble
 
-Go.Flow est une **SPA (Single Page Application) statique mono-fichier** développée pour Go Group (Lomé, Togo), société d'import/distribution de matériel esthétique depuis la Chine.
+Go.Flow est une application web monopage statique développée pour **Go Group** (Lomé, Togo), qui importe et distribue du matériel esthétique professionnel depuis la Chine. Elle couvre le référencement des produits et fournisseurs, le calcul du prix de revient réel, la simulation de marge et la production de devis clients au format PDF.
+
+L'application a été migrée d'un fichier unique vers une **architecture modulaire multi-fichiers** (PR #60). Elle reste néanmoins **statique et sans étape de construction** : les fichiers sources sont les fichiers livrés.
 
 | Caractéristique | Valeur |
-|-----------------|--------|
-| Pattern | SPA single-file statique |
-| Stack | HTML5 / CSS3 / Vanilla JS ES6+ async/await |
-| Fichier principal | `index.html` — **5 782 lignes** |
-| Build tooling | Aucun (zéro dépendance JS) |
-| Déploiement | Vercel — `go-flow-phi.vercel.app` |
-| Hébergement images | GitHub raw CDN (`RAWBASE`) |
-| Dépendances externes | Google Fonts (Montserrat + Poppins) |
-| Persistence principale | **IndexedDB** (`gf_store` / `kv`) |
-| Persistence légère | `localStorage` (paramètres + version) |
-| Version schéma données | `DATA_VER = 4` |
-| Fonctions JS | **277+** |
-| Sections CSS | **43** |
+|---|---|
+| Modèle | SPA statique modulaire, sans serveur applicatif |
+| Stack | HTML5 / CSS3 / JavaScript ES6+ (async/await) |
+| Fichiers de code | **13 fichiers · 6 060 lignes** |
+| Chargement | 11 balises `<script src>` classiques, ordre de dépendance explicite |
+| Étape de construction | Aucune — pas de bundler, pas de transpilation |
+| Gestionnaire de paquets | Aucun — pas de `package.json` |
+| Déploiement | Vercel statique — `go-flow-phi.vercel.app` |
+| Persistance principale | IndexedDB (`gf_store` / `kv`) |
+| Persistance légère | localStorage (réglages + version de schéma) |
+| Dépendances au démarrage | Google Fonts uniquement (Montserrat + Poppins) |
+| Images produits | CDN brut GitHub (`RAWBASE`) |
+| Fonctions JavaScript | **287** |
+| Tests automatisés | Aucun |
 
 ---
 
-## 2. Arborescence du Projet
+## 2. Structure du dépôt
 
 ```
 Go-Flow/
-├── index.html                          ← Toute l'application (5 782 lignes)
-├── README.md
-├── CONTEXTE_PROJET_GOGROUP_DEVIS.md
-├── ARCHITECTURE.md                     ← Ce document
-└── assets/
-    ├── Products images/                ← JPEG produits (séries 1 et 2)
-    ├── Quotes/                         ← PDF devis fournisseurs
-    ├── Freight Forwarders/             ← Assets transitaires
-    └── supplier/
-        ├── Oman Medical Beauty Manufacture/
-        ├── Paine Agent/
-        └── Shaanxi Yateli Technology/
+├── index.html              824 l.  — Shell : sprite d'icônes, onglets, 10 modales
+├── css/
+│   └── styles.css          576 l.  — Feuille de style unique (31 sections)
+├── js/
+│   ├── data-store.js       102 l.  — Couche de stockage (localStorage + IndexedDB)
+│   ├── seed-data.js        130 l.  — Constantes et jeux de données par défaut
+│   ├── column-manager.js   202 l.  — Gestionnaire universel de colonnes
+│   ├── app-shell.js        170 l.  — Navigation, onglets, réglages
+│   ├── calc-engine.js       68 l.  — Moteur de calcul (source unique de vérité)
+│   ├── catalogue.js      1 180 l.  — Catalogue, CRUD produits/fournisseurs/transitaires
+│   ├── devis.js          1 040 l.  — Panier devis, tarification, génération PDF
+│   ├── import-module.js    870 l.  — Import CSV / Excel / PDF / HTML
+│   ├── export-module.js    471 l.  — Export d'images canvas + archive ZIP
+│   ├── modals-backup.js    396 l.  — Modales, sauvegarde, restauration
+│   └── app-main.js          31 l.  — Amorçage, notifications, raccourcis
+│
+├── ARCHITECTURE.md          — Ce document
+├── CLAUDE.md                — Conventions à respecter lors des modifications
+├── README.md                — Présentation du projet
+├── PRODUCT.md               — Cadrage produit
+├── DESIGN.md                — Système de design
+├── graphify.html            — Utilitaire annexe, hors périmètre applicatif
+├── BackUp/                  — Sauvegardes JSON horodatées
+└── assets/                  — 385 fichiers : photos produits, devis, logos, sites archivés
 ```
+
+### Ordre de chargement
+
+L'ordre des balises `<script>` dans `index.html` (lignes 812 à 822) **est** le graphe de dépendances : il n'y a ni imports ni exports, les modules communiquent par la portée globale.
+
+```
+data-store  →  seed-data  →  column-manager  →  app-shell  →  calc-engine
+            →  catalogue  →  devis  →  import-module  →  export-module
+            →  modals-backup  →  app-main   (déclenche init())
+```
+
+> **Conséquence :** ce ne sont pas des modules ES. Les 287 fonctions partagent une portée globale unique. Réorganiser l'ordre des balises peut casser l'application silencieusement.
 
 ---
 
-## 3. Couche de Données — Architecture Hybride
+## 3. Répartition du code
 
-### 3.1 localStorage (données légères)
+| Fichier | Lignes | Fonctions | Responsabilité |
+|---|---:|---:|---|
+| `js/catalogue.js` | 1 180 | 67 | Rendu grille/tableau, vue groupée, CRUD des trois entités |
+| `js/devis.js` | 1 040 | 54 | Panier, stratégies tarifaires, client, PDF trilingue |
+| `js/import-module.js` | 870 | 52 | Quatre formats sources, mappage, validation, images |
+| `index.html` | 824 | — | Shell, 46 icônes SVG, 5 onglets, 10 modales |
+| `css/styles.css` | 576 | — | 31 sections, 19 requêtes média |
+| `js/export-module.js` | 471 | 39 | 6 gabarits canvas 1080 px, écriture ZIP native |
+| `js/modals-backup.js` | 396 | 29 | Modales, instantané, restauration, panneau stockage |
+| `js/column-manager.js` | 202 | 13 | 54 colonnes sur 3 vues |
+| `js/app-shell.js` | 170 | 12 | Onglets, vues, réglages, menu utilisateur |
+| `js/seed-data.js` | 130 | 1 | `DATA_VER`, `DS`, `CATS`, `DF`, `DP`, `DT` |
+| `js/data-store.js` | 102 | 12 | Contrat d'accès au stockage, migration |
+| `js/calc-engine.js` | 68 | 6 | Moteur de calcul et son adaptateur |
+| `js/app-main.js` | 31 | 2 | Notifications, adaptation clavier Mac, amorçage |
+| **Total** | **6 060** | **287** | |
 
-| Clé | Constante JS | Contenu |
-|-----|-------------|---------|
-| `gf_s` | `SK` | Paramètres globaux (taux change, marges, frais transfert, assurance, TVA) |
-| `gf_v` | `VK` | Version schéma (`4`) — guard de migration |
-| `gf_warn` | `BKP_WARN_K` | Timestamp du dernier rappel de sauvegarde hebdomadaire |
+---
 
-### 3.2 IndexedDB — base `gf_store`, magasin `kv` (données volumineuses)
+## 4. Couche de données
 
-| Clé | Constante JS | Contenu |
-|-----|-------------|---------|
-| `gf_p` | `PK` | Catalogue produits (avec photos base64) |
-| `gf_f` | `FK` | Fournisseurs |
-| `gf_t` | `TK` | Transitaires |
-| `gf_cols` | `CMK` | Visibilité colonnes (Catalogue / Simulation / Devis) |
-| `gf_win` | `WK` | Surcharges gagnant en vue groupée |
-| `gf_audit` | `AK` | Historique d'audit (max 100 entrées) |
-| `gf_d` | `DK` | Panier devis (lignes) |
-| `gf_dc` | `DCK` | Infos client devis (nom, société, pays…) |
-| `gf_dp` | `DPK` | Préférences devis (colonnes visibles, stratégie prix…) |
-| `gf_dvfilt` | `DFK` | Filtres actifs du devis |
-| `gf_devref` | `DVREFK` | Compteur de référence devis (ex. GG-2026-0042) |
-| `gf_imp` | `IMPK` | Préférences import + dernier HTML mémorisé (jusqu'à ~5 MB) |
-| `gf_exp` | `EXK` | Préférences export images (ordre champs, template…) |
+Le stockage est réparti selon le **volume** : les réglages, légers et stables, restent en localStorage pour un accès synchrone ; tout ce qui peut croître va en IndexedDB.
 
-### 3.3 API de stockage
+### localStorage — 3 clés
+
+| Clé | Contenu |
+|---|---|
+| `gf_s` | Paramètres globaux (taux de change, tarifs, marge, TVA, transfert, assurance) |
+| `gf_v` | Marqueur `DATA_VER`, déclencheur de migration de schéma |
+| `gf_warn` | Horodatage du dernier rappel de sauvegarde |
+
+### IndexedDB — base `gf_store`, magasin `kv`, 13 clés
+
+| Clé | Contenu |
+|---|---|
+| `gf_p` | Produits (photos base64 incluses) |
+| `gf_f` | Fournisseurs (logos) |
+| `gf_t` | Transitaires |
+| `gf_cols` | Préférences de colonnes par vue |
+| `gf_win` | Gagnants promus manuellement en vue groupée |
+| `gf_audit` | Journal d'audit — 100 dernières entrées |
+| `gf_d` | Panier du devis |
+| `gf_dc` | Client du devis |
+| `gf_dp` | Préférences d'affichage du devis |
+| `gf_dvfilt` | Filtres de la vue Devis |
+| `gf_devref` | Compteur de référence des devis |
+| `gf_imp` | Préférences d'import + dernier HTML ré-analysable |
+| `gf_exp` | Préférences d'export d'images |
+
+### IndexedDB — base `gf_fs`, magasin `handles`
+
+Base **distincte**, dédiée au `FileSystemDirectoryHandle` du dossier de sauvegarde automatique. Ce type d'objet ne peut pas être sérialisé en localStorage, d'où la base séparée (`js/modals-backup.js`).
+
+### Contrat d'accès
+
+| Fonction | Nature | Comportement |
+|---|---|---|
+| `LS_GET(k, fb)` | synchrone | Repli sur `fb` si le contenu est corrompu, avec avertissement console |
+| `LS_SET(k, v)` | synchrone | Notification si le quota est dépassé |
+| `IDB_GET(k, fb)` | asynchrone | Repli sur localStorage si IndexedDB est indisponible |
+| `IDB_SET(k, v)` | asynchrone | Même repli automatique |
+| `IDB_DELETE(k)` | asynchrone | Suppression d'une clé |
+| `idbDb()` | asynchrone | Connexion unique mémorisée à `gf_store` |
+| `idbAvailable()` | asynchrone | Détection mémorisée de la disponibilité d'IndexedDB |
+
+**Migration** — `IDB_MIGRATE_KEYS` liste les 12 clés déplacées de localStorage vers IndexedDB en une passe unique, protégée par l'indicateur `__migrated_v1`. Idempotente, transparente, sans perte.
+
+**Cycle de vie** — tout est chargé une seule fois pendant `init()` puis reflété en variables globales. Les lectures ultérieures n'atteignent plus le stockage ; seules les mutations déclenchent une écriture asynchrone.
+
+**Migration de schéma** — un écart entre `DATA_VER` et `gf_v` supprime `gf_p` et `gf_f`, puis réinjecte les données par défaut. Incrémenter `DATA_VER` est donc une opération destructrice pour le catalogue de l'utilisateur.
+
+---
+
+## 5. Moteur de calcul
+
+`js/calc-engine.js`, délimité par les marqueurs `MOTEUR DE CALCUL` / `FIN MOTEUR` (lignes 9 à 52).
+
+`calcEngine(i)` est une **fonction pure** : aucun accès au DOM, aux variables globales ni au stockage. Elle est directement testable hors navigateur. La dépendance aux paramètres globaux est portée par l'adaptateur `calc()`, situé hors des bornes du moteur.
+
+### Les trois étapes
+
+```
+ÉTAPE 1 — Coût de revient HT (devise source)
+  Coût d'achat HT     = EXW × Qté + Fret local      (fret local : par commande)
+  Frais de transfert  = S.trf   → % du coût d'achat OU montant fixe
+  Trade Assurance     = S.assu  → optionnelle, désactivée par défaut
+  Coût de revient HT  = Coût d'achat + Transfert + Assurance
+  Coût de revient U   = Coût de revient HT ÷ Qté
+
+ÉTAPE 2 — Prix de vente HT (devise cible) — conversion AVANT la marge
+  Coût revient U (XOF) = Coût de revient unitaire × taux de change
+  Marge unitaire       = Coût revient U (XOF) × taux de marge %
+  PV unitaire HT       = Coût revient U (XOF) + Marge − remise éventuelle
+
+ÉTAPE 3 — Prix de vente TTC (estimation)
+  CBM               = L × l × h ÷ 1e6 (cm) ou L × l × h (m)
+  Frais logistiques = Aérien   : kg  × Qté × tarifAerien
+                      Maritime : CBM × Qté × tarifMaritime
+                      (le tarif du transitaire prime sur le tarif global)
+  PV TTC            = PV HT + Frais logistiques
+```
+
+**Règle de TVA** — aucune TVA n'est jamais ajoutée aux frais logistiques : le tarif transitaire est un forfait tout compris (fret + douane + taxes). `S.tvaInterne` n'apparaît qu'en ligne distincte, pour les clients assujettis, assise sur le montant HT de la marchandise.
+
+`calcEngine` renvoie **29 champs**, ce qui évite tout recalcul en aval. Les montants sont arrondis à deux décimales par `r2()`.
+
+### Conversion de devises
+
+`xofRate(dev)` fournit le taux de conversion :
+
+| Devise | Taux |
+|---|---|
+| RMB | `S.tauxChange` (paramétrable, 95 par défaut) |
+| USD | **600 — codé en dur** |
+| EUR | **655 — codé en dur** |
+| Autre | 1 |
+
+> Seul le taux RMB est configurable. Les taux USD et EUR sont figés dans le code.
+
+### Consommateurs
+
+Catalogue · Simulateur · Devis · Export PDF · Export d'images · Aperçu du formulaire produit. Aucune formule tarifaire n'est réimplémentée ailleurs.
+
+---
+
+## 6. Gestionnaire universel de colonnes
+
+`js/column-manager.js` — un magasin unique et un composant réutilisable pilotent **54 colonnes sur 3 vues**.
+
+| Vue | Colonnes | Colonnes fixes |
+|---|---:|---:|
+| `catalogue` | 19 | 0 |
+| `simulation` | 16 | 2 |
+| `devis` | 19 | 0 |
+
+- `CM_DEFS` — définition d'une colonne : `{k, lbl, def, mob, g}`
+- `cmMount(vue, hôte, {inline})` — injecte le composant (bouton, compteur, menu déroulant)
+- `cmVisible(vue)` — ensemble effectif, avec masquage automatique des colonnes `mob:false` sous 768 px **jusqu'à** personnalisation par l'utilisateur
+- `cmToggle` / `cmShowAll` / `cmReset` → `cmSave()` vers `gf_cols` + re-rendu via `CM_RENDER[vue]`
+- Robustesse : les clés obsolètes sont ignorées ; les colonnes ajoutées après une sauvegarde reprennent leur `def`
+- **L'export PDF partage la sélection de la vue `devis`** — pas de configuration séparée. Ce qui est coché à l'écran est ce qui s'imprime.
+- Les colonnes internes (coût de revient, marge, EXW) sont désactivées par défaut ; la modale PDF avertit qu'elles deviendraient visibles par le client.
+
+---
+
+## 7. Interface
+
+### Shell (`index.html`)
+
+- **≥ 1024 px** — barre latérale fixe à gauche, barre supérieure translucide, barre dégradée de 4 px collée en haut
+- **< 1024 px** — la barre latérale se replie en bande de navigation horizontale défilante
+- **46 symboles SVG** déclarés une fois, référencés par `<use href="#i-nom"/>`. Helpers : `ICO(nom)`, `TRI(mode)`, `PH_LG` / `PH_SM`
+- Aucun emoji employé comme icône structurelle
+
+### Onglets — 5
+
+`catalogue` · `fournisseurs` · `transitaires` · `simulation` · `devis`
+
+Attributs `role="tab"`, `aria-selected`, `aria-controls`. Navigation par flèches gauche/droite.
+
+### Modales — 10
+
+`prod-modal` · `four-modal` · `trans-modal` · `pdf-modal` · `detail-modal` · `import-modal` · `export-modal` · `confirm-modal` · `shortcuts-modal` · panneau de réglages
+
+Contrat commun : `role="dialog"`, `aria-modal`, libellé associé, piège de focus clavier, fermeture par Échap.
+
+### Motifs d'interaction
+
+- `toast(msg, err)` — notification éphémère, 3 secondes
+- `toastUndo(msg, undoFn, ms)` — délai de grâce avant qu'une action destructive devienne définitive
+- `confirm-modal` — confirmation générique en remplacement de `window.confirm`
+- `shortcuts-modal` — aide aux raccourcis clavier, libellés adaptés sur Mac (`Ctrl` → `⌘`)
+- `#cm-live` — région live ARIA annonçant les changements de colonnes
+
+---
+
+## 8. Données par défaut
+
+| Constante | Volume | Contenu |
+|---|---|---|
+| `DP` | **34 produits** | Répartis sur 8 catégories. La clé `grp` regroupe les produits identiques de fournisseurs différents. Galerie `imgs` jusqu'à 3 photos. |
+| `DF` | **3 fournisseurs** | Shaanxi Yateli (F001, fabricant) · Oman Medical Beauty (F002, fabricant) · Paine Agent Sourcing (F003, agent de sourcing) |
+| `DT` | **1 transitaire** | E & C Logistics — 230 000 XOF/CBM maritime, 11 000 XOF/kg aérien, tout compris |
+
+### Paramètres par défaut (`DS`)
 
 ```js
-// localStorage — petits objets
-LS_GET(k, fallback)  / LS_SET(k, v)
-
-// IndexedDB — données volumineuses (async)
-await IDB_GET(k, fallback)
-IDB_SET(k, v)         // fire-and-forget (Promise non attendue)
-await IDB_DELETE(k)
+{ tauxChange:95, tarifAerien:11000, tarifMaritime:230000,
+  tauxMarge:35, tvaInterne:18,
+  trf:{mode:'pct',val:0}, assu:{on:false,mode:'pct',val:1.5} }
 ```
 
-**Fallback automatique** : si IndexedDB est indisponible (navigation privée stricte), `IDB_GET`/`IDB_SET` basculent silencieusement sur `localStorage`.
+### Catégories (`CATS`) — 8
 
-**Migration one-shot** (`migrateToIdb()`) : au premier démarrage après la mise à jour, les 12 clés listées dans `IDB_MIGRATE_KEYS` sont copiées de `localStorage` vers IndexedDB, puis supprimées de `localStorage`. Idempotent via le flag `__migrated_v1`.
+Hydrafacial `HYD` · Picolaser/Tatouage `PCL` · Analyse de peau `ADP` · RF Microneedling `RFM` · HIFU `HIF` · Dentaire `DEN` · Photothérapie LED `PDT` · Équipement & Accessoires `EQP`
 
-**Chargement en mémoire** : toutes les données IndexedDB sont chargées une seule fois dans `init()` vers des globals (`prods`, `fours`, `trans`, `auditHist`, etc.). Les lectures ne touchent plus le stockage après le démarrage ; seules les mutations persistent via `IDB_SET`.
+> Ces catégories sont **écrites en dur** dans `seed-data.js` : leur modification requiert une intervention sur le code.
 
----
-
-## 4. Modèles de Données
-
-### 4.1 Paramètres Globaux (`DS`)
+### Images produits
 
 ```js
-{
-  tauxChange:    95,       // 1 RMB = 95 XOF
-  tarifAerien:   11000,    // XOF par kg (fret aérien)
-  tarifMaritime: 230000,   // XOF par CBM (fret maritime)
-  tauxMarge:     35,       // % marge par défaut
-  tvaInterne:    18,       // % TVA (clients assujettis uniquement)
-  trf: {                   // Frais de transfert de fonds
-    mode: 'pct',           // 'pct' | 'fixe'
-    val: 0
-  },
-  assu: {                  // Assurance marchandises
-    on:   false,
-    mode: 'pct',
-    val:  1.5
-  }
-}
-```
-
-### 4.2 Produit
-
-```js
-{
-  id,        // 'P0001'–'P00NN' (défauts) | timestamp-based (nouveaux)
-  ref,       // ex. 'HYD-001-001'
-  nom, cat, grp,
-  fid, fn,   // ID + nom fournisseur (fn dénormalisé)
-  prix,      // Prix EXW (dans devise `dev`)
-  prach,     // Frais pré-embarquement (fret local)
-  dev,       // 'RMB' | 'USD' | 'EUR' | 'XOF'
-  dimU,      // Unité dimensions : 'cm' | 'm'
-  l, la, h,  // Dimensions
-  kg,        // Poids
-  tr,        // 'Maritime' | 'Aérien'
-  marge,     // % individuel ('' = global)
-  rem,       // % remise
-  conc,      // Prix concurrent marché XOF
-  moq,       // Quantité minimale
-  desc, specs, glink,
-  photos     // [] URLs ou base64, max 3
-}
-```
-
-### 4.3 Ligne de Devis
-
-```js
-{
-  cid,        // ID unique ligne
-  pid,        // ID produit source
-  nom,        // Désignation (éditable)
-  cat, grp, fid,
-  exw,        // Prix EXW négocié (éditable)
-  prach,      // Fret local négocié
-  dev,
-  l, la, h, dimU, kg,  // Dimensions (éditables)
-  moq,        // MOQ négocié
-  tr,         // Transport
-  marge,
-  rem,
-  qty,        // Quantité commandée
-  photos,
-  comment,    // Commentaire ligne devis
-  _nego: {    // Valeurs négociées (substitution au produit catalogue)
-    prix, prach, kg, moq, l, la, h
-  }
-}
-```
-
-### 4.4 Fournisseur & Transitaire
-
-Schémas inchangés depuis v3 (voir commits précédents) avec ajout du 3e fournisseur `F003` — Paine Agent Sourcing.
-
----
-
-## 5. Moteur de Calcul
-
-Le calcul est désormais séparé en deux couches :
-
-### 5.1 `calcEngine(i)` — moteur pur (sans état global)
-
-Prend un objet `i` avec toutes les valeurs explicites, retourne un objet de résultats complet.
-
-```js
-// Étape 1 — Coût de revient (devise source)
-coutAchat   = exw × qty + fretLocal
-fTrf        = fraisCfg(transfert, coutAchat)    // % ou fixe
-fAss        = assurance.on ? fraisCfg(assu, coutAchat) : 0
-coutRevient = coutAchat + fTrf + fAss            // ✅ base marge correcte
-
-// Étape 2 — Conversion et marge (en XOF)
-coutRevientUX = coutRevientU × tauxChange
-margeU        = coutRevientUX × margePct / 100   // ✅ marge sur coût de revient
-pvuBrut       = coutRevientUX + margeU
-remU          = pvuBrut × remisePct / 100
-pvuHT         = pvuBrut − remU
-
-// Étape 3 — Frais logistiques tout-compris (transitaire forfait)
-fraisLog      = mode='Aérien' ? kg × qty × tarifAerien
-                               : cbm × qty × tarifMaritime
-pvuTTC        = pvuHT + fraisLogU                // Frais logistiques inclus dans prix client
-tvaM          = assujetti ? pvtHT × tvaInterne / 100 : 0  // TVA séparée uniquement si assujetti
-```
-
-**Valeurs retournées** : `{qty, dev, coutAchat, coutRevient, coutRevientUX, margeU, margeTot, pvuHT, pvtHT, fraisLog, fraisLogU, pvuTTC, pvtTTC, tvaM, totalAvecTVA, cbm, cbmTot, …}`
-
-### 5.2 `calc(p, o={})` — adaptateur produit → moteur
-
-Adapte un objet produit du catalogue (avec les valeurs globales de `S`) vers `calcEngine()`.
-
----
-
-## 6. Architecture CSS
-
-### 6.1 Variables CSS (`:root`)
-
-```css
-/* Palette Go Group */
---rouge: #FF2244;  --orange: #FF6600;  --jaune: #FFB300;
---vert:  #00CC77;  --bleu:   #0099FF;  --violet: #7C3AED;
---blanc: #FFFFFF;  --nuit:   #1A1A2E;  --nuit2:  #16213E;
---nuit3: #0F3460;  --gris:   #8892A4;  --border: #2A2D3E;
---text:  #E8EAF6;  --muted:  #6B7280;
---grad: linear-gradient(135deg, #0099FF, #00CC77);
-
-/* Système */
---sidebar-w: 220px;  --top-h: 56px;
---card-r: 12px;      --modal-r: 16px;
---trans: .18s ease;
-```
-
-### 6.2 43 Sections CSS (commentaires `/* ===== … =====*/`)
-
-| Groupe | Sections |
-|--------|---------|
-| Layout SaaS | ICON SYSTEM, SHELL, TOPBAR, SIDEBAR, LAYOUT, BUTTONS |
-| Composants UI | TOOLBAR, KPI STATS, GRID & CARDS, TABLES, SETTINGS PANEL, MODALS, FORMS |
-| Sections | SECTION HEADERS, SIMULATION, TOAST, EMPTY STATES, CALC PREVIEW |
-| Entités | SUPPLIER CARD, GROUPED VIEW, COLUMN PICKER |
-| Devis | ÉDITION INLINE DEVIS, DEVIS |
-| Import/Export | IMPORT EN MASSE, EXPORT IMAGES DESIGN |
-| Utilitaires | SCROLLBAR, PRINT HEADER, PRINT, PRINT — DEVIS PDF |
-| Responsive / A11y | RESPONSIVE, ACCESSIBILITÉ |
-
----
-
-## 7. Architecture JS — Modules Fonctionnels
-
-### 7.1 Couche stockage (lignes 1265–1366)
-
-`LS_GET`, `LS_SET`, `idbDb`, `idbGetRaw`, `idbSetRaw`, `idbDeleteRaw`, `idbAllEntries`, `idbAvailable`, `IDB_GET`, `IDB_SET`, `IDB_DELETE`, `migrateToIdb`
-
-### 7.2 Gestion universelle des colonnes (lignes 1502–1705)
-
-`cmLoad`, `cmMigrateLegacy`, `cmSerialize`, `cmSave`, `cmVisible`, `cmToggle`, `cmShowAll`, `cmReset`, `cmMount`, `cmRefresh`, `cmRefreshCount`, `cmOpen`
-- Gère 3 vues : `catalogue`, `simulation`, `devis`
-- Persiste dans IndexedDB (`gf_cols`)
-
-### 7.3 Initialisation & paramètres (lignes 1708–1830)
-
-`init` (async), `buildProds`, `save`, `loadS`, `saveSettings`, `toggleSettings`, `userMenuToggle`, `userMenuClose`
-
-### 7.4 Moteur de calcul (lignes 1834–1901)
-
-`xofRate`, `toXOF`, `cbmOf`, `fraisCfg`, `calcEngine`, `calc`
-
-### 7.5 Historique audit (lignes 1902–1940)
-
-`auditLoad`, `auditLog`, `auditToCSV`, `exportAudit`
-
-### 7.6 Catalogue & groupement (lignes 1943–2440)
-
-`tab`, `setView`, `renderCat`, `toggleGrouped`, `setStratPrix`, `groupList`, `selectWinner`, `setWinner`, `toggleAccordion`, `cardPriceRows`, `toggleCostDetail`, `cardGallery`, `swapCardImg`, `prodGroupCard`, `prodGroupTable`, `toggleGroupTblRow`, `escH`, `truncTxt`, `catInfoRows`, `cardTopStrip`, `prodDelai`, `openDetails`, `showProdDetails`
-
-### 7.7 Édition inline devis (lignes 2281–2440)
-
-`dvFlash`, `dvPreserveScroll`, `refreshDevisAfterEdit`, `dvEditSimple`, `dvEditNego`, `dvToggleSource`, `dvModalQty`, `dvEditRow`, `dvNegoRow`, `showDevisDetails`
-
-### 7.8 Catalogue — rendu & CRUD produit (lignes 2441–2800)
-
-`fourLabel`, `fourBadgeClass`, `prodCard`, `prodTable`, `openProdModal`, `genRef`, `updateSLink`, `calcPrev`, `saveProd`, `delProd`, `addPics`, `renderThumbs`, `addLogo`, `previewLogoUrl`, `parseAlibabaUrl`
-
-### 7.9 Fournisseurs (lignes ~2800–3000)
-
-`renderFour`, `openFourModal`, `saveFour`, `delFour`
-
-### 7.10 Transitaires (lignes ~3000–3070)
-
-`renderTrans`, `openTransModal`, `saveTrans`, `delTrans`
-
-### 7.11 Module Devis (lignes 3071–3900)
-
-**Panier & client**
-`loadDevis`, `saveDevisItems`, `addToDevis`, `removeFromDevis`, `updateDevisQty`, `renderDevisCart`, `saveDevisClient`, `renderDevisClient`, `onDevisAssuToggle`, `devisFilterChips`, `devisApplyFilters`, `devisTotalBar`
-
-**Stratégies de prix**
-`devisStratUI`, `devisStratApply`, `devisStratCalc`, `devisPersoInputs`, `devisApplyStrat`
-
-**Signature & référence**
-`devisSignature`, `devisRef`, `devRefLoad`
-
-**PDF multilingue** (FR/EN/ZH)
-`generateDevisPDF`, `pdfT`, `trF`, `trCat` — génération canvas/print inline
-
-### 7.12 Simulation (lignes ~3900–4100)
-
-`popSim`, `setSimTrans`, `simSelProd`, `simCalc`, `qsim`
-
-### 7.13 Import en masse (lignes 4109–4980)
-
-`impLoadPrefs`, `impPrefs`, `impPrefsSave`, `impResolveImg`, `ensureLib`, `ensurePDF`, `openImportModal`, `impBack`, `impTypeChange`, `impUpdTools`, `impLoading`, `impFileInput`, `impHandleFile`, `parseCSVText`, `pdfToLines`, `impExtractRows`, `impAbsUrl`, `impRichParse`, `impAutoImgs`, `impFromHTML`, `impSaveLastHtml`, `impRenderLastHtml`, `impReparseLast`, `impSetTabular`, `impSetExtracted`, `impShowStep2`, `impRenderMap`, `impMapping`, `impRenderPrev`, `impDelRow`, `impExistingKeys`, `impCat`, `impBuild`, `impRun`, `impFinish`, `impExtractFiche`, `impSetFiche`, `impRenderFiche`, `impFicheSetLogo`, `impFicheLogoPrev`, `impFichePrev`, `impRunFiche`, `impRichRef`, `impRichSet`, `impRichDel`, `impRichAdd`, `impRenderRich`, `impRichUseImg`, `impImgsZip`, `impFileToDataURL`, `impEnsureImgCol`, `impBulkImgs`
-
-**Formats supportés** : CSV, Excel (.xlsx via SheetJS chargé à la demande), PDF (via pdf.js), HTML Alibaba/fiche produit
-
-### 7.14 Export images design (lignes 4987–5440)
-
-`expLoadPrefs`, `expInfoState`, `expInfoSave`, `expInfoToggle`, `expInfoMove`, `expInfoMoveTo`, `expSyncCat`, `expRenderInfos`, `expBox`, `expToggle`, `expToggleMode`, `expBarUpdate`, `expSelectAll`, `openExportModal`, `expRenderTpls`, `expSetTpl`, `expPrefChange`, `expNav`, `expPreview`, `expLoadImg`, `expRRect`, `expCover`, `expGrad`, `expWrap`, `expFitFont`, `expLogo`, `expInfoRows`, `expFitText`, `expRowsH`, `expRowsBlock`, `expDraw`, `expSlug`, `expSaveBlob`, `expDownload`, `zipCRC`, `zipStore`
-
-**Templates** : 3 templates visuels (grille 2×3, portrait, carré), export ZIP de toutes les images, drag-and-drop des champs info
-
-### 7.15 Sauvegarde & stockage (lignes 5440–5782)
-
-`openMod`, `closeMod`, `bkpCounts`, `bkpSnapshot`, `storBytes`, `storFmt`, `storBreakdown`, `renderStoragePanel`, `storClearAudit`, `storClearLastHtml`, `bkpIdb`, `bkpDirGet`, `bkpDirSet`, `bkpDirPerm`, `bkpChooseDir`, `bkpRemoveDir`, `bkpDirUI`, `bkpTrySaveToDir`, `exportBackup`, `importBackup`, `handleBackupFile`, `bkpWeeklyWarn`, `toast`
-
-**File System Access API** — sauvegarde automatique dans un dossier local choisi par l'utilisateur
-
----
-
-## 8. Structure HTML — Onglets & Modules
-
-### Onglets (navigation latérale — `sidebar`)
-
-| ID | Onglet | Fonctionnalités clés |
-|----|--------|---------------------|
-| `t-catalogue` | Catalogue | Vue grille/liste/groupée, filtres, KPI stats, sélecteur colonnes, export CSV, import |
-| `t-fournisseurs` | Fournisseurs | 3 fournisseurs (Yateli, Oman, Paine Agent), CRUD, import Alibaba |
-| `t-transitaires` | Transitaires | CRUD, tarifs tout-compris, logos |
-| `t-simulation` | Simulateur | Calcul commande unitaire avec breakdown complet |
-| `t-devis` | Devis | Panier multi-produits, stratégies prix, PDF FR/EN/ZH, filtres/tri |
-
-### Modales
-
-| ID | Modale |
-|----|--------|
-| `prod-modal` | Ajout/édition produit (CRUD complet + calcul temps réel) |
-| `four-modal` | Ajout/édition fournisseur |
-| `trans-modal` | Ajout/édition transitaire |
-| `imp-modal` | Import en masse (CSV/Excel/PDF/HTML — wizard 2 étapes) |
-| `exp-modal` | Export images design produits |
-| `det-modal` | Détails produit (lecture seule) |
-| `dv-det-modal` | Détails ligne devis |
-| `dv-qty-modal` | Saisie quantité devis |
-| `settings` (overlay) | Paramètres globaux + sauvegarde auto + panneau stockage |
-
----
-
-## 9. Catégories Produits
-
-```js
-const CATS = {
-  'Hydrafacial':           'HYD',
-  'Picolaser/Tatouage':    'PCL',
-  'Analyse de peau':       'ADP',
-  'RF Microneedling':      'RFM',
-  'HIFU':                  'HIF',
-  'Dentaire':              'DEN',     // Ajouté v4
-  'Photothérapie LED':     'PDT',     // Ajouté v4
-  'Équipement & Accessoires': 'EQP', // Ajouté v4
-}
+const RAWBASE = 'https://raw.githubusercontent.com/dinaagz/Go-Flow/main/';
+const IMG  = n => RAWBASE + 'assets/Products%20images/1%20(' + n + ').jpeg';
+const IMG2 = n => RAWBASE + 'assets/Products%20images/2%20(' + n + ').jpeg';
 ```
 
 ---
 
-## 10. Couverture Fonctionnelle Actuelle
+## 9. Modules fonctionnels
 
-| Module | Fonctionnalité | Statut |
-|--------|---------------|--------|
-| **Catalogue** | Vue grille / liste / groupée | ✅ |
-| | Filtres, recherche, sélecteur colonnes | ✅ |
-| | KPI stats (nb, valeur, CBM) | ✅ |
-| | Export CSV | ✅ |
-| | Import CSV / Excel / PDF / HTML Alibaba | ✅ |
-| | Import HTML fiche produit/fournisseur | ✅ |
-| | Import images en masse + ZIP | ✅ |
-| **Produit** | CRUD complet + calcul temps réel | ✅ |
-| | Photos base64 (max 3) | ✅ |
-| | Galerie avec swipe | ✅ |
-| | Quick simulate (→ onglet Simulation) | ✅ |
-| | Add to devis (→ panier) | ✅ |
-| | Détail produit (lecture seule) | ✅ |
-| **Fournisseurs** | CRUD + import Alibaba URL | ✅ |
-| | 3 fournisseurs (Yateli, Oman, Paine Agent) | ✅ |
-| **Transitaires** | CRUD + tarifs tout-compris | ✅ |
-| **Simulation** | Calcul commande unitaire complet | ✅ |
-| | Frais de transfert + assurance | ✅ |
-| | TVA interne conditionnelle (assujettis) | ✅ |
-| **Devis** | Panier multi-produits | ✅ |
-| | Édition inline prix/qtés/dims négociés | ✅ |
-| | Stratégies de prix (Prix bas, Meilleure qualité, Rapport qualité-prix, Personnalisé) | ✅ |
-| | Filtres et tri du panier | ✅ |
-| | Assurance sur le devis | ✅ |
-| | Export PDF FR / EN / ZH | ✅ |
-| | Référence devis auto (GG-YYYY-NNN) | ✅ |
-| | Infos client sur devis | ✅ |
-| **Export images** | Cartes produits design (3 templates) | ✅ |
-| | Export ZIP multi-produits | ✅ |
-| | Champs info drag-and-drop | ✅ |
-| **Sauvegarde** | Export/import JSON complet | ✅ |
-| | Sauvegarde auto dans dossier local (FSA API) | ✅ |
-| | Rappel hebdomadaire | ✅ |
-| **Stockage** | Panel monitoring IndexedDB / localStorage | ✅ |
-| | Nettoyage historique / HTML mémorisé | ✅ |
-| **Moteur calcul** | Marge sur coût de revient complet | ✅ (corrigé v4) |
-| | Frais de transfert (% ou fixe) | ✅ |
-| | Assurance marchandises (% du coût) | ✅ |
-| | Transitaire forfait tout-compris | ✅ |
-| | TVA séparée (assujettis uniquement) | ✅ |
-| | Taux de change multi-devises (RMB/USD/EUR/XOF) | ✅ |
-| **Accessibilité** | ARIA labels, focus management, keyboard nav | ✅ (PR #17) |
-| **Responsive** | Media queries mobile | ⚠️ Partiel (PR #17, amélioration continue) |
-| **Clients** | Fiche client (3 types) | ❌ Non implémenté |
-| **Dashboard** | Tableau de bord global | ❌ Non implémenté |
-| **Commandes** | Suivi commandes / statuts | ❌ Non implémenté |
+### Catalogue (`catalogue.js`)
+
+Vue grille ou tableau · **vue groupée** (`groupList` sur la clé `grp`) avec sélection du gagnant par stratégie (`prix_bas` / `meilleure_qualite` / `meilleur_rapport`), surchargeable manuellement (`setWinner` → `gf_win`) · galerie de miniatures · détail du coût dépliable · recherche, filtres, tri · export CSV · mode sélection pour l'export d'images. Porte également le CRUD des produits, fournisseurs et transitaires.
+
+### Devis (`devis.js`)
+
+Panier persistant · 4 stratégies tarifaires · 10 modes de tri · édition en ligne avec bascule catalogue/négocié · fiche client avec case « assujetti TVA » · référence auto-incrémentée (`gf_devref`) · taux de change en direct · affichage multi-devises · génération PDF via impression native en **FR / EN / ZH** (`PDF_I18N`), CGV incluses.
+
+### Import en masse (`import-module.js`)
+
+**CSV** — analyseur natif (séparateur auto `;`/`,`/tab, guillemets, BOM).
+**Excel** — SheetJS chargé à la demande.
+**PDF** — pdf.js chargé à la demande, texte regroupé en lignes visuelles puis heuristique nom + prix.
+**HTML** — analyse riche : titres, paragraphes, listes, images absolutisées, liens, e-mails, téléphones.
+
+Sources tabulaires → mappage de colonnes avec proposition automatique insensible aux accents, dernier mappage mémorisé par type. Sources extraites → aperçu entièrement modifiable. Traitement par lots de 25 avec barre de progression, validation et détection de doublons. Import de fiche fournisseur/transitaire depuis une page web avec pré-remplissage. Archive ZIP des images extraites.
+
+### Export d'images (`export-module.js`)
+
+6 gabarits canvas 1080 × 1080 (`classique`, `gradient`, `nuit`, `minimal`, `badge`, `catalogue`) · couleurs personnalisables · signature positionnable · **22 lignes d'information** synchronisées par défaut avec les colonnes visibles du catalogue, sélectionnables et réordonnables par glisser-déposer · téléchargement PNG unitaire ou archive ZIP via un écrivain natif sans compression (`zipStore`). Images chargées en `crossOrigin='anonymous'` : le canvas n'est jamais contaminé.
+
+### Sauvegarde (`modals-backup.js`)
+
+`bkpSnapshot()` construit l'instantané depuis les variables en mémoire, pas par copie brute du stockage. `exportBackup()` écrit dans un dossier local via l'API File System Access (Chrome/Edge), sinon déclenche un téléchargement. `handleBackupFile()` restaure chaque clé dans le magasin approprié. Rappel hebdomadaire via `gf_warn`. Panneau de suivi de l'occupation avec `navigator.storage.estimate()` et actions de nettoyage.
 
 ---
 
-*Synchroniser ce document lors de chaque PR majeure modifiant `index.html`.*
+## 10. Identité visuelle
+
+**Dégradé de marque** (`--grad`) — Rouge `#FF2244` → Orange `#FF6600` → Jaune `#FFD700` → Vert `#00CC77` → Bleu `#0099FF` → Violet `#7733FF`. L'ordre ne s'inverse jamais.
+
+**Typographie** — Montserrat (titres et chiffres, 700–900) · Poppins (texte courant, 300–700).
+
+**Couleurs fournisseurs** — Yateli `rgba(0,153,255,.85)` (bleu) · Oman `rgba(119,51,255,.85)` (violet).
+
+**Impression** — `.no-print { display: none !important }` retire la colonne Actions des documents imprimés.
+
+---
+
+## 11. Déploiement et développement
+
+```bash
+# Ouverture directe
+open index.html
+
+# Service local — recommandé depuis le passage en multi-fichiers
+python3 -m http.server 8080
+
+# Contrôle de syntaxe avant commit — désormais fichier par fichier
+for f in js/*.js; do node --check "$f" || echo "ÉCHEC : $f"; done
+```
+
+> Depuis le passage en multi-fichiers, le contrôle de syntaxe porte directement sur les fichiers `js/*.js` — il n'est plus nécessaire d'extraire le bloc `<script>` de `index.html`.
+
+### Dépendances externes
+
+| Ressource | Chargement | Criticité |
+|---|---|---|
+| Google Fonts | Au démarrage | Non bloquante — polices de repli |
+| CDN images GitHub | Au rendu du catalogue | Non bloquante — icône de remplacement |
+| SheetJS | À l'import Excel | Requise pour cette fonctionnalité seule |
+| pdf.js | À l'import PDF | Requise pour cette fonctionnalité seule |
+| `open.er-api.com` | Sur action explicite | Requise pour l'actualisation des taux |
+
+### Workflow
+
+Branche dédiée puis pull request. Les envois directs sur `main` sont bloqués.
+
+```bash
+git checkout -b feat/ma-fonctionnalite
+git push -u origin feat/ma-fonctionnalite
+```
+
+---
+
+## 12. Points de vigilance connus
+
+| Sujet | État |
+|---|---|
+| **Portée globale** | Les 287 fonctions partagent le même espace de noms — le découpage en fichiers n'a pas introduit d'imports/exports ES |
+| **Ordre de chargement** | Le graphe de dépendances est implicite, porté par l'ordre des balises `<script>` dans `index.html` |
+| **Échappement HTML** | Les données utilisateur sont majoritairement interpolées sans échappement dans les gabarits — un correctif a été proposé (PR #61) puis annulé (PR #62) |
+| **Tests** | Aucun, alors que `calcEngine` est purement fonctionnel et directement testable |
+| **Intégration continue** | Aucune — le contrôle de syntaxe repose sur la discipline du contributeur |
+| **Intégrité des CDN** | Les bibliothèques distantes sont chargées sans empreinte de contrôle ni politique de sécurité de contenu |
+| **Taux USD et EUR** | Codés en dur dans `xofRate()` — seul le taux RMB est paramétrable |
+| **Catégories** | Écrites en dur dans `seed-data.js`, non configurables par l'utilisateur |
+| **Rendu** | Régénération complète du balisage de la vue à chaque mutation, sans DOM virtuel |
+| **Sauvegarde** | Les images base64 sont incluses dans l'instantané JSON — les sauvegardes observées pèsent 1,1 à 1,4 Mo |
+
+---
+
+*Document établi à partir d'une analyse directe du code — 13 fichiers, 6 060 lignes, `DATA_VER = 4`.*

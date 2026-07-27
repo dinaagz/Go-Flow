@@ -1,4 +1,13 @@
 /* ---- UTILS ---- */
+// Anime les barres de progression via transform (composite GPU) plutôt que width (déclenche un reflow à chaque tick de chunk)
+function setProgress(el,pct){
+  el.style.transform=`scaleX(${pct/100})`;
+  const bar=el.closest('.progress');
+  if(bar)bar.setAttribute('aria-valuenow',Math.round(pct));
+}
+// Limite les recalculs coûteux (filtrage + reconstruction complète du DOM) déclenchés à chaque frappe dans un champ de recherche
+function debounce(fn,ms=180){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+const renderCatDeb=debounce(renderCat),renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans),dvFilterChangeDeb=debounce(dvFilterChange);
 let modReturnFocus=null;
 function openMod(id){
   modReturnFocus=document.activeElement;
@@ -11,16 +20,60 @@ function closeMod(id){
   document.getElementById(id).classList.remove('open');
   if(modReturnFocus&&document.contains(modReturnFocus)){modReturnFocus.focus();modReturnFocus=null;}
 }
+// Confirmation maison (remplace confirm() natif) : nomme l'élément, cohérente avec le reste du système de modales.
+let cfmResolve=null;
+function askConfirm(message,{title='Confirmer',okLabel='Supprimer'}={}){
+  if(cfmResolve){const r=cfmResolve;cfmResolve=null;r(false);} // une confirmation en attente est annulée par la suivante (modales exclusives)
+  document.getElementById('cfm-title').textContent=title;
+  document.getElementById('cfm-msg').textContent=message;
+  document.getElementById('cfm-ok').textContent=okLabel;
+  openMod('confirm-modal');
+  return new Promise(res=>{cfmResolve=res;});
+}
+function cfmCancel(){const r=cfmResolve;cfmResolve=null;closeMod('confirm-modal');if(r)r(false);}
+function cfmConfirm(){const r=cfmResolve;cfmResolve=null;closeMod('confirm-modal');if(r)r(true);}
+// Raccourcis clavier desktop (Alex power user) : sans effet si l'utilisateur est en train de taper dans un champ
+function isTypingTarget(el){
+  if(!el)return false;
+  return el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||el.isContentEditable;
+}
+const KB_NEW_MODAL={catalogue:openProdModal,fournisseurs:openFourModal,transitaires:openTransModal};
+const KB_SEARCH_ID={catalogue:'cat-search',fournisseurs:'four-search',transitaires:'tr-search',devis:'dv-search'};
+const KB_SAVE_FOR_MODAL={'prod-modal':saveProd,'four-modal':saveFour,'trans-modal':saveTrans};
+function currentTabName(){
+  const b=document.querySelector('.tab.active');
+  return b?b.id.replace('tab-',''):'catalogue';
+}
 // Clavier : Échap ferme modales et menus ; Tab reste piégé dans la modale ouverte ; flèches sur les onglets
 document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    const ov=document.querySelector('.overlay.open');
+    const fn=ov&&KB_SAVE_FOR_MODAL[ov.id];
+    if(fn){e.preventDefault();fn();}
+    return;
+  }
+  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.col-picker-drop.open,.user-menu.open')){
+    if(e.key==='/'){
+      const id=KB_SEARCH_ID[currentTabName()];
+      if(id){e.preventDefault();document.getElementById(id).focus();}
+      return;
+    }
+    if(e.key==='n'||e.key==='N'){
+      const fn=KB_NEW_MODAL[currentTabName()];
+      if(fn){e.preventDefault();fn();}
+      return;
+    }
+    if(e.key==='?'){e.preventDefault();openMod('shortcuts-modal');return;}
+  }
   if(e.key==='Escape'){
     const ov=document.querySelector('.overlay.open');
-    if(ov){closeMod(ov.id);return;}
+    if(ov){ov.id==='confirm-modal'?cfmCancel():closeMod(ov.id);return;}
     document.querySelectorAll('.col-picker-drop.open').forEach(d=>{
       d.classList.remove('open');
       const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
       if(b)b.setAttribute('aria-expanded','false');
     });
+    tbMoreCloseAll();
     userMenuClose();
     return;
   }
@@ -43,7 +96,10 @@ document.addEventListener('keydown',e=>{
     tab(next);document.getElementById('tab-'+next).focus();
   }
 });
-document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+document.querySelectorAll('.overlay').forEach(el=>el.addEventListener('click',e=>{
+  if(e.target!==el)return;
+  el.id==='confirm-modal'?cfmCancel():el.classList.remove('open');
+}));
 /* ===== SAUVEGARDE & RESTAURATION (backup JSON — localStorage pour gf_s/gf_v, IndexedDB pour le reste) ===== */
 // Clés incluses dans le backup (voir bkpSnapshot) : gf_s/gf_v restent en localStorage (réglages légers),
 // gf_p/gf_f/gf_t/gf_win/gf_audit/gf_d/gf_dc/gf_dp/gf_cols/gf_imp/gf_exp vivent en IndexedDB
@@ -121,11 +177,17 @@ async function renderStoragePanel(){
 }
 function storClearAudit(){
   if(!(auditHist||[]).length)return;
-  if(!confirm('Vider tout l\'historique des calculs ? Cette action est irréversible.'))return;
-  auditHist=[];
-  IDB_SET(AK,auditHist);
-  toast('Historique des calculs vidé ✓');
-  renderStoragePanel();
+  const n=auditHist.length;
+  askConfirm(`Vider les ${n} entrée${n>1?'s':''} de l'historique des calculs ?`,{title:"Vider l'historique",okLabel:'Vider'}).then(ok=>{
+    if(!ok)return;
+    const prev=auditHist;
+    auditHist=[];
+    IDB_SET(AK,auditHist);
+    renderStoragePanel();
+    toastUndo(`Historique des calculs vidé (${n} entrée${n>1?'s':''})`,()=>{
+      auditHist=prev;IDB_SET(AK,auditHist);renderStoragePanel();toast('Suppression annulée');
+    });
+  });
 }
 function storClearLastHtml(){
   const p=impPrefs();
@@ -249,7 +311,7 @@ async function bkpTrySaveToDir(fname,content){
       :(e&&e.name==='NotAllowedError')
         ?'Permission d\'écriture refusée — re-sélectionnez le dossier dans Paramètres.'
         :'Écriture impossible dans le dossier de sauvegarde.';
-    toast(`⚠️ ${msg} Téléchargement classique utilisé.`,true);
+    toast(`${msg} Téléchargement classique utilisé.`,true);
     return null;
   }
 }
@@ -298,9 +360,10 @@ function handleBackupFile(input){
     }
     const c=bkpCounts(j.data);
     const when=j.date?new Date(j.date).toLocaleDateString('fr-FR'):'date inconnue';
-    if(!confirm(`Restaurer la sauvegarde du ${when} ?\n\n`+
+    const ok=await askConfirm(`Restaurer la sauvegarde du ${when} ?\n\n`+
       `• ${c.produits} produits\n• ${c.fournisseurs} fournisseurs\n• ${c.transitaires} transitaires\n• ${c.devis} articles au panier devis\n\n`+
-      `⚠️ Toutes les données actuelles seront remplacées.`))return;
+      `Toutes les données actuelles seront remplacées.`,{title:'Restaurer la sauvegarde',okLabel:'Restaurer'});
+    if(!ok)return;
     try{
       for(const k of Object.keys(j.data)){
         if(k.indexOf('gf_')!==0||typeof j.data[k]!=='string')continue;
@@ -317,7 +380,7 @@ function handleBackupFile(input){
       toast('Sauvegarde restaurée ✓ — rechargement…');
       setTimeout(()=>location.reload(),800);
     }catch(e){
-      toast('⚠️ Espace de stockage saturé. Veuillez exporter vos données et supprimer les éléments inutiles.',true);
+      toast('Espace de stockage saturé. Veuillez exporter vos données et supprimer les éléments inutiles.',true);
     }
   };
   rd.readAsText(file);
@@ -328,6 +391,6 @@ function bkpWeeklyWarn(){
   const last=parseInt(localStorage.getItem(BKP_WARN_K)||'0');
   if(Date.now()-last<7*864e5)return;
   try{localStorage.setItem(BKP_WARN_K,String(Date.now()));}catch(e){return;}
-  setTimeout(()=>toast('⚠️ Données stockées localement — pensez à « Exporter mes données » (Paramètres)',true),1500);
+  setTimeout(()=>toast('Données stockées localement — pensez à « Exporter mes données » (Paramètres)',true),1500);
 }
 /* ===== FIN SAUVEGARDE & RESTAURATION ===== */

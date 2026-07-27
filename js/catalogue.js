@@ -53,10 +53,10 @@ function renderCat(){
   let list=prods.filter(p=>(!q||(p.nom.toLowerCase().includes(q)||p.ref.toLowerCase().includes(q)||(p.cat||'').toLowerCase().includes(q)))&&(!fc||p.cat===fc)&&(!fv||p.fid===fv));
   const totalV=prods.reduce((s,p)=>s+calc(p).coutRevientUX,0);
   document.getElementById('cat-stats').innerHTML=`
-    <div class="stat"><div class="stat-ico">${ICO('box')}</div><div class="stat-txt"><div class="stat-val">${prods.length}</div><div class="stat-lbl">Produits</div></div></div>
-    <div class="stat"><div class="stat-ico">${ICO('eye')}</div><div class="stat-txt"><div class="stat-val">${list.length}</div><div class="stat-lbl">Affichés</div></div></div>
-    <div class="stat"><div class="stat-ico">${ICO('tag')}</div><div class="stat-txt"><div class="stat-val">${[...new Set(prods.map(p=>p.cat))].length}</div><div class="stat-lbl">Catégories</div></div></div>
-    <div class="stat"><div class="stat-ico">${ICO('cash')}</div><div class="stat-txt"><div class="stat-val" style="font-size:15px">${N(totalV)}</div><div class="stat-lbl">Coût de revient catalogue</div></div></div>`;
+    <div class="stat stat-money"><div class="stat-ico">${ICO('cash')}</div><div class="stat-txt"><div class="stat-val">${N(totalV)}</div><div class="stat-lbl">Coût de revient catalogue</div></div></div>
+    <div class="stat stat-prod"><div class="stat-ico">${ICO('box')}</div><div class="stat-txt"><div class="stat-val">${prods.length}</div><div class="stat-lbl">Produits</div></div></div>
+    <div class="stat stat-view"><div class="stat-ico">${ICO('eye')}</div><div class="stat-txt"><div class="stat-val">${list.length}</div><div class="stat-lbl">Affichés</div></div></div>
+    <div class="stat stat-cat"><div class="stat-ico">${ICO('tag')}</div><div class="stat-txt"><div class="stat-val">${[...new Set(prods.map(p=>p.cat))].length}</div><div class="stat-lbl">Catégories</div></div></div>`;
   const c=document.getElementById('cat-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">'+ICO('inbox')+'</div><h3>Aucun produit trouvé</h3><p>Ajustez vos filtres ou ajoutez un produit.</p></div>';return;}
   if(grouped){
@@ -126,7 +126,7 @@ function cardPriceRows(p,c){
   return[
     cols.achat  ?`<div class="pr"><span class="pr-lbl">Achat EXW</span><span class="pr-val">${N(c.exwUX)}</span></div>`:'',
     cols.prach&&c.fretLocalX?`<div class="pr"><span class="pr-lbl">Fret local</span><span class="pr-val">${N(c.fretLocalX)}</span></div>`:'',
-    cols.revient?`<div class="pr pr-click" id="cdt-${p.id}" onclick="toggleCostDetail('${p.id}',event)" title="Voir le détail du coût de revient"><span class="pr-lbl">Coût de Revient HT ${ICO('chev')}</span><span class="pr-val">${N(c.coutRevientUX)}</span></div>${detail}`:'',
+    cols.revient?`<div class="pr pr-click" id="cdt-${p.id}" role="button" tabindex="0" aria-label="Voir le détail du coût de revient" onclick="toggleCostDetail('${p.id}',event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleCostDetail('${p.id}',event)}" title="Voir le détail du coût de revient"><span class="pr-lbl">Coût de Revient HT ${ICO('chev')}</span><span class="pr-val">${N(c.coutRevientUX)}</span></div>${detail}`:'',
     cols.fret   ?`<div class="pr"><span class="pr-lbl">Frais logistiques <small>(${c.mode})</small></span><span class="pr-val">${N(c.fraisLogU)}</span></div>`:'',
     cols.marge  ?`<div class="pr"><span class="pr-lbl">Marge</span><span class="pr-val" style="color:var(--vert-t)">${N(c.margeU)} <small>(${Nd(c.margePct,1)}%)</small></span></div>`:'',
     cols.vente  ?`<div class="pr pr-strong"><span class="pr-lbl">Prix de Vente HT</span><span class="pr-val">${N(c.pvuHT)}</span></div>`:'',
@@ -144,7 +144,7 @@ function toggleCostDetail(id,ev){
 /* Galerie d'images sur la carte : miniatures cliquables qui remplacent l'image principale */
 function cardGallery(p){
   if(!p.photos||p.photos.length<2)return'';
-  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${escH(p.nom)}" onerror="this.remove()" onclick="swapCardImg(this)">`).join('')}</div>`;
+  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${escH(p.nom)}" role="button" tabindex="0" onerror="this.remove()" onclick="swapCardImg(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();swapCardImg(this)}">`).join('')}</div>`;
 }
 function swapCardImg(t){
   const card=t.closest('.card');if(!card)return;
@@ -189,9 +189,9 @@ function prodGroupCard(g){
     ${cols.photos?cardGallery(w):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
-      <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -248,14 +248,14 @@ function prodGroupTable(groups){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(w)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
-        <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -264,6 +264,8 @@ function prodGroupTable(groups){
     const altRows=others.map(p=>{
       const fp=fours.find(x=>x.id===p.fid);const cp=calc(p);
       const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" alt="" loading="lazy">`:PH_SM;
+      // Ligne alternative (non-gagnante) : TTC volontairement en couleur seule, sans le
+      // traitement hero (Montserrat 800) — ne pas concurrencer visuellement le gagnant ci-dessus.
       return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
         <td></td>
         ${C.photos ?`<td>${pimg}</td>`:''}
@@ -334,7 +336,7 @@ function openDetails(title,rows,img){
   document.getElementById('detail-title').textContent=title;
   document.getElementById('detail-body').innerHTML=
     (img?`<img src="${img}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:12px" onerror="this.style.display='none'">`:'')+
-    rows.map(([l,v])=>`<div class="detail-row"><span>${l}</span><span>${v}</span></div>`).join('');
+    rows.map(([l,v,hero])=>`<div class="detail-row${hero?' detail-row-hero':''}"><span>${l}</span><span>${v}</span></div>`).join('');
   openMod('detail-modal');
 }
 function showProdDetails(id){
@@ -350,7 +352,7 @@ function showProdDetails(id){
     ['Achat EXW (XOF)',N(c.exwUX)],['Coût de Revient HT',N(c.coutRevientUX)],
     ['Frais logistiques (Transitaire)',N(c.fraisLogU)],
     ['Marge',`${N(c.margeU)} (${Nd(c.margePct,1)}%)`],
-    ['Prix de Vente HT',N(c.pvuHT)],['Prix de Vente TTC',N(c.pvuTTC)],
+    ['Prix de Vente HT',N(c.pvuHT)],['Prix de Vente TTC',N(c.pvuTTC),'hero'],
     ['Prix marché',p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'],
   ],p.photos&&p.photos[0]);
 }
@@ -514,7 +516,7 @@ function showDevisDetails(cid){
     `<div class="detail-row"><span>Prix total HT</span><span>${Ndv(c.pvtHT)}</span></div>`+
     `<div class="detail-row"><span>Frais logistiques Estimé</span><span>${Ndv(c.fraisLog)}</span></div>`+
     (c.tvaM?`<div class="detail-row"><span>TVA interne</span><span>${Ndv(c.tvaM)}</span></div>`:'')+
-    `<div class="detail-row"><span>Prix TTC Estimé</span><span>${Ndv(c.pvtTTC)}</span></div>`+
+    `<div class="detail-row detail-row-hero"><span>Prix TTC Estimé</span><span>${Ndv(c.pvtTTC)}</span></div>`+
     `<div class="detail-row"><span>Fournisseur</span><span>${esc(p.fn)||'—'}</span></div>`+
     `<div class="detail-row"><span>Transitaire</span><span>${esc(p.trans_nom)||'—'}</span></div>`+
     `<div class="detail-row"><span>Délai estimé</span><span>${p.trans_delai?p.trans_delai+' j':'—'}</span></div>`;
@@ -555,9 +557,9 @@ function prodCard(p){
     ${cols.photos?cardGallery(p):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
-      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+      <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -609,15 +611,15 @@ function prodTable(list){
       ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
       ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
       ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td style="color:var(--bleu-t);font-weight:600">${N(c.pvuTTC)}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
       ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
       ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px;position:relative">
         ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
-        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')">${ICO('pencil')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -741,16 +743,18 @@ function calcPrev(){
     <div>Marge (${document.getElementById('p-marge').value||S.tauxMarge}%): <b style="color:var(--vert-t)">${N(c.margeU)}</b></div>
     <div>Prix de Vente HT: <b>${N(c.pvuHT)}</b></div>
     <div>Frais logistiques: <b>${N(c.fraisLogU)}</b></div>
-    <div>Prix de Vente TTC: <b style="color:var(--bleu-t)">${N(c.pvuTTC)}</b></div>`;
+    <div style="grid-column:1/-1;border-top:1px solid var(--border2);padding-top:8px;margin-top:4px">Prix de Vente TTC: <b class="ttc-hero" style="font-size:14px">${N(c.pvuTTC)}</b></div>`;
 }
 
 function saveProd(){
   const nom=document.getElementById('p-nom').value.trim();
   const cat=document.getElementById('p-cat').value;
+  const prixVal=parseFloat(document.getElementById('p-prix').value);
   if(!nom||!cat){toast('Nom et catégorie requis',true);return;}
+  if(!prixVal){toast('Prix EXW requis',true);return;}
   const fid=document.getElementById('p-four').value;
   const f=fours.find(x=>x.id===fid);
-  let d={nom,cat,fid,fn:f?f.nom:'',prix:parseFloat(document.getElementById('p-prix').value)||0,
+  let d={nom,cat,fid,fn:f?f.nom:'',prix:prixVal,
     prach:parseFloat(document.getElementById('p-prach').value)||0,
     dev:document.getElementById('p-dev').value,l:parseFloat(document.getElementById('p-l').value)||0,
     la:parseFloat(document.getElementById('p-la').value)||0,h:parseFloat(document.getElementById('p-h').value)||0,
@@ -772,11 +776,22 @@ function saveProd(){
 }
 
 function delProd(id){
-  if(!confirm('Supprimer ce produit ?'))return;
-  prods=prods.filter(p=>p.id!==id);save('p');
-  // Retirer aussi du panier de devis pour garder les deux vues synchronisées
-  if(devisCart.some(x=>x.pid===id)){devisCart=devisCart.filter(x=>x.pid!==id);saveDevisCartLS();}
-  renderCat();popSim();toast('Supprimé');
+  const idx=prods.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  const p=prods[idx];
+  askConfirm(`Supprimer « ${p.nom} » ? Cette fiche produit sera retirée du catalogue.`,{title:'Supprimer ce produit',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    prods=prods.filter(x=>x.id!==id);save('p');
+    // Retirer aussi du panier de devis pour garder les deux vues synchronisées
+    const cartRemoved=devisCart.filter(x=>x.pid===id);
+    if(cartRemoved.length){devisCart=devisCart.filter(x=>x.pid!==id);saveDevisCartLS();}
+    renderCat();popSim();
+    toastUndo(`« ${p.nom} » supprimé`,()=>{
+      prods.splice(idx,0,p);
+      if(cartRemoved.length){devisCart.push(...cartRemoved);saveDevisCartLS();}
+      save('p');renderCat();popSim();renderDevisCart();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- PHOTOS ---- */
@@ -839,7 +854,7 @@ function renderFour(){
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const ev=parseInt(f.eval)||0;const stars=Array.from({length:5},(_,i)=>ICO('star','star'+(i<ev?' on':''))).join('');
-    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${escH(f.nom)}" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
+    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${escH(f.nom)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
     return`<div class="card">
       <div class="card-body">
         <div class="four-card-hdr">
@@ -856,13 +871,13 @@ function renderFour(){
         ${f.wc?`<div class="info-row">${ICO('msg')} WeChat : ${escH(f.wc)}</div>`:''}
         ${f.dom?`<div class="info-row" style="margin-top:4px">${ICO('factory')} ${escH(f.dom)}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'#fef3c7'};color:${f.ali==='Vérifié'?'var(--ok)':'#92400e'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
+          ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'var(--warn-bg)'};color:${f.ali==='Vérifié'?'var(--ok)':'var(--warn)'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
           ${f.ali_url?`<a href="${escH(f.ali_url)}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
           ${f.devis?`<a href="${escH(f.devis)}" target="_blank" class="devis-btn">${ICO('file')} Devis PDF</a>`:''}
         </div>
         <div class="card-acts">
           <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">${ICO('pencil')} Modifier</button>
-          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')">${ICO('trash')}</button>
+          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')" title="Supprimer" aria-label="Supprimer ${escH(f.nom)}">${ICO('trash')}</button>
         </div>
       </div></div>`;
   }).join('')}</div>`;
@@ -929,8 +944,16 @@ function saveFour(){
 }
 
 function delFour(id){
-  if(!confirm('Supprimer ce fournisseur ?'))return;
-  fours=fours.filter(f=>f.id!==id);save('f');renderFour();toast('Supprimé');
+  const idx=fours.findIndex(f=>f.id===id);
+  if(idx<0)return;
+  const f=fours[idx];
+  askConfirm(`Supprimer « ${f.nom} » ? Sa fiche fournisseur sera définitivement retirée.`,{title:'Supprimer ce fournisseur',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    fours=fours.filter(x=>x.id!==id);save('f');renderFour();
+    toastUndo(`« ${f.nom} » supprimé`,()=>{
+      fours.splice(idx,0,f);save('f');renderFour();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- TRANSITAIRES ---- */
@@ -940,7 +963,7 @@ function renderTrans(){
   const c=document.getElementById('trans-cont');
   if(!list.length){c.innerHTML='<div class="empty"><div class="empty-ico">'+ICO('ship')+'</div><h3>Aucun transitaire</h3><p>Ajoutez votre premier transitaire.</p></div>';return;}
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
-    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="">`:PH_SM}</div>
+    <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="" loading="lazy">`:PH_SM}</div>
     <div class="card-body">
       <div class="card-title">${escH(t.nom)}</div>
       <div class="card-cat">${escH(t.dep||'')} → ${escH(t.arr||'')} · ${escH(t.type||'')}</div>
@@ -950,8 +973,8 @@ function renderTrans(){
         ${t.wa?`<span>${ICO('phone')} ${escH(t.wa)}</span>`:''}
       </div>
       <div class="card-acts">
-        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')">${ICO('pencil')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')">${ICO('trash')}</button>
+        <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')" title="Modifier" aria-label="Modifier ${String(t.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')" title="Supprimer" aria-label="Supprimer ${escH(t.nom)}">${ICO('trash')}</button>
       </div>
     </div></div>`).join('')}</div>`;
 }
@@ -994,8 +1017,16 @@ function saveTrans(){
 }
 
 function delTrans(id){
-  if(!confirm('Supprimer ?'))return;
-  trans=trans.filter(t=>t.id!==id);save('t');renderTrans();popSim();toast('Supprimé');
+  const idx=trans.findIndex(t=>t.id===id);
+  if(idx<0)return;
+  const t=trans[idx];
+  askConfirm(`Supprimer « ${t.nom} » ? Cette fiche transitaire sera définitivement retirée.`,{title:'Supprimer ce transitaire',okLabel:'Supprimer'}).then(ok=>{
+    if(!ok)return;
+    trans=trans.filter(x=>x.id!==id);save('t');renderTrans();popSim();
+    toastUndo(`« ${t.nom} » supprimé`,()=>{
+      trans.splice(idx,0,t);save('t');renderTrans();popSim();toast('Suppression annulée');
+    });
+  });
 }
 
 /* ---- SIMULATION ---- */
@@ -1092,7 +1123,7 @@ function simCalc(){
     ${V.taux||V.marge||V.vente_ht||V.revient_u?`<div class="sim-sec">Étape 2 · Prix de Vente HT (XOF)</div>`:''}
     ${V.taux?`<div class="sim-row"><span>Taux de change</span><span>1 ${c.dev} = ${Nd(c.tauxChange,2)} XOF</span></div>`:''}
     ${V.revient_u?`<div class="sim-row"><span>Coût de revient unitaire (XOF)</span><span>${N(c.coutRevientUX)}</span></div>`:''}
-    ${V.marge?`<div class="sim-row"><span>Marge unitaire</span><span style="color:#4ade80">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
+    ${V.marge?`<div class="sim-row"><span>Marge unitaire</span><span style="color:var(--vert)">${N(c.margeU)} (${Nd(c.margePct,1)}%)</span></div>
     ${rem>0?`<div class="sim-row"><span>Remise (${rem}%)</span><span>incluse</span></div>`:''}`:''}
     ${V.vente_ht?`
     <div class="sim-row"><span>Prix de Vente unitaire HT</span><span style="font-weight:600">${N(c.pvuHT)}</span></div>
