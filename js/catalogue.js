@@ -144,7 +144,7 @@ function toggleCostDetail(id,ev){
 /* Galerie d'images sur la carte : miniatures cliquables qui remplacent l'image principale */
 function cardGallery(p){
   if(!p.photos||p.photos.length<2)return'';
-  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${String(p.nom||'').replace(/"/g,'&quot;')}" role="button" tabindex="0" onerror="this.remove()" onclick="swapCardImg(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();swapCardImg(this)}">`).join('')}</div>`;
+  return`<div class="card-gal">${p.photos.slice(0,4).map(s=>`<img src="${s}" loading="lazy" alt="Vue supplémentaire de ${escH(p.nom)}" role="button" tabindex="0" onerror="this.remove()" onclick="swapCardImg(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();swapCardImg(this)}">`).join('')}</div>`;
 }
 function swapCardImg(t){
   const card=t.closest('.card');if(!card)return;
@@ -159,7 +159,7 @@ function prodGroupCard(g){
   const lbl=fourLabel(f);const bc=fourBadgeClass(f);
   const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${String(w.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
+    ?`<img src="${imgSrc}" alt="${escH(w.nom)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
   const c=calc(w);
   const escapedKey=key.replace(/'/g,"\\'");
@@ -171,7 +171,7 @@ function prodGroupCard(g){
     return`<div class="alt-card">
       ${pimg}
       <div class="alt-card-info">
-        <div class="alt-card-nom">${p.nom}</div>
+        <div class="alt-card-nom">${escH(p.nom)}</div>
         <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.pvuTTC)} TTC</div>
       </div>
       <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
@@ -182,16 +182,16 @@ function prodGroupCard(g){
   return`<div class="card">
   ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(w.id)}${grpBadge}</div>`:cardTopStrip(w.id,bc,lbl,grpBadge?`<span style="position:static" class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fourn.</span>`:'')}
   <div class="card-body">
-    ${cols.ref?`<div class="card-ref">${w.ref}</div>`:''}
-    ${cols.nom?`<div class="card-title">${w.nom}</div>`:''}
-    <div class="card-cat">${cols.cat?w.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(w.tr)} ${w.tr}</div>
+    ${cols.ref?`<div class="card-ref">${escH(w.ref)}</div>`:''}
+    ${cols.nom?`<div class="card-title">${escH(w.nom)}</div>`:''}
+    <div class="card-cat">${cols.cat?escH(w.cat)+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(w.tr)} ${w.tr}</div>
     ${catInfoRows(w)}
     ${cols.photos?cardGallery(w):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -233,9 +233,9 @@ function prodGroupTable(groups){
     const winRow=`<tr>
       <td class="no-print">${expandBtn}${C.photos?'':`<span style="position:relative;display:inline-block;width:22px;height:22px">${expBox(w.id)}</span>`}</td>
       ${C.photos ?`<td>${expBox(w.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
-      ${C.ref    ?`<td><code style="font-size:10px">${w.ref}</code></td>`:''}
-      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${w.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>`:''}
-      ${C.cat    ?`<td><span class="pill-cat">${w.cat}</span></td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${escH(w.ref)}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${escH(w.nom)}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${escH(w.cat)}</span></td>`:''}
       ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
       ${C.moq    ?`<td>${w.moq||1}</td>`:''}
       ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(w.specs,60)}</td>`:''}
@@ -255,7 +255,7 @@ function prodGroupTable(groups){
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -269,8 +269,8 @@ function prodGroupTable(groups){
       return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
         <td></td>
         ${C.photos ?`<td>${pimg}</td>`:''}
-        ${C.ref    ?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
-        ${C.nom    ?`<td style="color:var(--muted)">${p.nom}</td>`:''}
+        ${C.ref    ?`<td><code style="font-size:9px">${escH(p.ref)}</code></td>`:''}
+        ${C.nom    ?`<td style="color:var(--muted)">${escH(p.nom)}</td>`:''}
         ${C.cat    ?`<td></td>`:''}
         ${C.four   ?`<td>${fourLabel(fp)}</td>`:''}
         ${C.moq    ?`<td>${p.moq||1}</td>`:''}
@@ -303,7 +303,7 @@ function toggleGroupTblRow(key,btn){
 }
 
 // Texte long (Spécificités / Description) : échappé, tronqué, tooltip au survol
-function escH(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
+function escH(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function truncTxt(s,n=60){
   s=String(s||'');
   if(!s)return'—';
@@ -343,7 +343,7 @@ function showProdDetails(id){
   const p=prods.find(x=>x.id===id);if(!p)return;
   const f=fours.find(x=>x.id===p.fid);const c=calc(p);
   openDetails(p.nom,[
-    ['Référence',p.ref],['Catégorie',p.cat],['Fournisseur',f?f.nom:p.fn||'—'],
+    ['Référence',escH(p.ref)],['Catégorie',escH(p.cat)],['Fournisseur',escH(f?f.nom:p.fn||'—')],
     ['Prix EXW',`${p.prix} ${p.dev||'RMB'}`],['Fret local',p.prach?`${p.prach} ${p.dev||'RMB'}`:'—'],
     ['Dimensions',`${p.l}×${p.la}×${p.h} ${p.dimU||'cm'}`],['CBM',Nd(c.cbm,4)+' m³'],['Poids',p.kg+' kg'],
     ['Transport',p.tr],['Délai livraison',prodDelai(p)],['MOQ',p.moq||1],
@@ -482,7 +482,7 @@ function showDevisDetails(cid){
   const item=devisCart.find(x=>x.cid===cid);if(!item)return;
   const c=calcDevis(item),p=item.snap;
   const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[p.dev]||p.dev;
-  const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const esc=escH;
   const catOpts=(CATS[p.cat]?'':`<option selected>${esc(p.cat)}</option>`)+
     Object.keys(CATS).map(k=>`<option${p.cat===k?' selected':''}>${k}</option>`).join('');
   const devOpts=(DV_NAMES[p.dev]?'':`<option value="${esc(p.dev)}" selected>${esc(p.dev)}</option>`)+
@@ -527,7 +527,7 @@ function fourLabel(f){
   if(!f)return'—';
   if(f.nom.includes('Yateli'))return'Yateli';
   if(f.nom.includes('Oman'))return'Oman';
-  return f.nom.split(' ')[0];
+  return escH(f.nom.split(' ')[0]);
 }
 
 function fourBadgeClass(f){
@@ -543,23 +543,23 @@ function prodCard(p){
   const bc=fourBadgeClass(f);
   const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
+    ?`<img src="${imgSrc}" alt="${escH(p.nom)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
   const c=calc(p);
   const priceRows=cardPriceRows(p,c);
   return`<div class="card">
   ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(p.id)}</div>`:cardTopStrip(p.id,bc,lbl)}
   <div class="card-body">
-    ${cols.ref?`<div class="card-ref">${p.ref}</div>`:''}
-    ${cols.nom?`<div class="card-title">${p.nom}</div>`:''}
-    <div class="card-cat">${cols.cat?p.cat+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(p.tr)} ${p.tr}</div>
+    ${cols.ref?`<div class="card-ref">${escH(p.ref)}</div>`:''}
+    ${cols.nom?`<div class="card-title">${escH(p.nom)}</div>`:''}
+    <div class="card-cat">${cols.cat?escH(p.cat)+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(p.tr)} ${p.tr}</div>
     ${catInfoRows(p)}
     ${cols.photos?cardGallery(p):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
       <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
@@ -596,9 +596,9 @@ function prodTable(list){
     const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
     return`<tr>
       ${C.photos ?`<td>${expBox(p.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
-      ${C.ref    ?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
-      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${p.nom}</td>`:''}
-      ${C.cat    ?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${escH(p.ref)}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${escH(p.nom)}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${escH(p.cat)}</span></td>`:''}
       ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
       ${C.moq    ?`<td>${p.moq||1}</td>`:''}
       ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
@@ -619,7 +619,7 @@ function prodTable(list){
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
         <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
       </div></td>
@@ -854,30 +854,30 @@ function renderFour(){
   c.innerHTML=`<div class="grid">${list.map(f=>{
     const np=prods.filter(p=>p.fid===f.id).length;
     const ev=parseInt(f.eval)||0;const stars=Array.from({length:5},(_,i)=>ICO('star','star'+(i<ev?' on':''))).join('');
-    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${String(f.nom||'').replace(/"/g,'&quot;')}" loading="lazy" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
+    const logoEl=f.logo?`<img src="${f.logo}" class="four-logo" alt="${escH(f.nom)}" loading="lazy" onerror="this.style.display='none'">`:`<div class="ph-sm" style="width:56px;height:56px;border-radius:12px;background:var(--gris);border:1px solid var(--border);flex-shrink:0">${ICO('factory')}</div>`;
     return`<div class="card">
       <div class="card-body">
         <div class="four-card-hdr">
           ${logoEl}
           <div class="four-info">
-            <div class="card-title" style="font-size:14px">${f.nom}</div>
-            <div style="font-size:11px;color:var(--muted)">${f.pays||''}</div>
+            <div class="card-title" style="font-size:14px">${escH(f.nom)}</div>
+            <div style="font-size:11px;color:var(--muted)">${escH(f.pays||'')}</div>
             <div style="margin-top:3px">${stars} <span style="font-size:10px;color:var(--muted)">${np} produit${np>1?'s':''}</span></div>
           </div>
         </div>
-        ${f.contact?`<div class="info-row">${ICO('user')} <b>${f.contact}</b></div>`:''}
-        ${f.email?`<div class="info-row">${ICO('mail')} <a href="mailto:${f.email}">${f.email}</a></div>`:''}
-        ${f.wa?`<div class="info-row">${ICO('phone')} <a href="https://wa.me/${f.wa.replace(/\D/g,'')}">${f.wa}</a></div>`:''}
-        ${f.wc?`<div class="info-row">${ICO('msg')} WeChat : ${f.wc}</div>`:''}
-        ${f.dom?`<div class="info-row" style="margin-top:4px">${ICO('factory')} ${f.dom}</div>`:''}
+        ${f.contact?`<div class="info-row">${ICO('user')} <b>${escH(f.contact)}</b></div>`:''}
+        ${f.email?`<div class="info-row">${ICO('mail')} <a href="mailto:${escH(f.email)}">${escH(f.email)}</a></div>`:''}
+        ${f.wa?`<div class="info-row">${ICO('phone')} <a href="https://wa.me/${f.wa.replace(/\D/g,'')}">${escH(f.wa)}</a></div>`:''}
+        ${f.wc?`<div class="info-row">${ICO('msg')} WeChat : ${escH(f.wc)}</div>`:''}
+        ${f.dom?`<div class="info-row" style="margin-top:4px">${ICO('factory')} ${escH(f.dom)}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
           ${f.ali!=='Non disponible'?`<span style="background:${f.ali==='Vérifié'?'var(--ok-bg)':'var(--warn-bg)'};color:${f.ali==='Vérifié'?'var(--ok)':'var(--warn)'};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${f.ali==='Vérifié'?'✓ Vérifié Alibaba':'Alibaba'}</span>`:''}
-          ${f.ali_url?`<a href="${f.ali_url}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
-          ${f.devis?`<a href="${f.devis}" target="_blank" class="devis-btn">${ICO('file')} Devis PDF</a>`:''}
+          ${f.ali_url?`<a href="${escH(f.ali_url)}" target="_blank" style="font-size:10px;color:var(--bleu);text-decoration:none;padding:2px 8px;border:1px solid var(--bleu);border-radius:10px">↗ Alibaba</a>`:''}
+          ${f.devis?`<a href="${escH(f.devis)}" target="_blank" class="devis-btn">${ICO('file')} Devis PDF</a>`:''}
         </div>
         <div class="card-acts">
           <button class="btn btn-sec btn-sm" onclick="openFourModal('${f.id}')">${ICO('pencil')} Modifier</button>
-          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')" title="Supprimer" aria-label="Supprimer ${String(f.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+          <button class="btn btn-danger btn-sm" onclick="delFour('${f.id}')" title="Supprimer" aria-label="Supprimer ${escH(f.nom)}">${ICO('trash')}</button>
         </div>
       </div></div>`;
   }).join('')}</div>`;
@@ -965,16 +965,16 @@ function renderTrans(){
   c.innerHTML=`<div class="grid">${list.map(t=>`<div class="card">
     <div class="card-img" style="height:80px">${t.logo?`<img src="${t.logo}" alt="" loading="lazy">`:PH_SM}</div>
     <div class="card-body">
-      <div class="card-title">${t.nom}</div>
-      <div class="card-cat">${t.dep||''} → ${t.arr||''} · ${t.type||''}</div>
+      <div class="card-title">${escH(t.nom)}</div>
+      <div class="card-cat">${escH(t.dep||'')} → ${escH(t.arr||'')} · ${escH(t.type||'')}</div>
       <div style="font-size:11px;margin-top:6px;display:flex;flex-direction:column;gap:3px">
         ${t.mar?`<span>${ICO('ship')} ${parseInt(t.mar).toLocaleString('fr-FR')} XOF/CBM${t.mard?' · '+t.mard+'j':''}</span>`:''}
         ${t.aer?`<span>${ICO('plane')} ${parseInt(t.aer).toLocaleString('fr-FR')} XOF/kg${t.aerd?' · '+t.aerd+'j':''}</span>`:''}
-        ${t.wa?`<span>${ICO('phone')} ${t.wa}</span>`:''}
+        ${t.wa?`<span>${ICO('phone')} ${escH(t.wa)}</span>`:''}
       </div>
       <div class="card-acts">
         <button class="btn btn-sec btn-sm" onclick="openTransModal('${t.id}')" title="Modifier" aria-label="Modifier ${String(t.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')" title="Supprimer" aria-label="Supprimer ${String(t.nom||'').replace(/"/g,'&quot;')}">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delTrans('${t.id}')" title="Supprimer" aria-label="Supprimer ${escH(t.nom)}">${ICO('trash')}</button>
       </div>
     </div></div>`).join('')}</div>`;
 }
@@ -1102,8 +1102,8 @@ function simCalc(){
   const D=v=>Nd(v,2)+' '+sym;
   const V=cmVisible('simulation');
   document.getElementById('sim-rows').innerHTML=`
-    ${V.produit?`<div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${p.nom}</span></div>`:''}
-    ${V.ref?`<div class="sim-row"><span>Référence</span><span>${p.ref}</span></div>`:''}
+    ${V.produit?`<div class="sim-row"><span>Produit</span><span style="text-align:right;max-width:200px">${escH(p.nom)}</span></div>`:''}
+    ${V.ref?`<div class="sim-row"><span>Référence</span><span>${escH(p.ref)}</span></div>`:''}
     ${V.four?`<div class="sim-row"><span>Fournisseur</span><span>${f?fourLabel(f):'—'}</span></div>`:''}
     ${V.moq?`<div class="sim-row"><span>MOQ</span><span>${p.moq||1}</span></div>`:''}
     ${V.specs?`<div class="sim-row"><span>Spécificités</span><span style="text-align:right;max-width:220px">${truncTxt(p.specs,80)}</span></div>`:''}

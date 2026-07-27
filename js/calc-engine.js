@@ -1,10 +1,13 @@
-function xofRate(dev){
-  if(dev==='RMB')return S.tauxChange;
+// ES module: no reference to the global `S` settings object or to `document` —
+// every external value (settings, rates) is passed in as a parameter so this
+// file is unit-testable in isolation (see tests/calc-engine.test.js).
+export function xofRate(dev,settings){
+  if(dev==='RMB')return settings.tauxChange;
   if(dev==='USD')return 600;
   if(dev==='EUR')return 655;
   return 1;
 }
-function toXOF(v,dev){return v?v*xofRate(dev):0;}
+export function toXOF(v,dev,settings){return v?v*xofRate(dev,settings):0;}
 
 /* ===== MOTEUR DE CALCUL (source unique de vérité) =====
    Étape 1 — Coût de revient HT en devise source :
@@ -12,10 +15,10 @@ function toXOF(v,dev){return v?v*xofRate(dev):0;}
    Étape 2 — Conversion en devise cible (XOF) PUIS marge sur le coût de revient unitaire converti
    Étape 3 — Frais logistiques transitaire tout-compris (fret + douane + taxes) → Prix de Vente TTC
    La TVA interne (clients assujettis) est affichée séparément, jamais ajoutée aux frais logistiques. */
-const r2=v=>Math.round((v+Number.EPSILON)*100)/100;
-function cbmOf(l,la,h,unit){const v=(l||0)*(la||0)*(h||0);return unit==='m'?v:v/1e6;}
-function fraisCfg(cfg,base){if(!cfg)return 0;return cfg.mode==='fixe'?(parseFloat(cfg.val)||0):r2(base*(parseFloat(cfg.val)||0)/100);}
-function calcEngine(i){
+export const r2=v=>Math.round((v+Number.EPSILON)*100)/100;
+export function cbmOf(l,la,h,unit){const v=(l||0)*(la||0)*(h||0);return unit==='m'?v:v/1e6;}
+export function fraisCfg(cfg,base){if(!cfg)return 0;return cfg.mode==='fixe'?(parseFloat(cfg.val)||0):r2(base*(parseFloat(cfg.val)||0)/100);}
+export function calcEngine(i){
   const qty=Math.max(1,i.qty||1);
   // Étape 1 — coût de revient (devise source) ; le fret local vaut pour la commande entière
   const coutAchat=r2((i.exw||0)*qty+(i.fretLocal||0));
@@ -52,17 +55,35 @@ function calcEngine(i){
 /* ===== FIN MOTEUR ===== */
 
 // Adaptateur produit → moteur (o : surcharges {marge,rem,qty,tr,fa,fm,assu,assujetti})
-function calc(p,o={}){
-  const margePct=o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):S.tauxMarge);
+// `settings` remplace l'ancien global `S` (tauxChange, tauxMarge, tarifAerien, tarifMaritime, trf, assu, tvaInterne).
+export function calc(p,settings,o={}){
+  const margePct=o.marge!==undefined?o.marge:(p.marge!==''&&p.marge!=null?parseFloat(p.marge):settings.tauxMarge);
   return calcEngine({
     exw:parseFloat(p.prix)||0,fretLocal:parseFloat(p.prach)||0,dev:p.dev||'RMB',
-    qty:o.qty||1,tauxChange:xofRate(p.dev||'RMB'),
+    qty:o.qty||1,tauxChange:xofRate(p.dev||'RMB',settings),
     margePct,remisePct:o.rem!==undefined?o.rem:(parseFloat(p.rem)||0),
     l:p.l,la:p.la,h:p.h,dimU:p.dimU||'cm',kg:p.kg,
     mode:o.tr||p.tr||'Maritime',
-    tarifAerien:o.fa||S.tarifAerien,tarifMaritime:o.fm||S.tarifMaritime,
-    transfert:S.trf,assurance:o.assu!==undefined?{...S.assu,on:o.assu}:S.assu,
-    tvaInterne:S.tvaInterne,assujetti:!!o.assujetti});
+    tarifAerien:o.fa||settings.tarifAerien,tarifMaritime:o.fm||settings.tarifMaritime,
+    transfert:settings.trf,assurance:o.assu!==undefined?{...settings.assu,on:o.assu}:settings.assu,
+    tvaInterne:settings.tvaInterne,assujetti:!!o.assujetti});
+}
+
+// ---- Pont de compatibilité ascendante ----
+// catalogue.js / devis.js / export-module.js / app-shell.js restent des
+// classic <script> (pas des modules) et appellent calc(p,o), xofRate(dev),
+// toXOF(v,dev), calcEngine(i), r2(v) comme des globales, en s'appuyant
+// implicitement sur le global `S`. On republie donc ces mêmes signatures
+// sur `window`, adossées au `S` global au moment de l'appel, pour que rien
+// d'autre n'ait à changer.
+if(typeof window!=='undefined'){
+  window.xofRate=dev=>xofRate(dev,S);
+  window.toXOF=(v,dev)=>toXOF(v,dev,S);
+  window.r2=r2;
+  window.cbmOf=cbmOf;
+  window.fraisCfg=fraisCfg;
+  window.calcEngine=calcEngine;
+  window.calc=(p,o)=>calc(p,S,o);
 }
 
 /* ---- HISTORIQUE AUDIT ---- */
