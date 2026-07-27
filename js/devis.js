@@ -521,12 +521,12 @@ function buildDevisGrid(list){
     const c=calcDevis(item),p=item.snap;
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     const imgHtml=p.photos&&p.photos[0]
-      ?`<img src="${p.photos[0]}" alt="${escH(p.nom)}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">${PH_LG}</div>`
+      ?`<img src="${p.photos[0]}" alt="${String(p.nom||'').replace(/"/g,'&quot;')}" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-placeholder" style="display:none">${PH_LG}</div>`
       :`<div class="card-img-placeholder">${PH_LG}</div>`;
     // SECTION PRODUIT (infos complémentaires) — Qté placée avant les colonnes de totaux
     const infosProduit=[
       SH.specs&&p.specs?row('Spécificités',`<span style="font-weight:400;color:var(--muted)">${truncTxt(p.specs,80)}</span>`):'',
-      SH.fournisseur?row('Fournisseur',escH(p.fn||'—')):'',
+      SH.fournisseur?row('Fournisseur',p.fn||'—'):'',
       SH.poids?row('Poids',(p.poids||p.kg||'—')+' kg'):'',
       SH.cbm?row('CBM',Nd(c.cbm,4)+' m³'):'',
     ].filter(Boolean).join('');
@@ -544,10 +544,10 @@ function buildDevisGrid(list){
     return`<div class="cart-item-grid">
       ${SH.photos?`<div class="card-img" style="height:130px">${imgHtml}</div>`:''}
       <div class="card-body">
-        ${SH.ref?`<div class="card-ref">${escH(p.ref)}</div>`:''}
-        ${SH.nom?`<div class="card-title">${escH(p.nom)}</div>`:''}
+        ${SH.ref?`<div class="card-ref">${p.ref}</div>`:''}
+        ${SH.nom?`<div class="card-title">${p.nom}</div>`:''}
         ${SH.commentaire?`<div style="margin:2px 0 4px">${dvNoteField(item,'13.5px')}</div>`:''}
-        ${SH.cat?`<div class="card-cat">${escH(p.cat)}</div>`:''}
+        ${SH.cat?`<div class="card-cat">${p.cat}</div>`:''}
         ${infosProduit}
         ${SH.qte?`<div class="cart-qty-ctrl">
           <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
@@ -602,13 +602,13 @@ function buildDevisTable(list){
     const imgSrc=p.photos&&p.photos[0];
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     return`<tr>
-      ${SH.ref?`<td><code style="font-size:10px">${escH(p.ref)}</code></td>`:''}
+      ${SH.ref?`<td><code style="font-size:10px">${p.ref}</code></td>`:''}
       ${SH.photos?`<td>${imgSrc?`<img src="${imgSrc}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" loading="lazy">`:PH_SM}</td>`:''}
-      ${SH.nom?`<td style="font-weight:500;max-width:160px">${escH(p.nom)}</td>`:''}
+      ${SH.nom?`<td style="font-weight:500;max-width:160px">${p.nom}</td>`:''}
       ${SH.commentaire?`<td style="min-width:180px">${dvNoteField(item,'12.5px')}</td>`:''}
-      ${SH.cat?`<td><span class="pill-cat">${escH(p.cat)}</span></td>`:''}
+      ${SH.cat?`<td><span class="pill-cat">${p.cat}</span></td>`:''}
       ${SH.specs?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
-      ${SH.fournisseur?`<td style="font-size:12px">${escH(p.fn||'—')}</td>`:''}
+      ${SH.fournisseur?`<td style="font-size:12px">${p.fn||'—'}</td>`:''}
       ${SH.qte?`<td><div class="cart-qty-ctrl" style="margin:0">
         <button onclick="dvQty('${item.cid}',${item.qty-1})">−</button>
         <input type="number" value="${item.qty}" min="1" onchange="dvQty('${item.cid}',this.value)" style="width:40px">
@@ -853,13 +853,12 @@ function generateDevisPDF(){
   const SH={};CM_DEFS.devis.forEach(d=>{SH[d.k]=colStore.devis.visible.includes(d.k);});
   // Bloc client
   const cl=devisClient;
-  const escC=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const clientHtml=[
-    cl.nom||cl.ent?`<strong>${escC([cl.nom,cl.ent].filter(Boolean).join(' — '))}</strong>`:'',
-    cl.email?`${T.client.email}${escC(cl.email)}`:'',
-    cl.tel?`${T.client.tel}${escC(cl.tel)}`:'',
-    cl.adr?`${T.client.adr}${escC(cl.adr)}`:'',
-    escC(cl.ville||''),
+    cl.nom||cl.ent?`<strong>${[cl.nom,cl.ent].filter(Boolean).join(' — ')}</strong>`:'',
+    cl.email?`${T.client.email}${cl.email}`:'',
+    cl.tel?`${T.client.tel}${cl.tel}`:'',
+    cl.adr?`${T.client.adr}${cl.adr}`:'',
+    cl.ville||'',
     cl.assujetti?`<em>${T.client.assujetti}</em>`:''
   ].filter(Boolean).join('<br>')||`<span style="color:var(--muted);font-style:italic">${T.client.aucune}</span>`;
   // En-têtes : toutes les colonnes suivent la sélection de l'aperçu — aucune colonne forcée.
@@ -891,18 +890,19 @@ function generateDevisPDF(){
   const nbCols=Math.max(1,colH.split('<th').length-1);
   const spanVal=Math.min(2,Math.max(1,nbCols-1)),spanLbl=Math.max(1,nbCols-spanVal);
   // Lignes
+  const escC=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const rowsHtml=dvList.map(item=>{
     const c=calcDevis(item),p=item.snap;
     const imgCell=SH.photos?`<td style="text-align:center">${p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`:''}</td>`:'';
     const devSymbol={RMB:'¥',USD:'$',EUR:'€',XOF:'F'}[c.dev]||c.dev;
     return`<tr>
-      ${SH.ref?`<td><code style="font-size:9px">${escC(p.ref)}</code></td>`:''}
+      ${SH.ref?`<td><code style="font-size:9px">${p.ref}</code></td>`:''}
       ${imgCell}
-      ${SH.nom?`<td><strong>${escC(trF(p,'nom',lang))}</strong></td>`:''}
+      ${SH.nom?`<td><strong>${trF(p,'nom',lang)}</strong></td>`:''}
       ${SH.commentaire?`<td style="font-style:italic;white-space:pre-wrap;word-wrap:break-word;line-height:1.4">${item.comment?escC(item.comment):''}</td>`:''}
-      ${SH.cat?`<td>${escC(trCat(p.cat,lang))}</td>`:''}
+      ${SH.cat?`<td>${trCat(p.cat,lang)}</td>`:''}
       ${SH.specs?`<td style="font-size:9px">${escH(trF(p,'specs',lang))||'—'}</td>`:''}
-      ${SH.fournisseur?`<td>${escC(p.fn||'—')}</td>`:''}
+      ${SH.fournisseur?`<td>${p.fn||'—'}</td>`:''}
       ${SH.qte?`<td style="text-align:center">${item.qty}</td>`:''}
       ${SH.poids?`<td>${p.poids||p.kg||'—'} kg</td>`:''}
       ${SH.cbm?`<td>${Nd(c.cbm,4)}</td>`:''}
