@@ -1,0 +1,6 @@
+/* Tailwind utilities layer for Go.Flow — Phase 1B overlay.
+   Preflight (Tailwind's base CSS reset) is intentionally left out: this file
+   only makes utility classes available for NEW markup going forward. It must
+   never re-style anything that already exists in css/styles.css. */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";

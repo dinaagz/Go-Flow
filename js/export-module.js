@@ -405,7 +405,7 @@ async function expDownload(zip){
   if(!ids.length)return;
   const prog=document.getElementById('exp-prog'),fill=document.getElementById('exp-prog-fill'),lbl=document.getElementById('exp-prog-lbl');
   const b1=document.getElementById('exp-dl-one'),b2=document.getElementById('exp-dl-zip');
-  prog.style.display='block';fill.style.width='0%';
+  prog.style.display='block';setProgress(fill,0);
   b1.disabled=b2.disabled=true;
   try{
     await document.fonts.ready;
@@ -422,7 +422,7 @@ async function expDownload(zip){
       const name='GoFlow_'+expSlug(p.ref+'_'+p.nom)+'.png';
       if(zip)files.push({name,blob});
       else{expSaveBlob(blob,name);await new Promise(r=>setTimeout(r,350));}
-      fill.style.width=Math.round((i+1)/ids.length*100)+'%';
+      setProgress(fill,Math.round((i+1)/ids.length*100));
     }
     if(zip){
       lbl.textContent='Assemblage du ZIP…';

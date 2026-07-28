@@ -510,7 +510,7 @@ function impRun(){
   document.getElementById('imp-errs').innerHTML='';
   const prog=document.getElementById('imp-prog');prog.style.display='block';
   const fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  fill.style.width='0%';
+  setProgress(fill,0);
   let i=0;
   const CH=25,hdrOff=impState.mode==='map'?2:1;
   (function step(){
@@ -521,7 +521,7 @@ function impRun(){
       if(r.err)errs.push({n:i+hdrOff,msg:r.err});
       else{added.push(r.ent);if(r.warn)warns.push({n:i+hdrOff,msg:r.warn});}
     }
-    fill.style.width=Math.round(i/rows.length*100)+'%';
+    setProgress(fill,Math.round(i/rows.length*100));
     lbl.textContent=`${i}/${rows.length} lignes traitées…`;
     if(i<rows.length){setTimeout(step,0);return;}
     impFinish(type,added,errs,warns);
@@ -533,7 +533,7 @@ function impFinish(type,added,errs,warns=[]){
     if(type==='fournisseurs'){fours=fours.concat(added);save('f');renderFour();renderCat();popSim();}
     if(type==='transitaires'){trans=trans.concat(added);save('t');renderTrans();popSim();}
   }
-  document.getElementById('imp-prog-fill').style.width='100%';
+  setProgress(document.getElementById('imp-prog-fill'),100);
   document.getElementById('imp-prog-lbl').textContent='Terminé';
   const errHtml=errs.length?`<div class="imp-summary warn"><b>${errs.length} ligne${errs.length>1?'s':''} ignorée${errs.length>1?'s':''} :</b><br>${errs.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${errs.length>8?'<br>… et '+(errs.length-8)+' autres':''}</div>`:'';
   const warnHtml=warns.length?`<div class="imp-summary warn"><b>${warns.length} avertissement${warns.length>1?'s':''} (lignes importées) :</b><br>${warns.slice(0,8).map(e=>`Ligne ${e.n} — ${e.msg}`).join('<br>')}${warns.length>8?'<br>… et '+(warns.length-8)+' autres':''}</div>`:'';
@@ -771,7 +771,7 @@ async function impImgsZip(kind){
   if(!list.length){toast('Aucune image téléchargeable',true);return;}
   const dir=kind==='supplier'?'assets/supplier/':'assets/Products images/';
   const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  prog.style.display='block';fill.style.width='0%';
+  prog.style.display='block';setProgress(fill,0);
   const files=[];let fail=0;const used=new Set();
   const uniq=n=>{let b=n,i=2;while(used.has(b)){b=n.replace(/(\.[^.]+)$/,`-${i}$1`);i++;}used.add(b);return b;};
   for(let i=0;i<list.length;i++){
@@ -785,7 +785,7 @@ async function impImgsZip(kind){
       if(!impImgExt.test(name))name+='.jpg';
       files.push({name:dir+uniq(name.replace(/[^\w .()À-ſ-]/g,'_')),blob});
     }catch(_){fail++;}
-    fill.style.width=Math.round((i+1)/list.length*100)+'%';
+    setProgress(fill,Math.round((i+1)/list.length*100));
   }
   prog.style.display='none';
   if(!files.length){toast('Téléchargement impossible — le site source bloque l\'accès (CORS)',true);return;}
@@ -837,7 +837,7 @@ async function impBulkImgs(inp){
   if(!impState||document.getElementById('imp-type').value!=='produits')return;
   if(!files.length){toast('Aucune image dans la sélection',true);return;}
   const prog=document.getElementById('imp-prog'),fill=document.getElementById('imp-prog-fill'),lbl=document.getElementById('imp-prog-lbl');
-  prog.style.display='block';fill.style.width='0%';lbl.textContent='Lecture des images…';
+  prog.style.display='block';setProgress(fill,0);lbl.textContent='Lecture des images…';
   const col=impEnsureImgCol();
   const nomCol=impMapping('produits').nom??0;
   const keyOf=n=>impNorm(String(n).split(/[\\/]/).pop().replace(/\.[^.]+$/,''));
@@ -845,7 +845,7 @@ async function impBulkImgs(inp){
   for(let i=0;i<files.length;i++){
     const d=await impFileToDataURL(files[i]);
     if(d)items.push({key:keyOf(files[i].name),data:d});
-    fill.style.width=Math.round((i+1)/files.length*100)+'%';
+    setProgress(fill,Math.round((i+1)/files.length*100));
     lbl.textContent=`Lecture des images… ${i+1}/${files.length}`;
   }
   let hits=0;
