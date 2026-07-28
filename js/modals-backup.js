@@ -52,7 +52,7 @@ document.addEventListener('keydown',e=>{
     if(fn){e.preventDefault();fn();}
     return;
   }
-  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.col-picker-drop.open,.user-menu.open')){
+  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.user-menu.open')&&!cmAnyOpen()){
     if(e.key==='/'){
       const id=KB_SEARCH_ID[currentTabName()];
       if(id){e.preventDefault();document.getElementById(id).focus();}
@@ -68,11 +68,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     const ov=document.querySelector('.overlay.open');
     if(ov){ov.id==='confirm-modal'?cfmCancel():closeMod(ov.id);return;}
-    document.querySelectorAll('.col-picker-drop.open').forEach(d=>{
-      d.classList.remove('open');
-      const b=d.parentElement&&d.parentElement.querySelector('.col-picker-btn');
-      if(b)b.setAttribute('aria-expanded','false');
-    });
+    cmCloseAll();
     tbMoreCloseAll();
     userMenuClose();
     return;
