@@ -7,7 +7,9 @@ function setProgress(el,pct){
 }
 // Limite les recalculs coûteux (filtrage + reconstruction complète du DOM) déclenchés à chaque frappe dans un champ de recherche
 function debounce(fn,ms=180){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
-const renderCatDeb=debounce(renderCat),renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans),dvFilterChangeDeb=debounce(dvFilterChange);
+// renderCatDeb a été retiré : la recherche catalogue utilise maintenant le debounce natif
+// d'Alpine (@input.debounce.180ms, voir catFiltersCmp dans js/catalogue.js).
+const renderFourDeb=debounce(renderFour),renderTransDeb=debounce(renderTrans),dvFilterChangeDeb=debounce(dvFilterChange);
 let modReturnFocus=null;
 function openMod(id){
   modReturnFocus=document.activeElement;
@@ -52,7 +54,7 @@ document.addEventListener('keydown',e=>{
     if(fn){e.preventDefault();fn();}
     return;
   }
-  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.user-menu.open')&&!cmAnyOpen()){
+  if(!isTypingTarget(e.target)&&!document.querySelector('.overlay.open,.user-menu.open')&&!cmAnyOpen()&&!userMenuAnyOpen()){
     if(e.key==='/'){
       const id=KB_SEARCH_ID[currentTabName()];
       if(id){e.preventDefault();document.getElementById(id).focus();}

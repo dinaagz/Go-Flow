@@ -78,16 +78,15 @@
       <button class="hdr-cart-btn" onclick="tab('devis')" aria-label="Devis"><svg class="ic" aria-hidden="true"><use href="#i-quote"/></svg> <span class="hdr-lbl">Devis</span></button>
       <span class="hdr-cart-count" id="cart-count" style="display:none">0</span>
     </div>
-    <div class="user-area" id="user-area">
-      <button class="user-avatar-btn" id="user-avatar-btn" onclick="userMenuToggle()" aria-haspopup="true" aria-expanded="false" aria-label="Espace utilisateur"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></button>
-      <div class="user-menu" id="user-menu" role="menu" aria-label="Espace utilisateur">
-        <div class="user-menu-hdr">
-          <div class="user-menu-name">Go Group</div>
-          <div class="user-menu-mail">globalgo.tg@gmail.com</div>
-        </div>
-        <button class="user-menu-item" role="menuitem" onclick="userMenuClose();toggleSettings()"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg> Paramètres</button>
-      </div>
-    </div>
+    <!-- Phase 1C: menu utilisateur — ouverture/fermeture + clic extérieur gérés par Alpine
+         (userMenuCmp, construit + monté entièrement par JS dans js/app-shell.js, voir
+         userMenuMount() — même raison que toastMount() dans js/app-main.js : toute
+         directive Alpine statique ici se ferait scanner avant que le composant ne soit
+         enregistré). Note : .user-menu/.user-menu-item restent en CSS custom ailleurs
+         (menu "Plus" du catalogue, #cat-more-drop), car partagés — hors périmètre de
+         cette migration ; ce composant-ci n'en dépend pas et est entièrement en
+         Tailwind. -->
+    <div class="relative ml-2" id="user-area"></div>
   </div>
 </header>
 
@@ -208,15 +207,32 @@
 <div id="t-catalogue" role="tabpanel" aria-labelledby="tab-catalogue">
   <div class="stats" id="cat-stats"></div>
   <div class="toolbar">
-    <div class="tb-group" role="group" aria-label="Recherche et filtres">
-      <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search" oninput="renderCatDeb()"></div>
-      <select class="filt" id="f-cat" onchange="renderCat()" aria-label="Filtrer par catégorie">
+    <!-- Phase 1C: recherche + filtres catalogue — l'état de saisie (texte tapé, catégorie/
+         fournisseur sélectionnés) et le déclenchement du rendu vivent dans Alpine
+         (catFiltersCmp, enregistré dans js/catalogue.js), avec le debounce natif Alpine
+         (@input.debounce.180ms) à la place du wrapper debounce() manuel. renderCat() reste
+         la logique métier vanilla : filtrage des produits + régénération du DOM du
+         catalogue — Alpine ne fait que lire les champs et l'appeler au bon moment. -->
+    <div class="tb-group" role="group" aria-label="Recherche et filtres" id="cat-filters-grp">
+      <div class="relative min-w-[200px] flex-1">
+        <svg class="ic pointer-events-none absolute left-[13px] top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-[var(--muted)]" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="text" placeholder="Rechercher..." aria-label="Rechercher un produit" id="cat-search"
+          x-model="q" @input.debounce.180ms="renderCat()"
+          class="w-full rounded-[10px] border border-[var(--border2)] bg-[var(--surface)] py-[10px] pl-[38px] pr-[14px] font-['Poppins',sans-serif] text-[13px] text-[var(--text)] shadow-[var(--sh-xs)] outline-none transition-all duration-[180ms] focus:border-[var(--bleu)] focus:shadow-[var(--ring)] [@media(pointer:coarse)]:py-[13px]">
+      </div>
+      <select id="f-cat" aria-label="Filtrer par catégorie" x-model="fc" @change="renderCat()"
+        style="background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2366708A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 11px center"
+        class="cursor-pointer appearance-none rounded-[10px] border border-[var(--border2)] bg-[var(--surface)] py-[10px] pl-[14px] pr-8 font-['Poppins',sans-serif] text-[13px] text-[var(--text)] shadow-[var(--sh-xs)] outline-none transition-all duration-[180ms] hover:border-[var(--border-hover)] focus:border-[var(--bleu)] focus:shadow-[var(--ring)] [@media(pointer:coarse)]:py-[13px]">
         <option value="">Toutes catégories</option>
         <option>Hydrafacial</option><option>Picolaser/Tatouage</option>
         <option>Analyse de peau</option><option>RF Microneedling</option><option>HIFU</option>
         <option>Dentaire</option><option>Photothérapie LED</option><option>Équipement &amp; Accessoires</option>
       </select>
-      <select class="filt" id="f-four" onchange="renderCat()" aria-label="Filtrer par fournisseur"><option value="">Tous fournisseurs</option></select>
+      <select id="f-four" aria-label="Filtrer par fournisseur" @change="renderCat()"
+        style="background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2366708A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 11px center"
+        class="cursor-pointer appearance-none rounded-[10px] border border-[var(--border2)] bg-[var(--surface)] py-[10px] pl-[14px] pr-8 font-['Poppins',sans-serif] text-[13px] text-[var(--text)] shadow-[var(--sh-xs)] outline-none transition-all duration-[180ms] hover:border-[var(--border-hover)] focus:border-[var(--bleu)] focus:shadow-[var(--ring)] [@media(pointer:coarse)]:py-[13px]">
+        <option value="">Tous fournisseurs</option>
+      </select>
     </div>
     <div class="tb-sep" aria-hidden="true"></div>
     <div class="tb-group" role="group" aria-label="Affichage et organisation">
@@ -811,7 +827,18 @@
 </div>
 
 <div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<!-- Phase 1C: notifications toast — état visuel (affichage/animation) géré par Alpine
+     (toastCmp, construit + monté entièrement par JS dans js/app-main.js, voir toastMount()).
+     Conteneur vide ici à dessein : TOUT directive Alpine (x-data, x-show, @event.window,
+     etc.) présente dans le HTML statique dès le chargement se fait scanner par Alpine
+     AVANT que le composant ne soit enregistré (Alpine.start() se déclenche en microtâche
+     juste après le chargement du vendor, avant même le 2e script `defer`) — et une fois
+     qu'Alpine a traité une directive sur un scope vide/cassé, un Alpine.initTree() manuel
+     ultérieur sur le même nœud ne la répare pas (bug constaté en test local, y compris
+     pour x-show ET @event.window — pas seulement x-data). D'où l'injection complète du
+     markup via innerHTML, comme cmMount/cmRefresh dans column-manager.js : rien n'existe
+     dans le DOM avant que toastMount() ne construise tout d'un coup. -->
+<div id="toast" role="status" aria-live="polite"></div>
 
 <!-- calc-engine.js is now an ES module (see js/calc-engine.js), which browsers
      always run deferred (after HTML parsing). The other files stay classic

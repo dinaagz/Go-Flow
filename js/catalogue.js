@@ -41,6 +41,23 @@ function Nd(n,d=2){return isNaN(n)?'—':n.toLocaleString('fr-FR',{minimumFracti
 
 
 /* ---- CATALOGUE ---- */
+/* Phase 1C: état de saisie (recherche texte + filtres catégorie/fournisseur) porté par
+   Alpine (catFiltersCmp, monté sur #cat-filters-grp juste en dessous) — q/fc reflètent ce
+   que l'utilisateur tape/sélectionne. Le filtrage et le rendu du catalogue restent en JS
+   vanilla dans renderCat() ci-dessous (lit toujours #cat-search/#f-cat/#f-four par id,
+   synchronisés par x-model) ; Alpine ne fait que déclencher son appel, avec son debounce
+   natif (@input.debounce.180ms) à la place de l'ancien wrapper debounce() manuel.
+   x-data posé par JS + Alpine.initTree() explicite plutôt que statique dans le HTML : voir
+   le commentaire détaillé dans js/app-main.js (toastCmp) — Alpine.start() se déclenche en
+   microtâche dès la fin du chargement du vendor, avant tout Alpine.data() enregistré dans
+   un fichier ultérieur comme celui-ci. */
+Alpine.data('catFiltersCmp',()=>({q:'',fc:''}));
+(function catFiltersMount(){
+  const el=document.getElementById('cat-filters-grp');
+  if(!el)return;
+  el.setAttribute('x-data','catFiltersCmp()');
+  Alpine.initTree(el);
+})();
 function renderCat(){
   cols=cmVisible('catalogue');
   const q=(document.getElementById('cat-search').value||'').toLowerCase();

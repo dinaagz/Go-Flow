@@ -43,15 +43,13 @@ body{font-family:'Poppins',sans-serif;background:var(--gris);color:var(--text);m
 .hdr-cart-btn{background:var(--nuit);border:1px solid var(--nuit);color:#fff;padding:9px 16px;border-radius:10px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;transition:all .18s var(--ease);box-shadow:var(--sh-xs)}
 .hdr-cart-btn:hover{background:var(--nuit3);box-shadow:var(--sh-md)}
 .hdr-cart-count{position:absolute;top:-7px;right:-7px;background:var(--rouge-t);color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;font-weight:700;min-width:16px;text-align:center;line-height:14px;z-index:10;display:none;box-shadow:0 0 0 2px #fff}
-.user-area{position:relative;margin-left:8px}
-.user-avatar-btn{width:38px;height:38px;border-radius:50%;border:2px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--grad) border-box;color:var(--nuit);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .18s var(--ease);box-shadow:var(--sh-xs)}
-.user-avatar-btn:hover,.user-avatar-btn[aria-expanded="true"]{box-shadow:var(--sh-md);transform:translateY(-1px)}
-.user-avatar-btn .ic{width:18px;height:18px}
+/* Phase 1C: le menu utilisateur (#user-area/#user-avatar-btn/#user-menu) est migré vers
+   Alpine.js + Tailwind (voir index.html et Alpine.data('userMenuCmp', ...) dans
+   js/app-shell.js) — plus de CSS custom ici pour ce composant.
+   .user-menu/.user-menu-item restent ci-dessous : partagés avec #cat-more-drop (menu
+   "Plus" du catalogue, .tb-more-drop), hors périmètre de cette migration. */
 .user-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:220px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--sh-xl);padding:6px;display:none;z-index:300}
 .user-menu.open{display:block;animation:modalIn .18s var(--ease)}
-.user-menu-hdr{padding:10px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
-.user-menu-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:var(--nuit)}
-.user-menu-mail{font-size:11px;color:var(--muted);margin-top:2px}
 .user-menu-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;border-radius:9px;padding:9px 12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--text);cursor:pointer;transition:background .15s}
 .user-menu-item:hover{background:rgba(0,153,255,.08)}
 .user-menu-item .ic{width:15px;height:15px;color:var(--muted)}
@@ -269,13 +267,8 @@ textarea.fc{resize:vertical;min-height:70px}
 .trans-btn:hover{border-color:var(--bleu)}
 .trans-btn.active{border-color:var(--bleu);background:#EDF6FF;color:var(--bleu-t);font-weight:600}
 /* ===== TOAST ===== */
-.toast{position:fixed;bottom:max(20px,env(safe-area-inset-bottom));right:20px;background:var(--surface);color:var(--text);padding:13px 18px;border-radius:12px;font-size:13px;font-weight:500;z-index:300;transform:translateY(100px);opacity:0;transition:all .3s var(--ease);border:1px solid var(--border);box-shadow:var(--sh-lg);display:flex;align-items:center;gap:10px;max-width:min(92vw,420px)}
-.toast::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--toast-dot,var(--vert));flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--toast-dot,var(--vert)) 18%,transparent)}
-.toast.show{transform:translateY(0);opacity:1}
-.toast-msg{flex:1}
-.toast-undo-btn{background:none;border:none;color:var(--bleu-t);font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 8px;border-radius:6px;flex-shrink:0;min-height:32px}
-.toast-undo-btn:hover{background:var(--gris)}
-.toast-undo-btn:focus-visible{outline:2px solid var(--bleu);outline-offset:1px}
+/* Phase 1C: le toast est migré vers Alpine.js + Tailwind (voir index.html #toast
+   et Alpine.data('toastCmp', ...) dans js/app-main.js) — plus de CSS custom ici. */
 /* ===== EMPTY STATES ===== */
 .empty{text-align:center;padding:64px 20px;color:var(--muted)}
 .empty-ico{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#EDF4FF,#F5EFFF);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -470,7 +463,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
 /* ===== PRINT ===== */
 @media print{
   body{background:#fff}
-  .grad-bar,.hdr,.sidebar,.toolbar,.card-acts,.btn,.overlay,.toast,.hdr-right,.no-print{display:none!important}
+  .grad-bar,.hdr,.sidebar,.toolbar,.card-acts,.btn,.overlay,#toast,.hdr-right,.no-print{display:none!important}
   .shell{display:block}
   .ph{display:block!important}
   .wrap{padding:0;max-width:100%}
@@ -502,7 +495,7 @@ td .exp-check{position:static;box-shadow:none;background:none;padding:2px;vertic
   body.printing-devis .hdr,
   body.printing-devis .sidebar,
   body.printing-devis .shell .wrap,
-  body.printing-devis .toast,
+  body.printing-devis #toast,
   body.printing-devis .overlay,
   body.printing-devis .ph{display:none!important}
   body.printing-devis #devis-print-area{display:block!important;padding:24px}

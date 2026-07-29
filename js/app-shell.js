@@ -108,24 +108,66 @@ function toggleSettings(){
   if(ov.classList.contains('open'))closeMod('spanel');else{openMod('spanel');renderStoragePanel();}
 }
 
-/* ---- ESPACE UTILISATEUR (avatar + menu déroulant) ---- */
+/* ---- ESPACE UTILISATEUR (avatar + menu déroulant) ----
+   Phase 1C: ouverture/fermeture + détection du clic extérieur (@click.outside) migrées
+   vers Alpine (userMenuCmp). userMenuToggle()/Close() restent les points d'entrée appelés
+   par le reste de l'app (clavier, autres modules).
+   Markup complet construit par JS (userMenuMount, innerHTML) plutôt que statique dans le
+   HTML, et userMenuToggle()/Close() qui dispatchent un CustomEvent plutôt que de muter
+   window.Alpine.$data(el) directement — voir le commentaire détaillé dans js/app-main.js
+   (toastCmp) pour les deux raisons : (1) toute directive Alpine statique présente dans le
+   HTML au chargement se fait scanner par Alpine avant que ce composant ne soit enregistré,
+   et un Alpine.initTree() ultérieur ne "répare" pas ce qui a déjà été traité à vide ;
+   (2) une mutation posée depuis l'extérieur d'Alpine (via $data(), Alpine.evaluate(), ou
+   écriture directe sur l'objet réactif) ne déclenche pas sa réactivité — seule une
+   évaluation faite PAR Alpine (@click="...", @event.window="...") la déclenche.
+   userMenuAnyOpen() reste une simple LECTURE via $data() — lire l'état actuel n'a pas ce
+   problème, seule l'écriture externe est concernée. */
+Alpine.data('userMenuCmp',()=>({
+  open:false,
+  toggle(){this.open=!this.open;},
+  close(){this.open=false;},
+}));
+(function userMenuMount(){
+  const el=document.getElementById('user-area');
+  if(!el)return;
+  el.innerHTML=`
+    <div x-data="userMenuCmp()" @click.outside="close()"
+      @gf-usermenu-toggle.window="toggle()" @gf-usermenu-close.window="close()">
+      <button id="user-avatar-btn" @click="toggle()" :aria-expanded="open" aria-haspopup="true" aria-label="Espace utilisateur"
+        class="inline-flex h-[38px] w-[38px] items-center justify-center rounded-full border-2 border-transparent text-[var(--nuit)] shadow-[var(--sh-xs)] transition-all duration-[180ms] [background:linear-gradient(var(--surface),var(--surface))_padding-box,var(--grad)_border-box] hover:-translate-y-px hover:shadow-[var(--sh-md)]"
+        :class="open?'-translate-y-px shadow-[var(--sh-md)]':''">
+        <svg class="ic h-[18px] w-[18px]" aria-hidden="true"><use href="#i-user"/></svg>
+      </button>
+      <div id="user-menu" role="menu" aria-label="Espace utilisateur"
+        x-show="open"
+        x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 -translate-y-0.5 scale-[.98]" x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+        :class="open?'max-[640px]:shadow-[0_0_0_100vmax_rgba(15,17,34,.45),var(--sh-lg)]':''"
+        class="absolute right-0 top-[calc(100%+10px)] z-[300] min-w-[220px] rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-[6px] shadow-[var(--sh-xl)] max-[640px]:fixed max-[640px]:left-3 max-[640px]:right-3 max-[640px]:top-auto max-[640px]:bottom-3 max-[640px]:min-w-0 max-[640px]:max-w-none max-[640px]:max-h-[min(70vh,520px)] max-[640px]:overflow-y-auto">
+        <div class="mb-[6px] border-b border-[var(--border)] px-3 pb-3 pt-[10px]">
+          <div class="font-['Montserrat',sans-serif] text-[13px] font-extrabold text-[var(--nuit)]">Go Group</div>
+          <div class="mt-[2px] text-[11px] text-[var(--muted)]">globalgo.tg@gmail.com</div>
+        </div>
+        <button type="button" role="menuitem" @click="close();toggleSettings()"
+          class="flex w-full items-center gap-[9px] rounded-[9px] px-3 py-[9px] text-left font-['Poppins',sans-serif] text-[13px] text-[var(--text)] transition-colors duration-150 hover:bg-[rgba(0,153,255,.08)]">
+          <svg class="ic h-[15px] w-[15px] text-[var(--muted)]" aria-hidden="true"><use href="#i-settings"/></svg> Paramètres
+        </button>
+      </div>
+    </div>`;
+  Alpine.initTree(el);
+})();
+function userMenuData(){
+  const el=document.getElementById('user-area');
+  return el&&window.Alpine?window.Alpine.$data(el.firstElementChild):null;
+}
 function userMenuToggle(){
-  const m=document.getElementById('user-menu'),b=document.getElementById('user-avatar-btn');
-  const open=!m.classList.contains('open');
-  m.classList.toggle('open',open);
-  b.setAttribute('aria-expanded',open);
-  if(open){
-    const close=e=>{
-      if(document.getElementById('user-area').contains(e.target))return;
-      userMenuClose();
-      document.removeEventListener('click',close);
-    };
-    setTimeout(()=>document.addEventListener('click',close),0);
-  }
+  window.dispatchEvent(new CustomEvent('gf-usermenu-toggle'));
 }
 function userMenuClose(){
-  document.getElementById('user-menu').classList.remove('open');
-  document.getElementById('user-avatar-btn').setAttribute('aria-expanded','false');
+  window.dispatchEvent(new CustomEvent('gf-usermenu-close'));
+}
+function userMenuAnyOpen(){
+  const d=userMenuData();return !!(d&&d.open);
 }
 
 
