@@ -169,39 +169,70 @@ function swapCardImg(t){
   if(m){m.src=t.src;m.style.display='';const ph=card.querySelector('.card-img .card-img-placeholder');if(ph)ph.style.display='none';}
 }
 
+/* Prépare une fois toutes les données d'affichage d'un produit brut (référence, nom,
+   catégorie, fournisseur, image, prix/marge déjà formatés) — utilisé par les 4 rendus
+   du catalogue (carte/tableau × produit seul/groupe) pour éviter de recalculer ces
+   valeurs à chaque fois. Les troncatures de texte contextuelles (longueurs différentes
+   entre carte, ligne principale de tableau et ligne alternative) restent gérées au
+   point d'appel via truncTxt, car elles dépendent de l'espace disponible dans chaque mise en page. */
+function prodVM(p){
+  const f=fours.find(x=>x.id===p.fid);
+  const c=calc(p);
+  return{
+    p,f,c,
+    lbl:fourLabel(f),
+    bc:fourBadgeClass(f),
+    imgSrc:p.photos&&p.photos[0]?p.photos[0]:null,
+    ref:escH(p.ref),
+    nom:escH(p.nom),
+    cat:escH(p.cat),
+    moq:p.moq||1,
+    cbm:Nd(c.cbm,4),
+    poids:p.kg,
+    achat:N(c.exwUX),
+    pract:c.fretLocalX?N(c.fretLocalX):'—',
+    revient:N(c.coutRevientUX),
+    fret:N(c.fraisLogU),
+    margeU:N(c.margeU),
+    margePct:Nd(c.margePct,1),
+    vente:N(c.pvuHT),
+    ttc:N(c.pvuTTC),
+    delai:prodDelai(p),
+    marche:p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—',
+    inCart:isInCart(p.id),
+  };
+}
+
 function prodGroupCard(g){
   const{key,prods:gps,winner:w}=g;
   const others=gps.filter(p=>p.id!==w.id);
-  const f=fours.find(x=>x.id===w.fid);
-  const lbl=fourLabel(f);const bc=fourBadgeClass(f);
-  const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
+  const vm=prodVM(w);
+  const{f,lbl,bc,imgSrc,c}=vm;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${escH(w.nom)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
+    ?`<img src="${imgSrc}" alt="${vm.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
-  const c=calc(w);
   const escapedKey=key.replace(/'/g,"\\'");
   const priceRows=cardPriceRows(w,c);
   const altCards=others.map(p=>{
-    const fp=fours.find(x=>x.id===p.fid);
-    const cp=calc(p);
-    const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" class="alt-card-img" alt="" loading="lazy" onerror="this.style.display='none'">`:'<span class="ph-sm" style="width:38px;justify-content:center">'+ICO('box')+'</span>';
+    const pvm=prodVM(p);
+    const pimg=pvm.imgSrc?`<img src="${pvm.imgSrc}" class="alt-card-img" alt="" loading="lazy" onerror="this.style.display='none'">`:'<span class="ph-sm" style="width:38px;justify-content:center">'+ICO('box')+'</span>';
     return`<div class="alt-card">
       ${pimg}
       <div class="alt-card-info">
-        <div class="alt-card-nom">${escH(p.nom)}</div>
-        <div class="alt-card-prix">${fourLabel(fp)} · ${N(cp.pvuTTC)} TTC</div>
+        <div class="alt-card-nom">${pvm.nom}</div>
+        <div class="alt-card-prix">${pvm.lbl} · ${pvm.ttc} TTC</div>
       </div>
       <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
-      <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
+      <button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${pvm.inCart?ICO('check'):ICO('quote')}</button>
     </div>`;
   }).join('');
   const grpBadge=others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:'';
   return`<div class="card">
   ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(w.id)}${grpBadge}</div>`:cardTopStrip(w.id,bc,lbl,grpBadge?`<span style="position:static" class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fourn.</span>`:'')}
   <div class="card-body">
-    ${cols.ref?`<div class="card-ref">${escH(w.ref)}</div>`:''}
-    ${cols.nom?`<div class="card-title">${escH(w.nom)}</div>`:''}
-    <div class="card-cat">${cols.cat?escH(w.cat)+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(w.tr)} ${w.tr}</div>
+    ${cols.ref?`<div class="card-ref">${vm.ref}</div>`:''}
+    ${cols.nom?`<div class="card-title">${vm.nom}</div>`:''}
+    <div class="card-cat">${cols.cat?vm.cat+' · ':''}${cols.four?lbl+' · ':''}${TRI(w.tr)} ${w.tr}</div>
     ${catInfoRows(w)}
     ${cols.photos?cardGallery(w):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
@@ -243,68 +274,68 @@ function prodGroupTable(groups){
   const rows=groups.map(g=>{
     const{key,prods:gps,winner:w}=g;
     const others=gps.filter(p=>p.id!==w.id);
-    const f=fours.find(x=>x.id===w.fid);const c=calc(w);
-    const imgSrc=w.photos&&w.photos[0]?w.photos[0]:null;
+    const vm=prodVM(w);
+    const{f,imgSrc,c}=vm;
     const escapedKey=key.replace(/'/g,"\\'");
     const expandBtn=others.length?`<button class="expand-cell" onclick="toggleGroupTblRow('${escapedKey}',this)" title="Voir alternatives" aria-label="Voir alternatives">${ICO('chev')}</button>`:'';
     const winRow=`<tr>
       <td class="no-print">${expandBtn}${C.photos?'':`<span style="position:relative;display:inline-block;width:22px;height:22px">${expBox(w.id)}</span>`}</td>
       ${C.photos ?`<td>${expBox(w.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
-      ${C.ref    ?`<td><code style="font-size:10px">${escH(w.ref)}</code></td>`:''}
-      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${escH(w.nom)}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>`:''}
-      ${C.cat    ?`<td><span class="pill-cat">${escH(w.cat)}</span></td>`:''}
-      ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
-      ${C.moq    ?`<td>${w.moq||1}</td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${vm.ref}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${vm.nom}${others.length?` <span class="pill-more">+${others.length}</span>`:''}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${vm.cat}</span></td>`:''}
+      ${C.four   ?`<td>${vm.lbl}</td>`:''}
+      ${C.moq    ?`<td>${vm.moq}</td>`:''}
       ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(w.specs,60)}</td>`:''}
       ${C.desc   ?`<td style="font-size:11px;color:var(--muted);max-width:220px">${truncTxt(w.desc,80)}</td>`:''}
-      ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
-      ${C.poids  ?`<td>${w.kg} kg</td>`:''}
-      ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
-      ${C.prach  ?`<td>${c.fretLocalX?N(c.fretLocalX):'—'}</td>`:''}
-      ${C.revient?`<td style="font-weight:600">${N(c.coutRevientUX)}</td>`:''}
-      ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
-      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
-      ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
-      ${C.delai  ?`<td>${prodDelai(w)}</td>`:''}
-      ${C.marche ?`<td style="color:var(--vert-t)">${w.conc?parseInt(w.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.cbm    ?`<td>${vm.cbm} m³</td>`:''}
+      ${C.poids  ?`<td>${vm.poids} kg</td>`:''}
+      ${C.achat  ?`<td>${vm.achat}</td>`:''}
+      ${C.prach  ?`<td>${vm.pract}</td>`:''}
+      ${C.revient?`<td style="font-weight:600">${vm.revient}</td>`:''}
+      ${C.fret   ?`<td>${vm.fret}</td>`:''}
+      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${vm.margeU} <small style="opacity:.7">(${vm.margePct}%)</small></td>`:''}
+      ${C.vente  ?`<td style="font-weight:700">${vm.vente}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${vm.ttc}</td>`:''}
+      ${C.delai  ?`<td>${vm.delai}</td>`:''}
+      ${C.marche ?`<td style="color:var(--vert-t)">${vm.marche}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
-        <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check'):ICO('quote')}</button>
+        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${vm.inCart?ICO('check'):ICO('quote')}</button>
       </div></td>
     </tr>`;
     const colCount=1+(Object.values(C).filter(Boolean).length)+1;
     const altRows=others.map(p=>{
-      const fp=fours.find(x=>x.id===p.fid);const cp=calc(p);
-      const pimg=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" alt="" loading="lazy">`:PH_SM;
+      const pvm=prodVM(p);
+      const pimg=pvm.imgSrc?`<img src="${pvm.imgSrc}" style="width:32px;height:32px;object-fit:cover;border-radius:4px" alt="" loading="lazy">`:PH_SM;
       // Ligne alternative (non-gagnante) : TTC volontairement en couleur seule, sans le
       // traitement hero (Montserrat 800) — ne pas concurrencer visuellement le gagnant ci-dessus.
       return`<tr class="tbl-alt-row" id="tbl-alt-${key}" style="display:none">
         <td></td>
         ${C.photos ?`<td>${pimg}</td>`:''}
-        ${C.ref    ?`<td><code style="font-size:9px">${escH(p.ref)}</code></td>`:''}
-        ${C.nom    ?`<td style="color:var(--muted)">${escH(p.nom)}</td>`:''}
+        ${C.ref    ?`<td><code style="font-size:9px">${pvm.ref}</code></td>`:''}
+        ${C.nom    ?`<td style="color:var(--muted)">${pvm.nom}</td>`:''}
         ${C.cat    ?`<td></td>`:''}
-        ${C.four   ?`<td>${fourLabel(fp)}</td>`:''}
-        ${C.moq    ?`<td>${p.moq||1}</td>`:''}
+        ${C.four   ?`<td>${pvm.lbl}</td>`:''}
+        ${C.moq    ?`<td>${pvm.moq}</td>`:''}
         ${C.specs  ?`<td style="font-size:10px;color:var(--muted)">${truncTxt(p.specs,40)}</td>`:''}
         ${C.desc   ?`<td style="font-size:10px;color:var(--muted)">${truncTxt(p.desc,50)}</td>`:''}
-        ${C.cbm    ?`<td>${Nd(cp.cbm,4)}</td>`:''}
-        ${C.poids  ?`<td>${p.kg} kg</td>`:''}
-        ${C.achat  ?`<td>${N(cp.exwUX)}</td>`:''}
-        ${C.prach  ?`<td>${cp.fretLocalX?N(cp.fretLocalX):'—'}</td>`:''}
-        ${C.revient?`<td>${N(cp.coutRevientUX)}</td>`:''}
-        ${C.fret   ?`<td>${N(cp.fraisLogU)}</td>`:''}
-        ${C.marge  ?`<td style="color:var(--vert-t)">${N(cp.margeU)}</td>`:''}
-        ${C.vente  ?`<td>${N(cp.pvuHT)}</td>`:''}
-        ${C.ttc    ?`<td style="color:var(--bleu-t)">${N(cp.pvuTTC)}</td>`:''}
-        ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
-        ${C.marche ?`<td>${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
-        <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${isInCart(p.id)?ICO('check'):ICO('quote')}</button></div></td>
+        ${C.cbm    ?`<td>${pvm.cbm}</td>`:''}
+        ${C.poids  ?`<td>${pvm.poids} kg</td>`:''}
+        ${C.achat  ?`<td>${pvm.achat}</td>`:''}
+        ${C.prach  ?`<td>${pvm.pract}</td>`:''}
+        ${C.revient?`<td>${pvm.revient}</td>`:''}
+        ${C.fret   ?`<td>${pvm.fret}</td>`:''}
+        ${C.marge  ?`<td style="color:var(--vert-t)">${pvm.margeU}</td>`:''}
+        ${C.vente  ?`<td>${pvm.vente}</td>`:''}
+        ${C.ttc    ?`<td style="color:var(--bleu-t)">${pvm.ttc}</td>`:''}
+        ${C.delai  ?`<td>${pvm.delai}</td>`:''}
+        ${C.marche ?`<td>${pvm.marche}</td>`:''}
+        <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${pvm.inCart?ICO('check'):ICO('quote')}</button></div></td>
       </tr>`;
     }).join('');
     return winRow+altRows;
@@ -555,30 +586,27 @@ function fourBadgeClass(f){
 }
 
 function prodCard(p){
-  const f=fours.find(x=>x.id===p.fid);
-  const lbl=fourLabel(f);
-  const bc=fourBadgeClass(f);
-  const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
+  const vm=prodVM(p);
+  const{f,lbl,bc,imgSrc}=vm;
   const imgHtml=imgSrc
-    ?`<img src="${imgSrc}" alt="${escH(p.nom)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
+    ?`<img src="${imgSrc}" alt="${vm.nom}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+'<div class="card-img-placeholder" style="display:none">'+PH_LG+'</div>'
     :`<div class="card-img-placeholder">${PH_LG}</div>`;
-  const c=calc(p);
-  const priceRows=cardPriceRows(p,c);
+  const priceRows=cardPriceRows(p,vm.c);
   return`<div class="card">
   ${cols.photos?`<div class="card-img">${imgHtml}<span class="badge ${bc}">${lbl}</span>${expBox(p.id)}</div>`:cardTopStrip(p.id,bc,lbl)}
   <div class="card-body">
-    ${cols.ref?`<div class="card-ref">${escH(p.ref)}</div>`:''}
-    ${cols.nom?`<div class="card-title">${escH(p.nom)}</div>`:''}
-    <div class="card-cat">${cols.cat?escH(p.cat)+' · ':''}${cols.four?fourLabel(f)+' · ':''}${TRI(p.tr)} ${p.tr}</div>
+    ${cols.ref?`<div class="card-ref">${vm.ref}</div>`:''}
+    ${cols.nom?`<div class="card-title">${vm.nom}</div>`:''}
+    <div class="card-cat">${cols.cat?vm.cat+' · ':''}${cols.four?lbl+' · ':''}${TRI(p.tr)} ${p.tr}</div>
     ${catInfoRows(p)}
     ${cols.photos?cardGallery(p):''}
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
       <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
+      <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
       <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
-      <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check')+' Devis':ICO('quote')}</button>
+      <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${vm.inCart?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
   </div></div>`;
 }
@@ -609,36 +637,36 @@ function prodTable(list){
     '<th class="no-print">Devis</th>',
   ].join('');
   const rows=list.map(p=>{
-    const f=fours.find(x=>x.id===p.fid);const c=calc(p);
-    const imgSrc=p.photos&&p.photos[0]?p.photos[0]:null;
+    const vm=prodVM(p);
+    const{imgSrc}=vm;
     return`<tr>
       ${C.photos ?`<td>${expBox(p.id)}${imgSrc?`<img src="${imgSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:6px" alt="" loading="lazy">`:PH_SM}</td>`:''}
-      ${C.ref    ?`<td><code style="font-size:10px">${escH(p.ref)}</code></td>`:''}
-      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${escH(p.nom)}</td>`:''}
-      ${C.cat    ?`<td><span class="pill-cat">${escH(p.cat)}</span></td>`:''}
-      ${C.four   ?`<td>${fourLabel(f)}</td>`:''}
-      ${C.moq    ?`<td>${p.moq||1}</td>`:''}
+      ${C.ref    ?`<td><code style="font-size:10px">${vm.ref}</code></td>`:''}
+      ${C.nom    ?`<td style="font-weight:500;max-width:180px">${vm.nom}</td>`:''}
+      ${C.cat    ?`<td><span class="pill-cat">${vm.cat}</span></td>`:''}
+      ${C.four   ?`<td>${vm.lbl}</td>`:''}
+      ${C.moq    ?`<td>${vm.moq}</td>`:''}
       ${C.specs  ?`<td style="font-size:11px;color:var(--muted);max-width:180px">${truncTxt(p.specs,60)}</td>`:''}
       ${C.desc   ?`<td style="font-size:11px;color:var(--muted);max-width:220px">${truncTxt(p.desc,80)}</td>`:''}
-      ${C.cbm    ?`<td>${Nd(c.cbm,4)} m³</td>`:''}
-      ${C.poids  ?`<td>${p.kg} kg</td>`:''}
-      ${C.achat  ?`<td>${N(c.exwUX)}</td>`:''}
-      ${C.prach  ?`<td>${c.fretLocalX?N(c.fretLocalX):'—'}</td>`:''}
-      ${C.revient?`<td style="font-weight:600">${N(c.coutRevientUX)}</td>`:''}
-      ${C.fret   ?`<td>${N(c.fraisLogU)}</td>`:''}
-      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${N(c.margeU)} <small style="opacity:.7">(${Nd(c.margePct,1)}%)</small></td>`:''}
-      ${C.vente  ?`<td style="font-weight:700">${N(c.pvuHT)}</td>`:''}
-      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${N(c.pvuTTC)}</td>`:''}
-      ${C.delai  ?`<td>${prodDelai(p)}</td>`:''}
-      ${C.marche ?`<td style="color:var(--vert-t)">${p.conc?parseInt(p.conc).toLocaleString('fr-FR')+' XOF':'—'}</td>`:''}
+      ${C.cbm    ?`<td>${vm.cbm} m³</td>`:''}
+      ${C.poids  ?`<td>${vm.poids} kg</td>`:''}
+      ${C.achat  ?`<td>${vm.achat}</td>`:''}
+      ${C.prach  ?`<td>${vm.pract}</td>`:''}
+      ${C.revient?`<td style="font-weight:600">${vm.revient}</td>`:''}
+      ${C.fret   ?`<td>${vm.fret}</td>`:''}
+      ${C.marge  ?`<td style="color:var(--vert-t);font-weight:600">${vm.margeU} <small style="opacity:.7">(${vm.margePct}%)</small></td>`:''}
+      ${C.vente  ?`<td style="font-weight:700">${vm.vente}</td>`:''}
+      ${C.ttc    ?`<td class="ttc-hero" style="font-size:13px">${vm.ttc}</td>`:''}
+      ${C.delai  ?`<td>${vm.delai}</td>`:''}
+      ${C.marche ?`<td style="color:var(--vert-t)">${vm.marche}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px;position:relative">
         ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
         <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
-        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${escH(p.nom)}">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
         <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
-        <button class="btn btn-sm ${isInCart(p.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${isInCart(p.id)?ICO('check'):ICO('quote')}</button>
+        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${vm.inCart?ICO('check'):ICO('quote')}</button>
       </div></td>
     </tr>`;
   }).join('');

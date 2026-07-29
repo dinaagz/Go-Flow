@@ -4,9 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Go.Flow — Console Import Go Group</title>
+<!-- CSP restrictive : bloque tout par défaut, n'autorise que les origines
+     réellement utilisées (polices Google, CDN pdf.js/xlsx chargés à la
+     demande par ensureLib(), images CDN GitHub + logos fournisseurs en
+     https, API de taux de change). 'unsafe-inline' reste nécessaire pour
+     script-src/style-src car l'app utilise massivement des attributs
+     onclick=/style= inline (pas de build à nonce) — migrer ces centaines
+     de handlers vers addEventListener est hors périmètre de cette tâche.
+     'unsafe-eval' est requis par Alpine.js (évalue les expressions x-data/
+     x-on en JS via eval() en interne). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://open.er-api.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; manifest-src 'self'">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" integrity="sha384-J307tgK+Qke6JCqP7MHr+Nhe2J2Gs2crbyUtJYo/y9kTbosBr96396GAZ0AKlVcf" crossorigin="anonymous">
 <link rel="stylesheet" href="css/styles.css">
 <!-- Phase 1B: Tailwind utilities layer (theme.css + utilities.css only, no
      preflight reset) — available for new markup, does not restyle anything

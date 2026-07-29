@@ -58,6 +58,7 @@ async function init(){
   try{window.matchMedia('(max-width:767px)').addEventListener('change',()=>{renderCat();simCalc();renderDevisCart();});}catch(e){}
   renderCat();renderFour();renderTrans();popSim();setSimTrans('Maritime');
   bkpWeeklyWarn();
+  storQuotaWarn();
 }
 
 function buildProds(){

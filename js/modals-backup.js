@@ -384,6 +384,17 @@ function handleBackupFile(input){
   rd.readAsText(file);
 }
 
+// Alerte quota navigateur : si le stockage utilisé (toutes données du site) dépasse 80% du quota disponible
+async function storQuotaWarn(){
+  if(!navigator.storage||!navigator.storage.estimate)return;
+  try{
+    const est=await navigator.storage.estimate();
+    if(!est.quota)return;
+    const pct=Math.round(100*(est.usage||0)/est.quota);
+    if(pct>=80)toast(`⚠️ Espace de stockage saturé à ${pct}%. Pensez à exporter vos données.`,true);
+  }catch(e){}
+}
+
 // Rappel d'export : au plus une fois par semaine
 function bkpWeeklyWarn(){
   const last=parseInt(localStorage.getItem(BKP_WARN_K)||'0');
