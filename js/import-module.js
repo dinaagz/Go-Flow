@@ -88,17 +88,18 @@ let impState=null,impCtx=null;
 
 /* ---- Chargement de bibliothèques à la demande (CDN) ---- */
 const impLibs={};
-function ensureLib(globalName,src){
+function ensureLib(globalName,src,integrity){
   if(window[globalName])return Promise.resolve();
   if(!impLibs[src])impLibs[src]=new Promise((res,rej)=>{
     const s=document.createElement('script');s.src=src;
-    s.onload=()=>res();s.onerror=()=>{delete impLibs[src];rej(new Error('bibliothèque inaccessible — connexion Internet requise'));};
+    if(integrity){s.integrity=integrity;s.crossOrigin='anonymous';}
+    s.onload=()=>res();s.onerror=()=>{delete impLibs[src];rej(new Error('bibliothèque inaccessible ou intégrité invalide — connexion Internet requise'));};
     document.head.appendChild(s);
   });
   return impLibs[src];
 }
 async function ensurePDF(){
-  await ensureLib('pdfjsLib','https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+  await ensureLib('pdfjsLib','https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e');
   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
@@ -153,7 +154,7 @@ async function impHandleFile(file){
       impSetTabular(file,parseCSVText(await file.text()));
     }else if(ext==='xlsx'||ext==='xls'){
       impLoading(true,'Chargement du lecteur Excel…');
-      await ensureLib('XLSX','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');
+      await ensureLib('XLSX','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw');
       impLoading(true,'Lecture du fichier Excel…');
       const wb=XLSX.read(new Uint8Array(await file.arrayBuffer()),{type:'array'});
       const grid=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}).map(r=>r.map(v=>String(v??'')));
