@@ -1,5 +1,7 @@
 # Go.Flow — Console Import Go Group
 
+[![CI](https://github.com/dinaagz/Go-Flow/actions/workflows/ci.yml/badge.svg)](https://github.com/dinaagz/Go-Flow/actions/workflows/ci.yml)
+
 > Application web de gestion des importations pour **Go Group** (Lomé, Togo).
 > Catalogue produits, fournisseurs, transitaires, simulation de coûts, devis PDF, import en masse et export d'images — tout en un seul fichier HTML.
 
