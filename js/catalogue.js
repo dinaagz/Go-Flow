@@ -223,7 +223,7 @@ function prodGroupCard(g){
         <div class="alt-card-prix">${pvm.lbl} · ${pvm.ttc} TTC</div>
       </div>
       <button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button>
-      <button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${pvm.inCart?ICO('check'):ICO('quote')}</button>
+      <button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" aria-label="${pvm.inCart?'Déjà dans le devis':'Ajouter '+pvm.nom+' au devis'}" style="padding:3px 8px;font-size:10px;border-radius:5px;flex-shrink:0">${pvm.inCart?ICO('check'):ICO('quote')}</button>
     </div>`;
   }).join('');
   const grpBadge=others.length?`<span class="grp-count-badge" onclick="toggleAccordion('${escapedKey}')">+${others.length} fournisseur${others.length>1?'s':''}</span>`:'';
@@ -238,10 +238,10 @@ function prodGroupCard(g){
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
-      <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
+      <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer" aria-label="Dupliquer ${escH(w.nom)}">${ICO('copy')}</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${escH(w.nom)}">${ICO('trash')}</button>
-      <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler">${ICO('calc')}</button>
-      <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
+      <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler" aria-label="Simuler ${escH(w.nom)}">${ICO('calc')}</button>
+      <button class="btn btn-sm ${isInCart(w.id)?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis" aria-label="${isInCart(w.id)?'Déjà dans le devis':'Ajouter '+escH(w.nom)+' au devis'}">${isInCart(w.id)?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
   </div>
   ${others.length?`<div class="alt-panel" id="ap-${key}"><div class="alt-panel-inner"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Alternatives fournisseurs</div>${altCards}</div></div>`:''}</div>`;
@@ -302,10 +302,10 @@ function prodGroupTable(groups){
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${w.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${w.id}')" title="Modifier" aria-label="Modifier ${String(w.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
-        <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer">${ICO('copy')}</button>
+        <button class="btn btn-sec btn-sm" onclick="dupProd('${w.id}')" title="Dupliquer" aria-label="Dupliquer ${vm.nom}">${ICO('copy')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${w.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
-        <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')">${ICO('calc')}</button>
-        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis">${vm.inCart?ICO('check'):ICO('quote')}</button>
+        <button class="btn btn-success btn-sm" onclick="qsim('${w.id}')" title="Simuler" aria-label="Simuler ${vm.nom}">${ICO('calc')}</button>
+        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${w.id}')" title="Ajouter au devis" aria-label="${vm.inCart?'Déjà dans le devis':'Ajouter '+vm.nom+' au devis'}">${vm.inCart?ICO('check'):ICO('quote')}</button>
       </div></td>
     </tr>`;
     const colCount=1+(Object.values(C).filter(Boolean).length)+1;
@@ -335,7 +335,7 @@ function prodGroupTable(groups){
         ${C.ttc    ?`<td style="color:var(--bleu-t)">${pvm.ttc}</td>`:''}
         ${C.delai  ?`<td>${pvm.delai}</td>`:''}
         ${C.marche ?`<td>${pvm.marche}</td>`:''}
-        <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" style="padding:3px 7px;font-size:10px">${pvm.inCart?ICO('check'):ICO('quote')}</button></div></td>
+        <td class="no-print"><div style="display:flex;gap:4px"><button class="alt-promote-btn" onclick="setWinner('${escapedKey}','${p.id}',event)">Choisir</button><button class="btn btn-sm ${pvm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" aria-label="${pvm.inCart?'Déjà dans le devis':'Ajouter '+pvm.nom+' au devis'}" style="padding:3px 7px;font-size:10px">${pvm.inCart?ICO('check'):ICO('quote')}</button></div></td>
       </tr>`;
     }).join('');
     return winRow+altRows;
@@ -603,10 +603,10 @@ function prodCard(p){
     ${priceRows?`<div class="card-prices">${priceRows}</div>`:''}
     <div class="card-acts">
       <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
-      <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
+      <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer" aria-label="Dupliquer ${vm.nom}">${ICO('copy')}</button>
       <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
-      <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
-      <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${vm.inCart?ICO('check')+' Devis':ICO('quote')}</button>
+      <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler" aria-label="Simuler ${vm.nom}">${ICO('calc')}</button>
+      <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" aria-label="${vm.inCart?'Déjà dans le devis':'Ajouter '+vm.nom+' au devis'}">${vm.inCart?ICO('check')+' Devis':ICO('quote')}</button>
     </div>
   </div></div>`;
 }
@@ -663,10 +663,10 @@ function prodTable(list){
         ${C.photos?'':expBox(p.id)}
         <button class="btn btn-sec btn-sm" onclick="showProdDetails('${p.id}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
         <button class="btn btn-sec btn-sm" onclick="openProdModal('${p.id}')" title="Modifier" aria-label="Modifier ${String(p.nom||'').replace(/"/g,'&quot;')}">${ICO('pencil')}</button>
-        <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer">${ICO('copy')}</button>
+        <button class="btn btn-sec btn-sm" onclick="dupProd('${p.id}')" title="Dupliquer" aria-label="Dupliquer ${vm.nom}">${ICO('copy')}</button>
         <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')" title="Supprimer" aria-label="Supprimer ${vm.nom}">${ICO('trash')}</button>
-        <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler">${ICO('calc')}</button>
-        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis">${vm.inCart?ICO('check'):ICO('quote')}</button>
+        <button class="btn btn-success btn-sm" onclick="qsim('${p.id}')" title="Simuler" aria-label="Simuler ${vm.nom}">${ICO('calc')}</button>
+        <button class="btn btn-sm ${vm.inCart?'btn-in-cart':'btn-sec'}" onclick="addToCart('${p.id}')" title="Ajouter au devis" aria-label="${vm.inCart?'Déjà dans le devis':'Ajouter '+vm.nom+' au devis'}">${vm.inCart?ICO('check'):ICO('quote')}</button>
       </div></td>
     </tr>`;
   }).join('');
