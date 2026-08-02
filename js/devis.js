@@ -627,7 +627,7 @@ function buildDevisTable(list){
       ${SH.prix_ttc?`<td class="ttc-hero" style="font-size:13px">${Ndv(c.pvtTTC)}</td>`:''}
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-sec btn-sm" onclick="showDevisDetails('${item.cid}')" title="Voir détails" aria-label="Voir tous les détails">${ICO('eye')}</button>
-        <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')">${ICO('trash')}</button>
+        <button class="btn btn-danger btn-sm" onclick="removeFromCart('${item.cid}')" title="Retirer du devis" aria-label="Retirer ${escH(item.snap.nom)} du devis">${ICO('trash')}</button>
       </div></td>
     </tr>`;
   }).join('');
