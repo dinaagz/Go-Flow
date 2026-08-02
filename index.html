@@ -73,6 +73,7 @@
 <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
 <symbol id="i-percent" viewBox="0 0 24 24"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
 </svg>
 <a class="skip-link" href="#main">Aller au contenu</a>
 <div class="grad-bar"></div>
@@ -113,6 +114,7 @@
     <button class="tab active" id="tab-catalogue" role="tab" aria-selected="true" aria-controls="t-catalogue" onclick="tab('catalogue')"><svg class="ic" aria-hidden="true"><use href="#i-box"/></svg><span>Catalogue</span></button>
     <button class="tab" id="tab-fournisseurs" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-fournisseurs" onclick="tab('fournisseurs')"><svg class="ic" aria-hidden="true"><use href="#i-factory"/></svg><span>Fournisseurs</span></button>
     <button class="tab" id="tab-transitaires" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-transitaires" onclick="tab('transitaires')"><svg class="ic" aria-hidden="true"><use href="#i-ship"/></svg><span>Transitaires</span></button>
+    <button class="tab" id="tab-clients" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-clients" onclick="tab('clients')"><svg class="ic" aria-hidden="true"><use href="#i-users"/></svg><span>Clients</span></button>
     <button class="tab" id="tab-simulation" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-simulation" onclick="tab('simulation')"><svg class="ic" aria-hidden="true"><use href="#i-calc"/></svg><span>Simulation</span></button>
     <button class="tab" id="tab-devis" role="tab" aria-selected="false" tabindex="-1" aria-controls="t-devis" onclick="tab('devis')"><svg class="ic" aria-hidden="true"><use href="#i-file"/></svg><span>Devis</span></button>
   </nav>
@@ -291,6 +293,25 @@
     <button class="btn btn-primary" onclick="openTransModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Transitaire</button>
   </div>
   <div id="trans-cont"></div>
+</div>
+
+<!-- CLIENTS -->
+<div id="t-clients" role="tabpanel" aria-labelledby="tab-clients" style="display:none">
+  <div class="toolbar">
+    <div class="search"><svg class="ic search-ic" aria-hidden="true"><use href="#i-search"/></svg><input type="text" placeholder="Rechercher un client..." aria-label="Rechercher un client" id="cli-search" oninput="renderClientsDeb()"></div>
+    <select class="filt" id="cli-filter-type" aria-label="Filtrer par type de client" onchange="renderClients()">
+      <option value="">Tous types</option>
+      <option value="particulier">Particulier</option>
+      <option value="entreprise">Entreprise</option>
+      <option value="institution">Institution</option>
+    </select>
+    <div class="view-tog">
+      <button class="view-btn active" id="cvg" onclick="setClientView('grid')" title="Grille" aria-label="Vue grille"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></button>
+      <button class="view-btn" id="cvl" onclick="setClientView('list')" title="Liste" aria-label="Vue liste"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
+    </div>
+    <button class="btn btn-primary" onclick="openClientModal()"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Nouveau client</button>
+  </div>
+  <div id="cli-cont"></div>
 </div>
 
 <!-- SIMULATION -->
@@ -616,6 +637,193 @@
   </div>
 </div>
 
+<!-- CLIENT MODAL -->
+<div class="overlay" id="client-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cm-title" style="max-width:840px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="cm-title">Nouveau client</h2>
+      <button class="modal-x" onclick="closeMod('client-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp full"><label class="flbl" for="cli-type">Type de client *</label>
+          <select class="fc" id="cli-type" required aria-required="true" onchange="cliTypeChange()">
+            <option value="">Sélectionner...</option>
+            <option value="particulier">Particulier</option>
+            <option value="entreprise">Entreprise</option>
+            <option value="institution">Institution</option>
+          </select>
+        </div>
+      </div>
+
+      <h2 class="sec-hdr"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Identification</h2>
+      <div class="fg">
+        <div class="fgrp full"><label class="flbl" id="cli-photo-lbl">Photo / Logo (1 image max, 2 Mo max — PNG, JPEG, WebP)</label>
+          <div class="upload-area" role="button" tabindex="0" aria-label="Ajouter une photo ou un logo (PNG, JPEG, WebP, 2 Mo max)"
+            onclick="document.getElementById('cli-photo-in').click()"
+            onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('cli-photo-in').click()}"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg> Cliquer pour ajouter (PNG, JPEG, WebP — 2 Mo max)</div>
+          <input type="file" id="cli-photo-in" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" onchange="addCliPhoto(this)">
+          <div class="thumbs" id="cli-photo-prev"></div>
+        </div>
+        <div class="fgrp"><label class="flbl" for="cli-id">ID Client (auto)</label><input type="text" class="fc" id="cli-id" readonly></div>
+        <div class="fgrp"><label class="flbl" for="cli-type-ro">Type de client</label><input type="text" class="fc" id="cli-type-ro" readonly></div>
+        <div class="fgrp"><label class="flbl" for="cli-devise">Devise</label><select class="fc" id="cli-devise"></select></div>
+      </div>
+
+      <!-- PARTICULIER -->
+      <div id="cli-sec-particulier" style="display:none">
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Informations personnelles</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-civ">Civilité</label>
+            <select class="fc" id="cli-civ"><option value="">—</option><option>M.</option><option>Mme</option><option>Mlle</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-nom">Nom et Prénoms *</label><input type="text" class="fc" id="cli-nom" required aria-required="true"></div>
+          <div class="fgrp"><label class="flbl" for="cli-sexe">Sexe</label>
+            <select class="fc" id="cli-sexe"><option value="">—</option><option>Féminin</option><option>Masculin</option><option>Non-binaire</option><option>Non identifié</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-piece-type">Pièce d'identité</label>
+            <select class="fc" id="cli-piece-type"><option value="">—</option><option>CNI</option><option>Passeport</option><option>Permis de conduire</option><option>Carte de séjour</option><option>Carte d'électeur</option><option>Carte d'étudiant</option><option>Carte professionnelle</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-piece-num">Numéro de pièce d'identité</label><input type="text" class="fc" id="cli-piece-num"></div>
+          <div class="fgrp"><label class="flbl" for="cli-prof">Profession / Métier</label><input type="text" class="fc" id="cli-prof"></div>
+        </div>
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg>Coordonnées client</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-email">Adresse e-mail</label><input type="email" class="fc" id="cli-email"></div>
+          <div class="fgrp"><label class="flbl" for="cli-tel">Téléphone (international)</label><input type="tel" class="fc" id="cli-tel" placeholder="+228 90 00 00 00"></div>
+          <div class="fgrp"><label class="flbl" for="cli-wa">Numéro WhatsApp (international)</label><input type="tel" class="fc" id="cli-wa" placeholder="+228 90 00 00 00"></div>
+          <div class="fgrp full"><label class="flbl" for="cli-adresse">Adresse client</label><input type="text" class="fc" id="cli-adresse"></div>
+          <div class="fgrp"><label class="flbl" for="cli-pays">Pays de résidence</label>
+            <select class="fc" id="cli-pays" onchange="cliVillesRefresh('cli-pays','cli-ville','cli-ville-dl')"></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ville">Ville de résidence</label>
+            <input type="text" class="fc" id="cli-ville" list="cli-ville-dl" placeholder="Saisir ou choisir">
+            <datalist id="cli-ville-dl"></datalist>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENTREPRISE -->
+      <div id="cli-sec-entreprise" style="display:none">
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-factory"/></svg>Informations Entreprise</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-ent-raison">Raison sociale *</label><input type="text" class="fc" id="cli-ent-raison" required aria-required="true"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-forme">Forme juridique</label>
+            <select class="fc" id="cli-ent-forme"><option value="">—</option><option>SARL</option><option>SA</option><option>SARL U</option><option>Entreprise individuelle</option><option>Pas encore de forme juridique</option><option>Autres</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-acteur">Type d'acteur</label>
+            <select class="fc" id="cli-ent-acteur"><option value="">—</option><option>Grossiste</option><option>Détaillant</option><option>Prestataire de services</option><option>Industriel</option><option>Autres</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-immat">Numéro d'immatriculation</label><input type="text" class="fc" id="cli-ent-immat"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-secteur">Secteur d'activité</label><input type="text" class="fc" id="cli-ent-secteur"></div>
+          <div class="fgrp full"><label class="flbl" for="cli-ent-desc">Description des activités</label><textarea class="fc" id="cli-ent-desc" rows="2"></textarea></div>
+          <div class="fgrp full"><label class="flbl" for="cli-ent-site">Site web et/ou réseaux sociaux</label><input type="text" class="fc" id="cli-ent-site" placeholder="https://..."></div>
+        </div>
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>Coordonnées Entreprise</h2>
+        <div class="fg">
+          <div class="fgrp full"><label class="flbl" for="cli-ent-adresse">Adresse du siège social</label><input type="text" class="fc" id="cli-ent-adresse"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-pays">Pays d'activités</label>
+            <select class="fc" id="cli-ent-pays" onchange="cliVillesRefresh('cli-ent-pays','cli-ent-ville','cli-ent-ville-dl')"></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-ville">Ville d'activités</label>
+            <input type="text" class="fc" id="cli-ent-ville" list="cli-ent-ville-dl" placeholder="Saisir ou choisir">
+            <datalist id="cli-ent-ville-dl"></datalist>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-email">Adresse e-mail professionnel</label><input type="email" class="fc" id="cli-ent-email"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-tel">Téléphone professionnel (international)</label><input type="tel" class="fc" id="cli-ent-tel" placeholder="+228 90 00 00 00"></div>
+        </div>
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Contact principal</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-civ">Civilité</label>
+            <select class="fc" id="cli-ent-c-civ"><option value="">—</option><option>M.</option><option>Mme</option><option>Mlle</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-nom">Nom et Prénoms</label><input type="text" class="fc" id="cli-ent-c-nom"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-tel">Téléphone personnel (international)</label><input type="tel" class="fc" id="cli-ent-c-tel"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-wa">Numéro WhatsApp (international)</label><input type="tel" class="fc" id="cli-ent-c-wa"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-email">E-mail personnel</label><input type="email" class="fc" id="cli-ent-c-email"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ent-c-fonction">Fonction / Poste</label><input type="text" class="fc" id="cli-ent-c-fonction"></div>
+        </div>
+      </div>
+
+      <!-- INSTITUTION -->
+      <div id="cli-sec-institution" style="display:none">
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg>Informations Institution</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-ins-raison">Raison sociale *</label><input type="text" class="fc" id="cli-ins-raison" required aria-required="true"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-type">Type d'institution</label>
+            <select class="fc" id="cli-ins-type"><option value="">—</option><option>Ministère</option><option>Agence d'État</option><option>ONG locale</option><option>ONG internationale</option><option>Association</option><option>Autres</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-dept">Département (service concerné)</label><input type="text" class="fc" id="cli-ins-dept"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-agrement">Numéro d'agrément officiel</label><input type="text" class="fc" id="cli-ins-agrement"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-secteur">Secteur d'activité</label><input type="text" class="fc" id="cli-ins-secteur"></div>
+          <div class="fgrp full"><label class="flbl" for="cli-ins-desc">Description des activités</label><textarea class="fc" id="cli-ins-desc" rows="2"></textarea></div>
+          <div class="fgrp full"><label class="flbl" for="cli-ins-site">Site web et/ou réseaux sociaux</label><input type="text" class="fc" id="cli-ins-site" placeholder="https://..."></div>
+        </div>
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg>Coordonnées Institution</h2>
+        <div class="fg">
+          <div class="fgrp full"><label class="flbl" for="cli-ins-adresse">Adresse du siège social</label><input type="text" class="fc" id="cli-ins-adresse"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-pays">Pays d'activités</label>
+            <select class="fc" id="cli-ins-pays" onchange="cliVillesRefresh('cli-ins-pays','cli-ins-ville','cli-ins-ville-dl')"></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-ville">Ville d'activités</label>
+            <input type="text" class="fc" id="cli-ins-ville" list="cli-ins-ville-dl" placeholder="Saisir ou choisir">
+            <datalist id="cli-ins-ville-dl"></datalist>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-email">Adresse e-mail professionnel</label><input type="email" class="fc" id="cli-ins-email"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-tel">Téléphone professionnel (international)</label><input type="tel" class="fc" id="cli-ins-tel" placeholder="+228 90 00 00 00"></div>
+        </div>
+        <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Contact principal</h2>
+        <div class="fg">
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-civ">Civilité</label>
+            <select class="fc" id="cli-ins-c-civ"><option value="">—</option><option>M.</option><option>Mme</option><option>Mlle</option></select>
+          </div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-nom">Nom et Prénoms</label><input type="text" class="fc" id="cli-ins-c-nom"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-tel">Téléphone personnel (international)</label><input type="tel" class="fc" id="cli-ins-c-tel"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-wa">Numéro WhatsApp (international)</label><input type="tel" class="fc" id="cli-ins-c-wa"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-email">E-mail personnel</label><input type="email" class="fc" id="cli-ins-c-email"></div>
+          <div class="fgrp"><label class="flbl" for="cli-ins-c-fonction">Fonction / Poste</label><input type="text" class="fc" id="cli-ins-c-fonction"></div>
+        </div>
+      </div>
+
+      <h2 class="sec-hdr" style="margin-top:16px"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg>Préférences et suivis</h2>
+      <div class="fg">
+        <div class="fgrp full"><label class="flbl">Services souhaités</label>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;padding:8px 0">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400"><input type="checkbox" id="cli-serv-import"> Import/Sourcing</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400"><input type="checkbox" id="cli-serv-mkt"> Marketing</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400"><input type="checkbox" id="cli-serv-dist"> Distribution</label>
+          </div>
+        </div>
+        <div class="fgrp"><label class="flbl" for="cli-canal">Canal de communication préféré</label>
+          <select class="fc" id="cli-canal"><option value="">—</option><option>WhatsApp</option><option>Appel</option><option>SMS</option><option>Email</option><option>Autres</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl" for="cli-pays-origine">Pays d'origine produit préféré</label>
+          <select class="fc" id="cli-pays-origine"></select>
+        </div>
+        <div class="fgrp"><label class="flbl" for="cli-langue">Langue de préférence</label>
+          <select class="fc" id="cli-langue"><option value="">—</option><option>Français</option><option>Anglais</option></select>
+        </div>
+        <div class="fgrp"><label class="flbl" for="cli-cible">Clientèle cible</label><input type="text" class="fc" id="cli-cible"></div>
+        <div class="fgrp"><label class="flbl" for="cli-zone">Zone géographique ciblée</label><input type="text" class="fc" id="cli-zone"></div>
+      </div>
+
+      <div id="cli-sec-system" style="display:none;margin-top:16px">
+        <h2 class="sec-hdr"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>Évaluation client</h2>
+        <div id="cli-stars" style="margin:6px 0 4px"></div>
+        <div style="font-size:12px;color:var(--muted)" id="cli-eval-com">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6">
+          Créé le <b id="cli-log-created">—</b><br>Dernière modification le <b id="cli-log-modif">—</b>
+        </div>
+      </div>
+
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('client-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveClient()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TRANSITAIRE MODAL -->
 <div class="overlay" id="trans-modal">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tm-title">
@@ -874,6 +1082,7 @@
 <script src="js/import-module.js" defer></script>
 <script src="js/export-module.js" defer></script>
 <script src="js/modals-backup.js" defer></script>
+<script src="js/clients-module.js" defer></script>
 <script src="js/app-main.js" defer></script>
 </body>
 </html>

@@ -49,6 +49,7 @@ async function init(){
   await devRefLoad();
   await impLoadPrefs();
   await expLoadPrefs();
+  await clientsInit();
   loadS();await loadDevis();
   cmMount('catalogue','cm-catalogue');
   cmMount('simulation','cm-simulation');
@@ -173,13 +174,14 @@ function userMenuAnyOpen(){
 
 
 function tab(name){
-  ['catalogue','fournisseurs','transitaires','simulation','devis'].forEach(t=>{
+  ['catalogue','fournisseurs','transitaires','clients','simulation','devis'].forEach(t=>{
     document.getElementById('t-'+t).style.display=t===name?'block':'none';
     const b=document.getElementById('tab-'+t);
     if(b){const on=t===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1;}
   });
   if(name==='devis')renderDevis();
   if(name==='catalogue')renderCat(); // resynchronise les checkboxes/prix après actions dans le devis
+  if(name==='clients')renderClients();
 }
 
 function setView(v){

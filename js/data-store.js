@@ -1,4 +1,4 @@
-const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v';
+const SK='gf_s',PK='gf_p',FK='gf_f',TK='gf_t',VK='gf_v',CK='gf_clients';
 // Stockage résilient : données corrompues → valeur de repli ; quota plein → toast au lieu d'un crash silencieux
 function LS_GET(k,fb){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v===null?fb:v;}catch(e){console.warn('localStorage corrompu:',k,e);return fb;}}
 function LS_SET(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){toast('Espace de stockage saturé. Veuillez exporter vos données (Paramètres) et supprimer les éléments inutiles.',true);}}
