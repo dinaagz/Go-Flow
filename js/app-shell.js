@@ -47,6 +47,8 @@ async function init(){
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   await auditLoad();
   await devRefLoad();
+  await loadDevisHist();
+  await companyLegalLoad();
   await impLoadPrefs();
   await expLoadPrefs();
   await clientsInit();

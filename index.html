@@ -74,6 +74,7 @@
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
 <symbol id="i-percent" viewBox="0 0 24 24"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
 <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
 </svg>
 <a class="skip-link" href="#main">Aller au contenu</a>
 <div class="grad-bar"></div>
@@ -504,6 +505,22 @@
     <div id="dv-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div id="dv-cart-cont"></div>
     <div id="dv-total-bar"></div>
+  </div>
+
+  <!-- Historique des devis (statuts) -->
+  <div class="devis-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <h2 class="devis-section-title" style="margin-bottom:0"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Historique des devis</h2>
+      <select class="filt" id="dv-hist-filter" onchange="dvHistFilterChange()" aria-label="Filtrer l'historique par statut">
+        <option value="">Tous les statuts</option>
+        <option value="Brouillon">Brouillon</option>
+        <option value="Envoyé">Envoyé</option>
+        <option value="Négociation">Négociation</option>
+        <option value="Accepté">Accepté</option>
+        <option value="Refusé">Refusé</option>
+      </select>
+    </div>
+    <div id="dv-hist-cont"></div>
   </div>
 
   <!-- Actions -->
@@ -1046,6 +1063,52 @@
       <div class="fact">
         <button class="btn btn-sec" onclick="cfmCancel()">Annuler</button>
         <button class="btn btn-danger" id="cfm-ok" onclick="cfmConfirm()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale changement de statut d'un devis -->
+<div class="overlay" id="dv-status-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dvs-title" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="dvs-title"><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg> Statut du devis <code id="dvs-ref" style="font-size:12px"></code></h2>
+      <button class="modal-x" onclick="closeMod('dv-status-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp full"><label class="flbl" for="dvs-select">Nouveau statut</label>
+          <select class="fc" id="dvs-select">
+            <option value="Brouillon">Brouillon</option>
+            <option value="Envoyé">Envoyé</option>
+            <option value="Négociation">Négociation</option>
+            <option value="Accepté">Accepté</option>
+            <option value="Refusé">Refusé</option>
+          </select>
+        </div>
+        <div class="fgrp full"><label class="flbl" for="dvs-comment">Commentaire (facultatif)</label>
+          <textarea class="fc" id="dvs-comment" rows="3" placeholder="Ex : client relancé par téléphone le..."></textarea>
+        </div>
+      </div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('dv-status-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="confirmDvStatus()">Enregistrer le statut</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale historique des statuts d'un devis -->
+<div class="overlay" id="dv-hist-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dvh-title" style="max-width:480px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="dvh-title"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg> Historique du devis <code id="dvh-ref" style="font-size:12px"></code></h2>
+      <button class="modal-x" onclick="closeMod('dv-hist-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="dvh-list" style="max-height:360px;overflow-y:auto"></div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('dv-hist-modal')">Fermer</button>
       </div>
     </div>
   </div>
