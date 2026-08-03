@@ -46,6 +46,7 @@ for f in js/*.js; do node --check "$f" || echo "FAIL: $f"; done
 | `js/import-module.js` | Bulk import (CSV/Excel/PDF/HTML) |
 | `js/export-module.js` | Image export (canvas templates, ZIP) |
 | `js/modals-backup.js` | Generic modal open/close + backup/restore, storage usage panel |
+| `js/company-legal.js` | Company info (name, logo, RCCM, CFE, address, payment methods, contact) + legal texts (CGV, mentions légales, payment/delivery conditions) — `getCompanyInfo()`/`getLegalTexts()` are the read API for future PDF generation |
 | `js/app-main.js` | `toast()` + the `init(); bkpDirUI();` calls that boot the app once every other file is loaded |
 
 The section markers referenced below (e.g. `===== MOTEUR DE CALCUL`) still exist verbatim inside their respective files.
@@ -78,6 +79,9 @@ Storage is split by weight: small settings stay in **localStorage**; everything 
 | `gf_audit` | IndexedDB | Calculation audit trail (last 100 entries: settings changes, generated devis PDFs, bulk imports, image exports), exportable as JSON from the settings panel; cached in-memory as `auditHist` |
 | `gf_d` / `gf_dc` / `gf_dp` | IndexedDB | Devis cart / client / prefs |
 | `gf_devref` | IndexedDB | Devis reference number counter (cached in-memory as `devRefCache`) |
+| `gf_devis_hist` | IndexedDB | Devis status history (cached in-memory as `devisHist`): one record per generated devis reference `{ref, date, client, totaux, status, statusHistory:[{status,date,comment}]}`. Created/updated by `devisHistUpsert()` on every `generateDevisPDF()` call; status changed via `devisApplyStatus()` (any transition allowed). Devis generated before this feature existed are migrated once from `gf_audit` (`devis_pdf` entries) at status `Brouillon` |
+| `gf_company` | IndexedDB | Company info (cached in-memory as `company`): name, logo (data URL), RCCM, CFE/tax number, address, payment methods (`paiements`, free list), email/phone/website. Read via `getCompanyInfo()` |
+| `gf_legal` | IndexedDB | Legal texts (cached in-memory as `legalTxt`): CGV, mentions légales, payment conditions, delivery conditions — free text, meant for future PDF generation. Read via `getLegalTexts()` |
 | `gf_imp` | IndexedDB | Bulk-import prefs — last column mapping per type: `{map: {produits\|fournisseurs\|transitaires: {normalizedHeader: fieldKey}}, lastHtml: {name, txt, ts}}` (`lastHtml` = last imported HTML ≤5 MB, re-parsable from step 1; cached in-memory via `impPrefs()`/`impPrefsSave()`) |
 | `gf_exp` | IndexedDB | Image-export prefs: `{tpl, bg, txt, logoPos, infosOn, infosOrder}`. `infosOn`/`infosOrder` = info lines shown on exported images (same keys as `CM_DEFS.catalogue`); `null` = synced with the catalogue's visible columns. Legacy `showMarge` only feeds the sync default |
 
