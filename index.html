@@ -384,7 +384,14 @@
   <div class="devis-section">
     <h2 class="devis-section-title"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg>Informations client</h2>
     <div class="fg">
-      <div class="fgrp"><label class="flbl" for="dv-nom">Nom complet</label><input class="fc" id="dv-nom" placeholder="Jean Dupont" oninput="saveDevisClient()"></div>
+      <!-- Phase 2.4: sélecteur client CRM avec auto-complétion (devisClientCmp, js/devis.js).
+           Conteneur vide à dessein : le markup complet (input, dropdown de suggestions,
+           bouton "Mettre à jour le client") est construit par JS (devisClientPickerMount,
+           innerHTML) puis Alpine.initTree() une seule fois — même pattern éprouvé que
+           toastMount (js/app-main.js) et userMenuMount (js/app-shell.js). L'input conserve
+           l'id dv-nom : le reste du code (saveDevisClient, PDF, tests) continue de le lire
+           par id sans changement. -->
+      <div class="fgrp" id="dv-client-picker"></div>
       <div class="fgrp"><label class="flbl" for="dv-ent">Entreprise</label><input class="fc" id="dv-ent" placeholder="Beauté Pro SARL" oninput="saveDevisClient()"></div>
       <div class="fgrp"><label class="flbl" for="dv-email">Email</label><input type="email" class="fc" id="dv-email" placeholder="client@exemple.com" oninput="saveDevisClient()"></div>
       <div class="fgrp"><label class="flbl" for="dv-tel">Téléphone / WhatsApp</label><input class="fc" id="dv-tel" placeholder="+228 ..." oninput="saveDevisClient()"></div>
@@ -642,7 +649,7 @@
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cm-title" style="max-width:840px">
     <div class="modal-hdr">
       <h2 class="modal-title" id="cm-title">Nouveau client</h2>
-      <button class="modal-x" onclick="closeMod('client-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+      <button class="modal-x" onclick="closeClientModal()" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
     </div>
     <div class="modal-body">
       <div class="fg">
@@ -817,7 +824,7 @@
       </div>
 
       <div class="fact">
-        <button class="btn btn-sec" onclick="closeMod('client-modal')">Annuler</button>
+        <button class="btn btn-sec" onclick="closeClientModal()">Annuler</button>
         <button class="btn btn-primary" onclick="saveClient()">Enregistrer</button>
       </div>
     </div>
