@@ -124,6 +124,9 @@ function bkpSnapshot(){
   data['gf_cols']=JSON.stringify(cmSerialize());
   data['gf_imp']=JSON.stringify(impPrefs());
   data['gf_exp']=JSON.stringify(expPrefs);
+  data[DVHK]=JSON.stringify(devisHist||[]);
+  data[CPK]=JSON.stringify(company);
+  data[LGK]=JSON.stringify(legalTxt);
   Object.keys(data).forEach(k=>{if(data[k]==null)delete data[k];});
   return data;
 }

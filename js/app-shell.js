@@ -47,6 +47,8 @@ async function init(){
   document.getElementById('ph-date').textContent='Généré le '+new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
   await auditLoad();
   await devRefLoad();
+  await loadDevisHist();
+  await companyLegalLoad();
   await impLoadPrefs();
   await expLoadPrefs();
   await clientsInit();
@@ -107,7 +109,8 @@ function saveSettings(){
 
 function toggleSettings(){
   const ov=document.getElementById('spanel');
-  if(ov.classList.contains('open'))closeMod('spanel');else{openMod('spanel');renderStoragePanel();}
+  if(ov.classList.contains('open'))closeMod('spanel');
+  else{openMod('spanel');renderStoragePanel();loadCompanyUI();loadLegalUI();}
 }
 
 /* ---- ESPACE UTILISATEUR (avatar + menu déroulant) ----

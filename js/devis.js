@@ -667,6 +667,7 @@ function renderDevis(){
   if(lbl)lbl.textContent='XOF pour 1 '+(DV_NAMES[devisFX.dev]||devisFX.dev);
   setStrategy(devisPrefs.strategy||'marge_fixe');
   renderDevisCart();
+  renderDevisHist();
 }
 
 function renderDevisCart(){
@@ -1210,16 +1211,166 @@ function generateDevisPDF(){
       ${T.cgv.delais}
       ${T.cgv.footer}
     </div>`:''}`;
+  const dvTotaux={totHT:r2(totHT),fraisLog:r2(totLog),assurance:r2(totAssurance),tva:r2(totTVA),montantTotal:r2(montantFinal),totalFormatted:Ndv(montantFinal)};
   auditLog('devis_pdf',{ref,client:{...cl},devise:devisFX.dev,taux:devisFX.taux,lang,
     strategie:devisPrefs.strategy,parametres:{...S},
     lignes:dvList.map((item,ix)=>({ref:item.snap.ref,nom:item.snap.nom,qty:item.qty,comment:item.comment||'',calc:cs[ix]})),
-    totaux:{totHT:r2(totHT),fraisLog:r2(totLog),assurance:r2(totAssurance),tva:r2(totTVA),montantTotal:r2(montantFinal)}});
+    totaux:dvTotaux});
+  devisHistUpsert(ref,now,{...cl},dvTotaux);
   // Nom de fichier suggéré à l'enregistrement PDF : GoShip_[REFDEVIS].pdf
   const prevTitle=document.title;
   document.title='GoShip_'+ref;
   window.print();
   document.title=prevTitle;
   document.body.classList.remove('printing-devis');
+}
+
+/* ---- HISTORIQUE DES DEVIS & SUIVI DE STATUT (Phase 2 step 2.1) ----
+   Chaque génération de PDF crée ou met à jour un enregistrement dans gf_devis_hist,
+   identifié par la référence du devis (ref) — voir devisRef(). Le statut suit un cycle
+   libre : toute transition est autorisée (ex. Brouillon → Accepté directement), chaque
+   changement étant journalisé dans statusHistory avec date + commentaire optionnel. */
+const DVHK='gf_devis_hist';
+const DV_STATUSES=['Brouillon','Envoyé','Négociation','Accepté','Refusé'];
+const DV_STATUS_COLOR={
+  Brouillon:{bg:'rgba(102,112,138,.14)',fg:'#66708A'},
+  'Envoyé':{bg:'rgba(0,153,255,.14)',fg:'#0099FF'},
+  'Négociation':{bg:'rgba(255,102,0,.14)',fg:'#FF6600'},
+  'Accepté':{bg:'rgba(0,204,119,.14)',fg:'#00CC77'},
+  'Refusé':{bg:'rgba(255,34,68,.14)',fg:'#FF2244'},
+};
+let devisHist=[],devisHistFilter='';
+
+async function loadDevisHist(){
+  devisHist=await IDB_GET(DVHK,[]);
+  let changed=false;
+  // Rétro-compatibilité : tout enregistrement sans statut (créé avant cette fonctionnalité) reçoit Brouillon
+  devisHist.forEach(d=>{
+    if(!d.status){d.status='Brouillon';changed=true;}
+    if(!Array.isArray(d.statusHistory)||!d.statusHistory.length){
+      d.statusHistory=[{status:d.status,date:d.date||new Date().toISOString(),comment:''}];changed=true;
+    }
+  });
+  // Migration ponctuelle, une seule fois : reprend les devis déjà générés (journalisés dans
+  // l'historique des calculs, gf_audit, type 'devis_pdf') avant l'existence de cet historique
+  // dédié aux statuts — chacun démarre au statut Brouillon.
+  const migrated=await IDB_GET('__devis_hist_migrated',false);
+  if(!migrated){
+    (auditHist||[]).filter(e=>e.type==='devis_pdf').forEach(e=>{
+      const ref=e.data&&e.data.ref;
+      if(!ref||devisHist.some(d=>d.ref===ref))return;
+      devisHist.push({
+        id:ref,ref,date:e.ts,client:e.data.client||{},devise:e.data.devise||'XOF',
+        totaux:{...(e.data.totaux||{}),totalFormatted:e.data.totaux?N(e.data.totaux.montantTotal):'—'},
+        status:'Brouillon',
+        statusHistory:[{status:'Brouillon',date:e.ts,comment:"Devis importé depuis l'historique des calculs"}]
+      });
+    });
+    await IDB_SET('__devis_hist_migrated',true);
+    changed=true;
+  }
+  devisHist.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(changed)IDB_SET(DVHK,devisHist);
+}
+
+// Crée ou met à jour l'enregistrement d'historique associé à une référence de devis —
+// un devis régénéré à l'identique (même contenu, voir devisSignature) réutilise la même
+// référence et ne repart donc jamais de zéro sur son statut.
+function devisHistUpsert(ref,now,client,totaux){
+  let rec=devisHist.find(d=>d.ref===ref);
+  if(rec){
+    Object.assign(rec,{client:{...client},totaux});
+  }else{
+    rec={id:ref,ref,date:now.toISOString(),client:{...client},totaux,
+      status:'Brouillon',statusHistory:[{status:'Brouillon',date:now.toISOString(),comment:'Devis généré'}]};
+    devisHist.unshift(rec);
+  }
+  IDB_SET(DVHK,devisHist);
+  renderDevisHist();
+  return rec;
+}
+
+// Change le statut d'un devis : toutes les transitions sont autorisées, sans restriction de cycle.
+function devisApplyStatus(ref,status,comment){
+  const rec=devisHist.find(d=>d.ref===ref);
+  if(!rec)return;
+  rec.status=status;
+  rec.statusHistory.push({status,date:new Date().toISOString(),comment:(comment||'').trim()});
+  IDB_SET(DVHK,devisHist);
+  renderDevisHist();
+  toast(`Statut du devis ${ref} : ${status} ✓`);
+}
+
+let dvStatusTarget=null;
+function openDvStatusModal(ref){
+  const rec=devisHist.find(d=>d.ref===ref);if(!rec)return;
+  dvStatusTarget=ref;
+  document.getElementById('dvs-ref').textContent=ref;
+  document.getElementById('dvs-select').value=rec.status;
+  document.getElementById('dvs-comment').value='';
+  openMod('dv-status-modal');
+}
+function confirmDvStatus(){
+  if(!dvStatusTarget)return;
+  const status=document.getElementById('dvs-select').value;
+  const comment=document.getElementById('dvs-comment').value;
+  devisApplyStatus(dvStatusTarget,status,comment);
+  closeMod('dv-status-modal');
+  dvStatusTarget=null;
+}
+
+function openDvHistModal(ref){
+  const rec=devisHist.find(d=>d.ref===ref);if(!rec)return;
+  document.getElementById('dvh-ref').textContent=ref;
+  const rows=[...rec.statusHistory].reverse().map(h=>{
+    const c=DV_STATUS_COLOR[h.status]||DV_STATUS_COLOR.Brouillon;
+    return`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="flex-shrink:0;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:${c.bg};color:${c.fg}">${escH(h.status)}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--muted)">${new Date(h.date).toLocaleString('fr-FR')}</div>
+        ${h.comment?`<div style="font-size:12.5px;margin-top:2px">${escH(h.comment)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('dvh-list').innerHTML=rows||'<div style="color:var(--muted);font-size:12px">Aucun historique</div>';
+  openMod('dv-hist-modal');
+}
+
+function dvHistFilterChange(){
+  devisHistFilter=document.getElementById('dv-hist-filter').value||'';
+  renderDevisHist();
+}
+function dvStatusBadge(status){
+  const c=DV_STATUS_COLOR[status]||DV_STATUS_COLOR.Brouillon;
+  return`<span style="padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700;background:${c.bg};color:${c.fg}">${escH(status)}</span>`;
+}
+function renderDevisHist(){
+  const cont=document.getElementById('dv-hist-cont');
+  if(!cont)return;
+  const list=devisHist.filter(d=>!devisHistFilter||d.status===devisHistFilter);
+  if(!devisHist.length){
+    cont.innerHTML=`<div class="empty"><div class="empty-ico">${ICO('file')}</div><h3>Aucun devis généré</h3><p>Générez un PDF depuis le panier ci-dessus pour l'ajouter à l'historique.</p></div>`;
+    return;
+  }
+  if(!list.length){
+    cont.innerHTML=`<div class="empty"><div class="empty-ico">${ICO('inbox')}</div><h3>Aucun devis avec ce statut</h3></div>`;
+    return;
+  }
+  cont.innerHTML=`<div style="overflow-x:auto"><table class="tbl">
+    <thead><tr><th>Référence</th><th>Date</th><th>Client</th><th>Montant TTC</th><th>Statut</th><th></th></tr></thead>
+    <tbody>${list.map(d=>{
+      const cl=d.client||{};
+      const montant=(d.totaux&&d.totaux.totalFormatted)||'—';
+      return`<tr>
+        <td><code style="font-size:11px">${escH(d.ref)}</code></td>
+        <td style="white-space:nowrap;font-size:12px">${new Date(d.date).toLocaleDateString('fr-FR')}</td>
+        <td>${escH([cl.nom,cl.ent].filter(Boolean).join(' — ')||'—')}</td>
+        <td style="font-weight:600;white-space:nowrap">${montant}</td>
+        <td><button onclick="openDvStatusModal('${d.ref}')" style="border:none;background:transparent;cursor:pointer;padding:0" title="Changer le statut" aria-label="Changer le statut du devis ${escH(d.ref)}">${dvStatusBadge(d.status)}</button></td>
+        <td><button class="btn btn-sec btn-sm" onclick="openDvHistModal('${d.ref}')">${ICO('clock')} Historique</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
 }
 
 /* ---- FIN MODULE DEVIS ---- */

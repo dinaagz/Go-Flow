@@ -74,6 +74,7 @@
 <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
 <symbol id="i-percent" viewBox="0 0 24 24"><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
 <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
 </svg>
 <a class="skip-link" href="#main">Aller au contenu</a>
 <div class="grad-bar"></div>
@@ -205,6 +206,53 @@
   <div style="font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;border:1px solid var(--ok-brd);border-radius:8px;background:var(--ok-bg)">
     <div id="stor-panel">Calcul en cours…</div>
   </div>
+
+  <!-- Entreprise (Phase 2 step 2.2) : infos Go Group, moyens de paiement, coordonnées —
+       centralisées pour être réutilisées plus tard dans la génération des devis/factures PDF. -->
+  <h2 class="sec-hdr" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-factory"/></svg>Entreprise</h2>
+  <div class="fg">
+    <div class="fgrp"><label class="flbl" for="cp-nom">Nom de l'entreprise</label><input class="fc" id="cp-nom" placeholder="Go Group"></div>
+    <div class="fgrp full"><label class="flbl">Logo</label>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div id="cp-logo-preview" style="display:flex;align-items:center;gap:8px"></div>
+        <label class="btn btn-sec btn-sm" style="cursor:pointer"><svg class="ic" aria-hidden="true"><use href="#i-upload"/></svg> Choisir un logo<input type="file" accept="image/*" style="display:none" onchange="companyLogoUpload(this)"></label>
+      </div>
+    </div>
+    <div class="fgrp"><label class="flbl" for="cp-rccm">RCCM</label><input class="fc" id="cp-rccm" placeholder="TG-LOM-01-2024-..."></div>
+    <div class="fgrp"><label class="flbl" for="cp-cfe">CFE / N° fiscal</label><input class="fc" id="cp-cfe"></div>
+    <div class="fgrp full"><label class="flbl" for="cp-adresse">Adresse du siège social</label><input class="fc" id="cp-adresse" placeholder="Lomé, Togo"></div>
+  </div>
+
+  <h3 style="font-size:13px;font-weight:700;margin-top:18px;margin-bottom:10px">Moyens de paiement</h3>
+  <div id="cp-payments-list"></div>
+  <button class="btn btn-sec btn-sm" onclick="companyPmAdd()" style="margin-top:4px"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg> Ajouter un moyen de paiement</button>
+
+  <h3 style="font-size:13px;font-weight:700;margin-top:18px;margin-bottom:10px">Coordonnées</h3>
+  <div class="fg">
+    <div class="fgrp"><label class="flbl" for="cp-email">Email professionnel</label><input type="email" class="fc" id="cp-email" placeholder="contact@gogroup.tg"></div>
+    <div class="fgrp"><label class="flbl" for="cp-tel">Téléphone professionnel</label><input class="fc" id="cp-tel" placeholder="+228 ..."></div>
+    <div class="fgrp full"><label class="flbl" for="cp-site">Site Internet</label><input class="fc" id="cp-site" placeholder="https://..."></div>
+  </div>
+  <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="companySave()">Enregistrer les informations entreprise</button></div>
+
+  <!-- Documents & mentions légales (Phase 2 step 2.3) : textes réutilisables plus tard
+       dans les PDF de devis/factures via getLegalTexts() — n'affecte jamais le calcul. -->
+  <h2 class="sec-hdr" style="margin-top:24px"><svg class="ic" aria-hidden="true"><use href="#i-quote"/></svg>Documents &amp; Mentions légales</h2>
+  <div class="fg">
+    <div class="fgrp full"><label class="flbl" for="lg-cgv">Conditions Générales de Vente</label>
+      <textarea class="fc" id="lg-cgv" rows="5" placeholder="Conditions générales de vente applicables à vos devis et factures..."></textarea>
+    </div>
+    <div class="fgrp full"><label class="flbl" for="lg-mentions">Mentions légales</label>
+      <textarea class="fc" id="lg-mentions" rows="4" placeholder="Raison sociale, capital, immatriculation..."></textarea>
+    </div>
+    <div class="fgrp full"><label class="flbl" for="lg-paiement">Conditions de paiement</label>
+      <textarea class="fc" id="lg-paiement" rows="3" placeholder="Modalités et délais de paiement..."></textarea>
+    </div>
+    <div class="fgrp full"><label class="flbl" for="lg-livraison">Conditions de livraison</label>
+      <textarea class="fc" id="lg-livraison" rows="3" placeholder="Délais et modalités de livraison..."></textarea>
+    </div>
+  </div>
+  <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="legalSave()">Enregistrer les mentions légales</button></div>
 
   <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
@@ -504,6 +552,22 @@
     <div id="dv-filter-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
     <div id="dv-cart-cont"></div>
     <div id="dv-total-bar"></div>
+  </div>
+
+  <!-- Historique des devis (statuts) -->
+  <div class="devis-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <h2 class="devis-section-title" style="margin-bottom:0"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg>Historique des devis</h2>
+      <select class="filt" id="dv-hist-filter" onchange="dvHistFilterChange()" aria-label="Filtrer l'historique par statut">
+        <option value="">Tous les statuts</option>
+        <option value="Brouillon">Brouillon</option>
+        <option value="Envoyé">Envoyé</option>
+        <option value="Négociation">Négociation</option>
+        <option value="Accepté">Accepté</option>
+        <option value="Refusé">Refusé</option>
+      </select>
+    </div>
+    <div id="dv-hist-cont"></div>
   </div>
 
   <!-- Actions -->
@@ -1051,6 +1115,52 @@
   </div>
 </div>
 
+<!-- Modale changement de statut d'un devis -->
+<div class="overlay" id="dv-status-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dvs-title" style="max-width:420px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="dvs-title"><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg> Statut du devis <code id="dvs-ref" style="font-size:12px"></code></h2>
+      <button class="modal-x" onclick="closeMod('dv-status-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="fg">
+        <div class="fgrp full"><label class="flbl" for="dvs-select">Nouveau statut</label>
+          <select class="fc" id="dvs-select">
+            <option value="Brouillon">Brouillon</option>
+            <option value="Envoyé">Envoyé</option>
+            <option value="Négociation">Négociation</option>
+            <option value="Accepté">Accepté</option>
+            <option value="Refusé">Refusé</option>
+          </select>
+        </div>
+        <div class="fgrp full"><label class="flbl" for="dvs-comment">Commentaire (facultatif)</label>
+          <textarea class="fc" id="dvs-comment" rows="3" placeholder="Ex : client relancé par téléphone le..."></textarea>
+        </div>
+      </div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('dv-status-modal')">Annuler</button>
+        <button class="btn btn-primary" onclick="confirmDvStatus()">Enregistrer le statut</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale historique des statuts d'un devis -->
+<div class="overlay" id="dv-hist-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dvh-title" style="max-width:480px">
+    <div class="modal-hdr">
+      <h2 class="modal-title" id="dvh-title"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg> Historique du devis <code id="dvh-ref" style="font-size:12px"></code></h2>
+      <button class="modal-x" onclick="closeMod('dv-hist-modal')" aria-label="Fermer"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div id="dvh-list" style="max-height:360px;overflow-y:auto"></div>
+      <div class="fact">
+        <button class="btn btn-sec" onclick="closeMod('dv-hist-modal')">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="cm-live" class="sr-only" role="status" aria-live="polite"></div>
 <!-- Phase 1C: notifications toast — état visuel (affichage/animation) géré par Alpine
      (toastCmp, construit + monté entièrement par JS dans js/app-main.js, voir toastMount()).
@@ -1090,6 +1200,7 @@
 <script src="js/export-module.js" defer></script>
 <script src="js/modals-backup.js" defer></script>
 <script src="js/clients-module.js" defer></script>
+<script src="js/company-legal.js" defer></script>
 <script src="js/app-main.js" defer></script>
 </body>
 </html>
