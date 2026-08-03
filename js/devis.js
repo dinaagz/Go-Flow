@@ -34,7 +34,7 @@ async function loadDevis(){
     if(!it.active)it.active={prix:'cat',prach:'cat',kg:'cat',dims:'cat',moq:'cat'};
     if(!it.edited)it.edited={};
   });
-  devisClient=(await IDB_GET(DCK,null))||{nom:'',ent:'',email:'',tel:'',adr:'',ville:''};
+  devisClient=(await IDB_GET(DCK,null))||{nom:'',ent:'',email:'',tel:'',adr:'',ville:'',clientId:null,clientType:null};
   const saved=await IDB_GET(DPK,null);
   devisPrefs=saved?{...DV_PREFS_DEFAULT,...saved}:{...DV_PREFS_DEFAULT};
   delete devisPrefs.show; // migré vers gf_cols (cmMigrateLegacy)
@@ -42,9 +42,14 @@ async function loadDevis(){
   const savedFilt=LS_GET(DFK,null);
   devisFilters=savedFilt?{q:'',cat:'',four:'',trans:'',sort:'',...savedFilt}:{q:'',cat:'',four:'',trans:'',sort:''};
   updateCartBadge();
+  devisClientPickerMount();
 }
 function saveDevisCartLS(){IDB_SET(DK,devisCart);updateCartBadge();}
-function saveDevisClient(){
+// fromUser=false pour les écritures programmatiques (application d'un client CRM) : évite
+// de déclencher gf-devis-field-edit et donc d'afficher à tort "Mettre à jour le client"
+// juste après une sélection/création (voir devisApplyClient).
+function saveDevisClient(fromUser=true){
+  const clientId=devisClient.clientId||null,clientType=devisClient.clientType||null;
   devisClient={
     nom:document.getElementById('dv-nom').value,
     ent:document.getElementById('dv-ent').value,
@@ -53,9 +58,187 @@ function saveDevisClient(){
     adr:document.getElementById('dv-adr').value,
     ville:document.getElementById('dv-ville').value,
     assujetti:document.getElementById('dv-assuj').checked,
+    clientId,clientType,
   };
   IDB_SET(DCK,devisClient);
+  if(fromUser)window.dispatchEvent(new CustomEvent('gf-devis-field-edit'));
 }
+
+/* ---- SÉLECTEUR CLIENT CRM (Phase 2.4) ----
+   Connecte le formulaire devis à la base Clients (js/clients-module.js, tableau global
+   `clients`) : auto-complétion sur le champ Nom, remplissage automatique des autres champs
+   à la sélection, création à la volée, mise à jour du client en base sur demande explicite.
+   Ne touche jamais à calcEngine ni au panier — uniquement aux 6 champs texte existants. */
+
+// Adapte un client CRM (particulier/entreprise/institution) vers les 6 champs texte du
+// formulaire devis. `ville` combine ville+pays car le devis n'a qu'un seul champ pour les
+// deux (voir devisSplitVillePays pour l'opération inverse lors d'une mise à jour).
+function devisMapClientToDevis(c){
+  if(c.type==='particulier'){
+    return{
+      nom:c.nomPrenom||'',ent:'',email:c.email||'',tel:c.tel||c.whatsapp||'',
+      adr:c.adresse||'',ville:[c.ville,c.pays].filter(Boolean).join(', '),
+    };
+  }
+  // entreprise / institution partagent la même forme de champs (contact + raison sociale)
+  return{
+    nom:c.contactNom||'',ent:c.raisonSociale||'',email:c.emailPro||c.contactEmailPerso||'',
+    tel:c.telPro||c.contactTelPerso||'',adr:c.adresseSiege||'',
+    ville:[c.villeActivite,c.paysActivite].filter(Boolean).join(', '),
+  };
+}
+// Sépare le champ combiné "Ville, Pays" du devis pour ré-écrire les deux champs distincts
+// du client CRM lors d'une mise à jour (devisUpdateClientInBase).
+function devisSplitVillePays(v){
+  const parts=(v||'').split(',').map(s=>s.trim()).filter(Boolean);
+  return{ville:parts[0]||'',pays:parts[1]||''};
+}
+// Applique un client CRM (existant ou tout juste créé) au formulaire devis : remplit les
+// champs, lie le client (clientId/clientType), persiste, et synchronise le composant Alpine
+// (dispatch plutôt que mutation directe de $data — voir toastCmp dans js/app-main.js).
+function devisApplyClient(c){
+  const m=devisMapClientToDevis(c);
+  document.getElementById('dv-nom').value=m.nom;
+  document.getElementById('dv-ent').value=m.ent;
+  document.getElementById('dv-email').value=m.email;
+  document.getElementById('dv-tel').value=m.tel;
+  document.getElementById('dv-adr').value=m.adr;
+  document.getElementById('dv-ville').value=m.ville;
+  devisClient.clientId=c.id;
+  devisClient.clientType=c.type;
+  saveDevisClient(false);
+  window.dispatchEvent(new CustomEvent('gf-devis-client-sync',{detail:{
+    query:m.nom,selectedId:c.id,selectedType:c.type,
+  }}));
+  toast(`Client « ${cliDisplayName(c)} » appliqué au devis ✓`);
+}
+// Ouvre la modale client (clients-module.js) pré-remplie avec le texte tapé dans le devis ;
+// cliSaveHook applique automatiquement le client fraîchement créé au devis à l'enregistrement.
+function devisOpenCreateClient(name){
+  cliSaveHook=c=>devisApplyClient(c);
+  openClientModal(null);
+  const typeSel=document.getElementById('cli-type');
+  typeSel.value='particulier';
+  cliTypeChange();
+  if(name)document.getElementById('cli-nom').value=name;
+}
+// Réécrit dans la base Clients les champs du devis modifiés après sélection — jamais
+// déclenché automatiquement (toujours sur clic explicite du bouton "Mettre à jour le client").
+function devisUpdateClientInBase(){
+  const id=devisClient.clientId;
+  if(!id)return;
+  const c=clients.find(x=>x.id===id);
+  if(!c){toast('Client introuvable dans la base',true);return;}
+  const nom=document.getElementById('dv-nom').value.trim();
+  const ent=document.getElementById('dv-ent').value.trim();
+  const email=document.getElementById('dv-email').value.trim();
+  const tel=document.getElementById('dv-tel').value.trim();
+  const adr=document.getElementById('dv-adr').value.trim();
+  const{ville,pays}=devisSplitVillePays(document.getElementById('dv-ville').value);
+  if(c.type==='particulier'){
+    Object.assign(c,{nomPrenom:nom||c.nomPrenom,email,tel,adresse:adr,ville:ville||c.ville,pays:pays||c.pays});
+  }else{
+    Object.assign(c,{contactNom:nom,raisonSociale:ent||c.raisonSociale,emailPro:email,telPro:tel,
+      adresseSiege:adr,villeActivite:ville||c.villeActivite,paysActivite:pays||c.paysActivite});
+  }
+  c.dateModif=new Date().toISOString();
+  saveClients();
+  renderClients();
+  toast(`Client « ${cliDisplayName(c)} » mis à jour ✓`);
+}
+function devisCliBadgeClass(t){
+  return t==='particulier'?'bg-[rgba(0,153,255,.14)] text-[var(--bleu-t)]'
+    :t==='entreprise'?'bg-[rgba(119,51,255,.14)] text-[#7733FF]'
+    :'bg-[rgba(255,102,0,.14)] text-[#FF6600]';
+}
+Alpine.data('devisClientCmp',()=>({
+  query:'',results:[],open:false,selectedId:null,selectedType:null,dirty:false,highlightIdx:-1,
+  init(){
+    this.query=devisClient.nom||'';
+    this.selectedId=devisClient.clientId||null;
+    this.selectedType=devisClient.clientType||null;
+  },
+  search(){
+    const q=this.query.trim().toLowerCase();
+    this.highlightIdx=-1;
+    if(!q){this.results=[];this.open=false;return;}
+    this.results=clients.filter(c=>{
+      const name=cliDisplayName(c).toLowerCase();
+      const email=(cliContact(c).email||'').toLowerCase();
+      return name.includes(q)||email.includes(q);
+    }).slice(0,8);
+    this.open=true;
+  },
+  pick(c){devisApplyClient(c);},
+  createNew(){this.open=false;devisOpenCreateClient(this.query.trim());},
+  updateClient(){devisUpdateClientInBase();this.dirty=false;},
+  clearSelection(){
+    devisClient.clientId=null;devisClient.clientType=null;saveDevisClient(false);
+    this.selectedId=null;this.selectedType=null;this.dirty=false;
+  },
+  onFieldEdit(){if(this.selectedId)this.dirty=true;},
+  syncFrom(d){
+    this.query=d.query;this.selectedId=d.selectedId;this.selectedType=d.selectedType;
+    this.dirty=false;this.results=[];this.open=false;
+  },
+  move(dir){
+    if(!this.results.length)return;
+    this.highlightIdx=(this.highlightIdx+dir+this.results.length)%this.results.length;
+  },
+  chooseHighlighted(){
+    if(this.highlightIdx>=0&&this.results[this.highlightIdx])this.pick(this.results[this.highlightIdx]);
+  },
+  typeCode(t){return CLI_TYPE_CODE[t]||'';},
+  badgeClass:devisCliBadgeClass,
+}));
+function devisClientPickerMount(){
+  const el=document.getElementById('dv-client-picker');
+  if(!el)return;
+  el.innerHTML=`
+    <div class="relative" x-data="devisClientCmp()"
+      @gf-devis-field-edit.window="onFieldEdit()" @gf-devis-client-sync.window="syncFrom($event.detail)">
+      <label class="flbl" for="dv-nom">Nom complet</label>
+      <input class="fc" id="dv-nom" placeholder="Jean Dupont" autocomplete="off"
+        x-model="query" oninput="saveDevisClient()" @input.debounce.150ms="search()"
+        @focus="if(results.length)open=true" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)"
+        @keydown.enter.prevent="chooseHighlighted()" @keydown.escape="open=false"
+        role="combobox" aria-label="Nom complet — rechercher un client existant" aria-autocomplete="list"
+        :aria-expanded="open" aria-controls="dv-client-listbox"
+        :aria-activedescendant="highlightIdx>=0?('dv-client-opt-'+highlightIdx):null">
+      <div id="dv-client-listbox" role="listbox" aria-label="Suggestions de clients"
+        x-show="open && (results.length || query.trim().length>=2)" x-transition @click.outside="open=false"
+        class="absolute z-[250] mt-1 max-h-64 w-full max-w-[360px] overflow-y-auto rounded-[12px] border border-[var(--border)] bg-[var(--surface)] p-1 shadow-[var(--sh-xl)]">
+        <template x-for="(c,i) in results" :key="c.id">
+          <button type="button" role="option" :id="'dv-client-opt-'+i" :aria-selected="highlightIdx===i" @click="pick(c)" @mouseenter="highlightIdx=i"
+            class="flex w-full items-center gap-2 rounded-[9px] px-2 py-[7px] text-left text-[12.5px]"
+            :class="highlightIdx===i?'bg-[rgba(0,153,255,.08)]':'hover:bg-[rgba(0,153,255,.08)]'">
+            <span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[var(--gris)] text-[10px] font-extrabold text-[var(--muted)]" x-text="cliInitials(cliDisplayName(c))"></span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-semibold text-[var(--text)]" x-text="cliDisplayName(c)"></span>
+              <span class="block truncate text-[10.5px] text-[var(--muted)]" x-text="cliContact(c).email||cliContact(c).tel||c.id"></span>
+            </span>
+            <span class="flex-shrink-0 rounded-full px-[7px] py-[2px] text-[9.5px] font-extrabold tracking-wide" :class="badgeClass(c.type)" x-text="typeCode(c.type)"></span>
+          </button>
+        </template>
+        <div x-show="!results.length && query.trim().length>=2" class="px-1 py-1">
+          <button type="button" @click="createNew()"
+            class="flex w-full items-center gap-2 rounded-[9px] px-2 py-[7px] text-left text-[12.5px] font-semibold text-[var(--bleu-t)] hover:bg-[rgba(0,153,255,.08)]">
+            ➕ Créer ce client
+          </button>
+        </div>
+      </div>
+      <div x-show="selectedId" class="mt-[6px] flex items-center gap-2 text-[10.5px] text-[var(--muted)]">
+        <span>Client lié : <span class="font-semibold text-[var(--text)]" x-text="selectedId"></span></span>
+        <button type="button" @click="clearSelection()" class="underline hover:text-[var(--text)]">Dissocier</button>
+      </div>
+      <button type="button" x-show="selectedId && dirty" x-transition @click="updateClient()"
+        class="mt-[6px] inline-flex w-fit items-center gap-1 rounded-[8px] border border-[var(--border2)] bg-[var(--surface)] px-[9px] py-[5px] text-[11.5px] font-semibold text-[var(--bleu-t)] hover:bg-[rgba(0,153,255,.08)]">
+        💾 Mettre à jour le client
+      </button>
+    </div>`;
+  Alpine.initTree(el);
+}
+
 function saveDevisPrefs(){
   if(devisPrefs.strategy==='personnalise'){
     const el=document.getElementById('strat-perso-val');
@@ -461,7 +644,11 @@ function setDevisView(v){
 
 /* ---- RENDU DE L'ONGLET DEVIS ---- */
 function renderDevis(){
-  document.getElementById('dv-nom').value=devisClient.nom||'';
+  // dv-nom est géré par Alpine (devisClientCmp, x-model="query") — synchronisé via
+  // événement plutôt qu'écriture DOM directe, voir devisClientPickerMount().
+  window.dispatchEvent(new CustomEvent('gf-devis-client-sync',{detail:{
+    query:devisClient.nom||'',selectedId:devisClient.clientId||null,selectedType:devisClient.clientType||null,
+  }}));
   document.getElementById('dv-ent').value=devisClient.ent||'';
   document.getElementById('dv-email').value=devisClient.email||'';
   document.getElementById('dv-tel').value=devisClient.tel||'';

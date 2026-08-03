@@ -5,6 +5,12 @@
    localStorage transparent). Rien ici ne touche au moteur de calcul ni aux devis. */
 
 let clients=[],editCli=null,clientView='grid',cliPhotoData='';
+// Callback à usage unique posé par le module Devis avant d'ouvrir la modale en mode
+// "création rapide" (devisOpenCreateClient) : reçoit le client fraîchement créé pour
+// l'appliquer au devis. Remis à null après appel ou après fermeture/annulation
+// (closeClientModal) pour ne jamais fuiter vers une création de client sans rapport.
+let cliSaveHook=null;
+function closeClientModal(){cliSaveHook=null;closeMod('client-modal');}
 
 const CLI_TYPE_CODE={particulier:'PAR',entreprise:'ENT',institution:'INS'};
 const CLI_TYPE_LABEL={particulier:'Particulier',entreprise:'Entreprise',institution:'Institution'};
@@ -283,6 +289,7 @@ function saveClient(){
     base.dateCreation=now;base.dateModif=now;
     clients.push(base);
     toast('Client ajouté ✓');
+    if(cliSaveHook){const fn=cliSaveHook;cliSaveHook=null;fn(base);}
   }
   saveClients();
   document.getElementById('cli-type').disabled=false;
